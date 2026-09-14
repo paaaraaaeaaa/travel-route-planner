@@ -1188,23 +1188,33 @@ class Component extends DCLogic {
   fetchSegmentRouteForMode = async (idx, mode) => {
     const { places } = this.state;
     const a = places[idx], b = places[idx + 1];
-    if (!a || !b || !a.x || !a.y || !b.x || !b.y) return;
-    const key = `${mode}_${a.id}_${b.id}`;
-    if (this.state.routeCache[key]) return;
+    const key = `${mode}_${a?.id}_${b?.id}`;
+    if (!a || !b || !a.x || !a.y || !b.x || !b.y) {
+      // 좌표 없는 방문지(수동 입력 실패 등) — 명확히 실패로 캐시해서 "검색 버튼 눌러주세요" 무한 루프 방지
+      console.log('[route] skip fetch, missing coords', { idx, mode, a: a && { id: a.id, x: a.x, y: a.y }, b: b && { id: b.id, x: b.x, y: b.y } });
+      this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: '방문지 좌표가 없어 경로를 조회할 수 없습니다' } } }));
+      return;
+    }
+    if (this.state.routeCache[key]) { console.log('[route] cache hit, skip fetch', key); return; }
+    console.log('[route] fetching segment', { mode, fromId: a.id, toId: b.id });
     try {
+      console.log('[route] API request', { action: mode, fromId: a.id, toId: b.id });
       const r = await fetch('/api/kakao', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: mode, params: { originX: a.x, originY: a.y, destX: b.x, destY: b.y, priority: this.state.criteria } }),
       });
-      const data = await r.json();
-      if (!r.ok) {
+      const data = await r.json().catch(() => null);
+      console.log('[route] API response', { action: mode, status: r.status, data });
+      if (!r.ok || !data) {
         console.error(`fetchSegmentRouteForMode(${mode}) error:`, data);
-        this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: data?.error || '경로 정보를 불러오지 못했습니다' } } }));
+        const msg = r.status === 429 ? '무료 API 사용량을 초과했을 수 있습니다' : (data?.error || '경로 정보를 불러오지 못했습니다');
+        this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: msg } } }));
         return;
       }
       // api/kakao.js가 이미 { distanceKm, minutes, transfers, pathPoints }로 정규화해서 반환
       this.setState(s => ({ routeCache: { ...s.routeCache, [key]: data } }));
+      console.log('[route] cached', key, data);
     } catch (err) {
       console.error('fetchSegmentRouteForMode fetch failed:', err);
       this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: '경로 정보를 불러오지 못했습니다' } } }));
@@ -1213,15 +1223,18 @@ class Component extends DCLogic {
 
   // [경로 검색] 버튼: 현재 구간들에 대해 car/walk/transit 3개 모두, 캐시에 없는 것만 병렬 조회
   searchAllRoutes = async () => {
-    if (this.state.routeSearching) return;
+    console.log('[route] search button clicked');
+    if (this.state.routeSearching) { console.log('[route] already searching, ignored'); return; }
     const segCount = this.state.segments.length;
-    if (segCount < 1) return;
+    console.log('[route] search started, segments:', this.state.segments, 'places:', this.state.places.map(p => ({ id: p.id, name: p.name, x: p.x, y: p.y })));
+    if (segCount < 1) { console.log('[route] no segments, aborting'); return; }
     this.setState({ routeSearching: true });
     const tasks = [];
     for (let idx = 0; idx < segCount; idx++) {
       for (const mode of MODE_ORDER) tasks.push(this.fetchSegmentRouteForMode(idx, mode));
     }
     await Promise.all(tasks);
+    console.log('[route] search completed, routeCache:', this.state.routeCache);
     this.setState({ routeSearching: false, routeSearched: true });
     this.syncKakaoRoutePolyline();
     this.logActivity('경로를 검색했습니다');
