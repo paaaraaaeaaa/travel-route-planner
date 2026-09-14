@@ -446,13 +446,13 @@ a:hover{color:#146030}
         </sc-if>
       </div>
       <sc-if value="{{ hasSelectedMapDoc }}" hint-placeholder-val="{{ false }}">
-        <div ref="{{ selectionCardRef }}" style="position:absolute;bottom:14px;left:14px;right:14px;z-index:20;background:#fff;border-radius:14px;box-shadow:0 -4px 20px rgba(0,0,0,.18);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="position:absolute;bottom:14px;left:14px;width:min(360px, calc(100% - 220px));z-index:20;background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.18);padding:14px 16px;display:flex;flex-direction:column;gap:10px">
           <div style="min-width:0">
             <div style="font-size:10.5px;font-weight:700;color:#7BCB93;letter-spacing:.04em;margin-bottom:2px">선택한 장소</div>
             <div style="font-size:14px;font-weight:700;color:#171719;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ selectedMapDocName }}</div>
             <div style="font-size:11.5px;color:rgba(23,23,25,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ selectedMapDocAddress }}</div>
           </div>
-          <div onClick="{{ confirmMapSelection }}" style="flex-shrink:0;background:#171719;color:#fff;font-size:13px;font-weight:700;padding:10px 16px;border-radius:10px;cursor:pointer;white-space:nowrap">이 장소 선택</div>
+          <div onClick="{{ confirmMapSelection }}" style="background:#171719;color:#fff;font-size:13px;font-weight:700;padding:10px 16px;border-radius:10px;cursor:pointer;white-space:nowrap;text-align:center">이 장소 선택</div>
         </div>
       </sc-if>
     </sc-if>
@@ -749,7 +749,7 @@ a:hover{color:#146030}
 
 <!-- AI 도우미: 평소엔 작은 진입 버튼, 클릭 시 패널로 확장 -->
 <sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
-<div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: {{ aiFabBottom }}; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
+<div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: 76px; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
   <span>✨</span><span style="white-space:nowrap">AI 도우미</span>
 </div>
 
@@ -1003,7 +1003,6 @@ class Component extends DCLogic {
     savedRoutes: [],
     saveLabel: '저장',
     aiOpen: false,
-    aiFabBottomPx: 76,
     aiInput: '',
     aiLoading: false,
     aiMessages: [
@@ -1035,15 +1034,6 @@ class Component extends DCLogic {
 
   componentDidUpdate() {
     this.syncPolyline();
-    // 선택된 장소 확인 카드의 실제 렌더링 높이를 측정해 AI FAB를 그 위로 충분히 띄운다 (고정 px 추측 금지)
-    const GAP = 16, CARD_BOTTOM = 14;
-    if (this.state.selectedMapDoc && this.selectionCardRef.current) {
-      const h = this.selectionCardRef.current.getBoundingClientRect().height;
-      const needed = Math.round(CARD_BOTTOM + h + GAP);
-      if (needed > 0 && needed !== this.state.aiFabBottomPx) this.setState({ aiFabBottomPx: needed });
-    } else if (this.state.aiFabBottomPx !== 76) {
-      this.setState({ aiFabBottomPx: 76 });
-    }
   }
 
   loadKakaoSdk = async () => {
@@ -2009,8 +1999,6 @@ class Component extends DCLogic {
       aiSendLabel: this.state.aiLoading ? '...' : '전송',
       aiPanelClass: aiOpen ? 'rp-ai-panel rp-ai-panel-open' : 'rp-ai-panel',
       aiFabDisplay: aiOpen ? 'none' : 'flex',
-      aiFabBottom: `${this.state.aiFabBottomPx}px`,
-      selectionCardRef: this.selectionCardRef,
       toastMsg: this.state.toastMsg, toastOpacity: this.state.toastVisible ? 1 : 0,
       places: enrichedPlaces,
       timeline,
