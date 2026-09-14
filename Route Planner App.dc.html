@@ -993,7 +993,7 @@ class Component extends DCLogic {
       this.setState(s => ({
         aiMessages: [...s.aiMessages, {
           role: 'ai',
-          text: 'AI 답변을 가져오지 못했어요. 잠시 후 다시 시도해주세요.',
+          text: error?.message || 'AI 답변을 가져오지 못했어요. 잠시 후 다시 시도해주세요.',
         }],
         aiLoading: false,
       }));
