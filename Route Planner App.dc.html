@@ -388,7 +388,7 @@ a:hover{color:#146030}
   </sc-if>
 
   <!-- 주소 추가 입력 -->
-  <div style="padding: 14px 20px; margin-top: auto; position: sticky; bottom: 0; background: {{ c.panelBg }}; border-top: 1px solid {{ c.border }}; z-index: 4">
+  <div style="padding: 14px 20px; margin-top: auto; position: sticky; bottom: 0; background: {{ c.panelBg }}; border-top: 1px solid {{ c.border }}; z-index: 4; position: relative">
     <div style="display:flex;gap:6px">
       <sc-if value="{{ hasDayTabs }}" hint-placeholder-val="{{ false }}">
         <select value="{{ newAddressDayValue }}" onChange="{{ onNewAddressDayChange }}" style="font-size:12px;font-weight:700;padding:0 6px;border-radius:10px;border:1px solid {{ c.border }};background:{{ c.chipBg }};color:{{ c.text }};flex-shrink:0;height:42px">
@@ -398,7 +398,7 @@ a:hover{color:#146030}
         </select>
       </sc-if>
       <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
-      <input value="{{ newAddress }}" onChange="{{ onAddressInput }}" onKeyDown="{{ onAddressKeyDown }}" placeholder="주소를 입력하거나 붙여넣기" style="flex:1;min-width:0;height:42px;box-sizing:border-box;border:1px solid {{ addressInputBorder }};border-radius:11px;padding:0 12px;font-size:13px;font-family:inherit;color:{{ c.text }};outline:none;background-color:{{ addressInputBg }}">
+      <input value="{{ newAddress }}" onChange="{{ onAddressInput }}" onKeyDown="{{ onAddressKeyDown }}" onFocus="{{ openSearchMode }}" placeholder="주소를 검색하여 추가하기" style="flex:1;min-width:0;height:42px;box-sizing:border-box;border:1px solid {{ addressInputBorder }};border-radius:11px;padding:0 12px;font-size:13px;font-family:inherit;color:{{ c.text }};outline:none;background-color:{{ addressInputBg }}">
       <div onClick="{{ addPlace }}" class="{{ addBtnClass }}" style="height: 42px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; color: {{ addBtnColor }}; border-radius: 10px; padding: 0 22px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; border: none; box-shadow: none; background-color: {{ addBtnBg }}; border-width: 1px; border-color: {{ addBtnBorder }}; border-style: solid">추가</div>
       </sc-if>
     </div>
@@ -419,6 +419,43 @@ a:hover{color:#146030}
 <sc-if value="{{ mapExpanded }}" hint-placeholder-val="{{ true }}">
   <div style="flex:1;position:relative;background:#EAF2FE;overflow:hidden;min-height:280px">
     <div ref="{{ mapRef }}" style="position:absolute;inset:0"></div>
+    <sc-if value="{{ searchMode }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;top:14px;left:14px;right:14px;z-index:20;display:flex;flex-direction:column;gap:8px">
+        <div style="background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.18);display:flex;align-items:center;gap:8px;padding:4px 4px 4px 14px">
+          <input value="{{ mapSearchQuery }}" onChange="{{ onMapSearchInput }}" onKeyDown="{{ onMapSearchKeyDown }}" placeholder="장소명 또는 주소를 검색하세요" autoFocus="{{ true }}" style="flex:1;min-width:0;height:40px;border:none;outline:none;font-size:13.5px;font-family:inherit;color:#171719;background:transparent">
+          <div onClick="{{ runMapSearch }}" style="cursor:pointer;width:36px;height:36px;border-radius:9px;background:#7BCB93;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#12321F" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+          </div>
+          <div onClick="{{ closeSearchMode }}" style="cursor:pointer;width:32px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(23,23,25,.4);font-size:16px">×</div>
+        </div>
+        <sc-if value="{{ mapSearchLoading }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.14);padding:14px;font-size:12.5px;color:rgba(23,23,25,.5)">검색 중...</div>
+        </sc-if>
+        <sc-if value="{{ mapSearchError }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.14);padding:14px;font-size:12.5px;color:#D9534F">{{ mapSearchError }}</div>
+        </sc-if>
+        <sc-if value="{{ hasMapSearchResults }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.14);max-height:260px;overflow-y:auto">
+            <sc-for list="{{ mapSearchResultItems }}" as="res" hint-placeholder-count="0">
+              <div onClick="{{ res.onSelect }}" style="padding:10px 14px;border-bottom:1px solid #F0F0F1;cursor:pointer;display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:13px;font-weight:700;color:#171719">{{ res.name }}</div>
+                <div style="font-size:11.5px;color:rgba(23,23,25,.5)">{{ res.address }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ hasSelectedMapDoc }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;bottom:14px;left:14px;right:14px;z-index:20;background:#fff;border-radius:14px;box-shadow:0 -4px 20px rgba(0,0,0,.18);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="min-width:0">
+            <div style="font-size:10.5px;font-weight:700;color:#7BCB93;letter-spacing:.04em;margin-bottom:2px">선택한 장소</div>
+            <div style="font-size:14px;font-weight:700;color:#171719;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ selectedMapDocName }}</div>
+            <div style="font-size:11.5px;color:rgba(23,23,25,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ selectedMapDocAddress }}</div>
+          </div>
+          <div onClick="{{ confirmMapSelection }}" style="flex-shrink:0;background:#171719;color:#fff;font-size:13px;font-weight:700;padding:10px 16px;border-radius:10px;cursor:pointer;white-space:nowrap">이 장소 선택</div>
+        </div>
+      </sc-if>
+    </sc-if>
     <sc-if value="{{ showMockOverlay }}" hint-placeholder-val="{{ true }}">
     <div style="position:absolute;inset:0;background-image:linear-gradient(#DCE7F5 1px,transparent 1px),linear-gradient(90deg,#DCE7F5 1px,transparent 1px);background-size:38px 38px;opacity:.7"></div>
     <div style="position:absolute;top:14px;left:14px;background:rgba(23,23,25,.72);color:#fff;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.02em">{{ mapStatusLabel }}</div>
@@ -916,6 +953,13 @@ class Component extends DCLogic {
     copyLabel: '복사',
     newAddress: '',
     newAddressDay: 0,
+    searchMode: false,
+    mapSearchQuery: '',
+    mapSearchResults: [],
+    mapSearchLoading: false,
+    mapSearchError: null,
+    selectedMapDoc: null,
+    pendingSelectedDoc: null,
     dragIndex: null,
     expandedPlaces: {},
     editModalOpen: false,
@@ -1376,10 +1420,11 @@ class Component extends DCLogic {
   };
   togglePermissionMenu = () => this.setState(s => ({ permissionMenuOpen: !s.permissionMenuOpen }));
   setPermission = (p) => this.setState({ permission: p, permissionMenuOpen: false });
-  onAddressInput = (e) => this.setState({ newAddress: e.target.value });
+  onAddressInput = (e) => this.setState({ newAddress: e.target.value, pendingSelectedDoc: null });
   onNewAddressDayChange = (e) => this.setState({ newAddressDay: Number(e.target.value) });
   onAddressKeyDown = (e) => {
     if (e.key !== 'Enter') return;
+    e.preventDefault();
     this.setState({ addBtnPressed: true });
     setTimeout(() => this.setState({ addBtnPressed: false }), 120);
     this.addPlace();
@@ -1389,10 +1434,81 @@ class Component extends DCLogic {
     this.setState({ toastMsg: msg, toastVisible: true });
     this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2200);
   };
-  addPlace = () => {
-    const addr = this.state.newAddress.trim();
-    if (!addr) return;
-    this.setState({ addConfirmOpen: true, pendingName: addr, pendingAddress: addr, pendingDay: this.state.newAddressDay || 0 });
+  // 왼쪽 입력칸 클릭/포커스 → 오른쪽 Kakao 지도 위에 검색 모드 활성화
+  openSearchMode = () => {
+    if (this.state.searchMode) return;
+    this.setState({ searchMode: true, mapSearchQuery: this.state.newAddress, mapSearchResults: [], mapSearchError: null, selectedMapDoc: null });
+  };
+  closeSearchMode = () => {
+    this.clearSearchMarker();
+    this.setState({ searchMode: false, mapSearchResults: [], mapSearchError: null, selectedMapDoc: null });
+  };
+  onMapSearchInput = (e) => this.setState({ mapSearchQuery: e.target.value });
+  onMapSearchKeyDown = (e) => { if (e.key === 'Enter') { e.preventDefault(); this.runMapSearch(); } };
+  runMapSearch = async () => {
+    const query = this.state.mapSearchQuery.trim();
+    if (!query) return;
+    this.setState({ mapSearchLoading: true, mapSearchError: null, mapSearchResults: [], selectedMapDoc: null });
+    this.clearSearchMarker();
+    try {
+      const r = await fetch('/api/kakao', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'keyword', params: { query } }),
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        console.error('runMapSearch error:', data);
+        this.setState({ mapSearchLoading: false, mapSearchError: data?.error || '검색에 실패했어요' });
+        return;
+      }
+      const docs = Array.isArray(data.documents) ? data.documents : [];
+      this.setState({ mapSearchLoading: false, mapSearchResults: docs });
+      if (!docs.length) this.setState({ mapSearchError: '검색 결과가 없어요' });
+    } catch (err) {
+      console.error('runMapSearch fetch failed:', err);
+      this.setState({ mapSearchLoading: false, mapSearchError: '검색 요청 중 오류가 발생했어요' });
+    }
+  };
+  clearSearchMarker = () => {
+    if (this._searchMarker) { this._searchMarker.setMap(null); this._searchMarker = null; }
+  };
+  // 검색 결과 클릭 → 아직 방문지에 추가하지 않고, 실제 좌표로 지도만 이동 + 선택 마커 표시
+  selectMapResult = (doc) => {
+    this.setState({ selectedMapDoc: doc });
+    if (this.kakaoMap && window.kakao && window.kakao.maps) {
+      const pos = new window.kakao.maps.LatLng(Number(doc.y), Number(doc.x));
+      this.kakaoMap.setCenter(pos);
+      this.kakaoMap.setLevel(4);
+      this.clearSearchMarker();
+      this._searchMarker = new window.kakao.maps.Marker({ position: pos, map: this.kakaoMap });
+    }
+  };
+  // "이 장소 선택" → 방문지에 아직 추가하지 않고, 입력칸에만 반영. 실제 추가는 "추가" 버튼에서
+  confirmMapSelection = () => {
+    const doc = this.state.selectedMapDoc;
+    if (!doc) return;
+    this.clearSearchMarker();
+    this.setState({ newAddress: doc.place_name, pendingSelectedDoc: doc, searchMode: false, selectedMapDoc: null, mapSearchResults: [], mapSearchError: null });
+  };
+  // 실제 검색으로 확인된 좌표/주소/place_id를 그대로 사용해 방문지 등록 (재검색 없음)
+  addSelectedPlace = (doc) => {
+    const day = this.state.newAddressDay || 0;
+    this.setState(s => {
+      const places = [...s.places, {
+        id: s.nextId, name: doc.place_name, category: '미분류',
+        address: doc.road_address_name || doc.address_name, roadAddress: doc.road_address_name,
+        jibunAddress: doc.address_name, placeId: doc.id,
+        x: Number(doc.x), y: Number(doc.y),
+        priority: 'normal', duration: 15, hours: 'unknown', hoursLabel: '영업시간 확인 필요', day,
+      }];
+      return { places, nextId: s.nextId + 1, newAddress: '', pendingSelectedDoc: null, segments: this.resizeSegments(places, s.segments) };
+    }, () => {
+      this.syncKakaoMarkers();
+      this.refreshAllSegmentRoutes();
+    });
+    this.logActivity(`${doc.place_name}을 추가했습니다`);
+    this.showToast('방문지가 일정에 추가됐어요');
   };
   onPendingNameChange = (e) => this.setState({ pendingName: e.target.value });
   onPendingAddressChange = (e) => this.setState({ pendingAddress: e.target.value });
@@ -1947,6 +2063,19 @@ class Component extends DCLogic {
       onAddressInput: this.onAddressInput,
       onAddressKeyDown: this.onAddressKeyDown,
       addPlace: this.addPlace,
+      openSearchMode: this.openSearchMode, closeSearchMode: this.closeSearchMode,
+      searchMode: this.state.searchMode,
+      mapSearchQuery: this.state.mapSearchQuery, onMapSearchInput: this.onMapSearchInput, onMapSearchKeyDown: this.onMapSearchKeyDown,
+      runMapSearch: this.runMapSearch, mapSearchLoading: this.state.mapSearchLoading, mapSearchError: this.state.mapSearchError,
+      hasMapSearchResults: this.state.mapSearchResults.length > 0,
+      mapSearchResultItems: this.state.mapSearchResults.map((doc, i) => ({
+        key: doc.id || i, name: doc.place_name, address: doc.road_address_name || doc.address_name,
+        onSelect: () => this.selectMapResult(doc),
+      })),
+      hasSelectedMapDoc: !!this.state.selectedMapDoc,
+      selectedMapDocName: this.state.selectedMapDoc?.place_name || '',
+      selectedMapDocAddress: this.state.selectedMapDoc ? (this.state.selectedMapDoc.road_address_name || this.state.selectedMapDoc.address_name) : '',
+      confirmMapSelection: this.confirmMapSelection,
       addBtnClass: this.state.addBtnPressed ? 'rp-btn-primary rp-btn-pressed' : 'rp-btn-primary',
       permissionsModalOpen: this.state.permissionsModalOpen,
       openPermissionsModal: this.openPermissionsModal,
