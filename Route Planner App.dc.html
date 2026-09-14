@@ -693,10 +693,16 @@ a:hover{color:#146030}
           <div>⚠️ 공유된 일정과 저장된 일정에서도 더 이상 확인할 수 없습니다.</div>
           <div>⚠️ 삭제한 일정은 복구할 수 없습니다.</div>
         </div>
+        <div onClick="{{ toggleDeleteAgreeChecked }}" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-top:2px">
+          <div style="width:18px;height:18px;border-radius:5px;border:1.5px solid {{ deleteAgreeChecked ? '#C25454' : '#D6D7DA' }};background:{{ deleteAgreeChecked ? '#C25454' : '#fff' }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <sc-if value="{{ deleteAgreeChecked }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></sc-if>
+          </div>
+          <span style="font-size:12.5px;color:#171719;font-weight:600">정말 삭제할 건지 확인했습니다</span>
+        </div>
       </sc-if>
       <div style="display:flex;gap:8px">
         <div onClick="{{ closeDeleteConfirm }}" style="flex:1;text-align:center;border:1px solid #E1E2E4;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:#171719;cursor:pointer">취소</div>
-        <div onClick="{{ confirmDelete }}" style="flex:1;text-align:center;background:#C25454;color:#fff;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:pointer">{{ deleteConfirmBtnLabel }}</div>
+        <div onClick="{{ confirmDelete }}" style="flex:1;text-align:center;background:{{ deleteConfirmDisabled ? '#E8B9B9' : '#C25454' }};color:#fff;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:{{ deleteConfirmDisabled ? 'not-allowed' : 'pointer' }}">{{ deleteConfirmBtnLabel }}</div>
       </div>
       </div>
     </div>
@@ -919,6 +925,7 @@ class Component extends DCLogic {
     deleteConfirmOpen: false,
     deleteTargetId: null,
     deleteTargetLabel: '',
+    deleteAgreeChecked: false,
     categoryModalOpen: false,
     categoryTargetId: null,
     selectedDay: null,
@@ -1364,9 +1371,11 @@ class Component extends DCLogic {
     if (!place) return;
     this.setState({ deleteConfirmOpen: true, deleteTargetId: id, deleteTargetLabel: place.name });
   };
-  closeDeleteConfirm = () => this.setState({ deleteConfirmOpen: false, deleteTargetId: null });
+  closeDeleteConfirm = () => this.setState({ deleteConfirmOpen: false, deleteTargetId: null, deleteAgreeChecked: false });
+  toggleDeleteAgreeChecked = () => this.setState(s => ({ deleteAgreeChecked: !s.deleteAgreeChecked }));
   confirmDelete = () => {
-    const { deleteTargetId } = this.state;
+    const { deleteTargetId, deleteAgreeChecked } = this.state;
+    if (deleteTargetId === 'ORIGINAL_ROUTE' && !deleteAgreeChecked) return;
     if (deleteTargetId === 'ALL') {
       const count = this.state.places.length;
       this.setState({ places: [], segments: [] });
@@ -1374,7 +1383,7 @@ class Component extends DCLogic {
     } else if (deleteTargetId != null) {
       this.deletePlace(deleteTargetId);
     }
-    this.setState({ deleteConfirmOpen: false, deleteTargetId: null });
+    this.setState({ deleteConfirmOpen: false, deleteTargetId: null, deleteAgreeChecked: false });
   };
   clearAllPlaces = () => {
     if (this.state.places.length === 0) return;
@@ -1823,6 +1832,9 @@ class Component extends DCLogic {
       deleteConfirmMessage: this.state.deleteTargetId === 'ORIGINAL_ROUTE' ? '정말 삭제하시겠습니까?' : `${this.state.deleteTargetLabel}을 삭제하시겠습니까?`,
       deleteConfirmBtnLabel: this.state.deleteTargetId === 'ORIGINAL_ROUTE' ? '일정 삭제' : '삭제',
       isDeletingOriginalRoute: this.state.deleteTargetId === 'ORIGINAL_ROUTE',
+      deleteAgreeChecked: this.state.deleteAgreeChecked,
+      toggleDeleteAgreeChecked: this.toggleDeleteAgreeChecked,
+      deleteConfirmDisabled: this.state.deleteTargetId === 'ORIGINAL_ROUTE' && !this.state.deleteAgreeChecked,
       closeDeleteConfirm: this.closeDeleteConfirm,
       confirmDelete: this.confirmDelete,
       addConfirmOpen: this.state.addConfirmOpen,
