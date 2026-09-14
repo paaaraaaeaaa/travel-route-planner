@@ -36,8 +36,8 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
   100%{transform:translate(0,0)}
 }
 .pd-trail{position:absolute;width:6px;height:2.5px;border-radius:2px;background:rgba(61,58,54,.55);opacity:0;z-index:1;animation-name:pd-trail-fade;animation-timing-function:ease-out;animation-iteration-count:infinite;animation-duration:var(--dur,13s);animation-delay:var(--delay,0s)}
-.pd-logo-ant2{animation:pd-logo-ant-push 20s ease-in-out 3}
-.pd-logo-text2{display:inline-flex;animation:pd-logo-text-push 20s ease-in-out 3}
+.pd-logo-ant2{animation:pd-logo-ant-push 20s ease-in-out 1}
+.pd-logo-text2{display:inline-flex;animation:pd-logo-text-push 20s ease-in-out 1}
 @keyframes pd-logo-ant-push{
   0%{transform:translateX(0);opacity:1}
   40%{transform:translateX(260px);opacity:1}
@@ -195,7 +195,11 @@ const DARK = {
 
 class Component extends DCLogic {
   state = { theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || this.props.defaultTheme || 'light', logoAnimKey: 0 };
-  replayLogoAnim = () => this.setState(s => ({ logoAnimKey: s.logoAnimKey + 1 }));
+  replayLogoAnim = () => {
+    if (this._logoAnimTimer) return;
+    this.setState(s => ({ logoAnimKey: s.logoAnimKey + 1 }));
+    this._logoAnimTimer = setTimeout(() => { this._logoAnimTimer = null; }, 20000);
+  };
   toggleTheme = () => this.setState(s => {
     const next = s.theme === 'light' ? 'dark' : 'light';
     try { localStorage.setItem('pd-theme', next); } catch (e) {}

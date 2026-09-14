@@ -15,7 +15,7 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
 a{color:#1F7A44}
 a:hover{color:#146030}
 .pd-fade{transition:background-color .35s ease,color .35s ease,border-color .35s ease}
-.mr-card{transition:box-shadow .15s,border-color .15s}
+.mr-card:hover{box-shadow:0 2px 10px rgba(23,23,25,.06);border-color:#CFE8D9}
 .mr-icon-btn:hover{background-color:#EAEBEC}
 .mr-nav-link{transition:color .15s ease}
 .mr-nav-link:hover{color:#95C898 !important}
@@ -46,10 +46,10 @@ a:hover{color:#146030}
   <div style="max-width:1140px;margin:0 auto;padding:32px 24px 80px">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px">
       <div style="margin-left:8px">
-        <div style="font-size:22px;font-weight:700;color:{{ c.text }};margin-bottom:4px">내 일정</div>
+        <div style="font-size:24px;font-weight:800;color:{{ c.text }};letter-spacing:-0.01em;margin-bottom:5px">내 일정</div>
         <div style="font-size:13px;color:{{ c.textSub }}">저장해둔 동선을 확인하고 이어서 계획할 수 있어요</div>
       </div>
-      <div onClick="{{ openNewTripModal }}" style="cursor: pointer; font-size: 14px; font-weight: 700; background: #7BCB93; color: #12321F; border-radius: 9px; padding: 9px 16px; white-space: nowrap; flex-shrink: 0; margin-right: 8px; width: 61px; height: 18px; text-align: center">＋ 새 일정</div>
+      <div onClick="{{ openNewTripModal }}" style="cursor:pointer;font-size:13.5px;font-weight:700;background:#7BCB93;color:#12321F;border-radius:10px;padding:10px 18px;white-space:nowrap;flex-shrink:0">＋ 새 일정</div>
     </div>
 
     <sc-if value="{{ hasRoutes }}" hint-placeholder-val="{{ false }}">
@@ -58,20 +58,15 @@ a:hover{color:#146030}
           <div onClick="{{ tab.onSelect }}" style="cursor:pointer;padding:6px 12px;border-radius:8px;font-size:12.2px;font-weight:600;background:{{ tab.bg }};color:{{ tab.color }}">{{ tab.label }}</div>
         </sc-for>
       </div>
-      <div style="display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:14px">
         <sc-for list="{{ pagedRoutes }}" as="route" hint-placeholder-count="3">
-          <div class="pd-fade mr-card" style="background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;opacity:{{ route.cardOpacity }}">
-            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+          <div class="pd-fade mr-card" style="background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;padding:16px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;opacity:{{ route.cardOpacity }}">
+            <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:7px">
               <sc-if value="{{ route.isEditing }}" hint-placeholder-val="{{ false }}">
-                <input value="{{ route.editValue }}" onChange="{{ route.onEditChange }}" onBlur="{{ route.onEditSave }}" onKeyDown="{{ route.onEditKeyDown }}" autoFocus="{{ true }}" style="font-size:14.5px;font-weight:700;color:{{ c.text }};background:{{ c.bg }};border:1px solid {{ c.border }};border-radius:6px;padding:2px 6px;width:100%;box-sizing:border-box;font-family:inherit">
+                <input value="{{ route.editValue }}" onChange="{{ route.onEditChange }}" onBlur="{{ route.onEditSave }}" onKeyDown="{{ route.onEditKeyDown }}" autoFocus="{{ true }}" style="font-size:15.5px;font-weight:700;color:{{ c.text }};background:{{ c.bg }};border:1px solid {{ c.border }};border-radius:6px;padding:2px 6px;width:100%;box-sizing:border-box;font-family:inherit">
               </sc-if>
               <sc-if value="{{ route.notEditing }}" hint-placeholder-val="{{ true }}">
-                <div style="display:flex;align-items:center;gap:6px;min-width:0">
-                  <div onClick="{{ route.onEditStart }}" style="font-size:14.5px;font-weight:700;color:{{ c.text }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;min-width:0" title="클릭해서 제목 수정">{{ route.name }}</div>
-                  <sc-for list="{{ route.memberChips }}" as="mem" hint-placeholder-count="1">
-                    <div style="font-size:11px;font-weight:700;color:{{ c.textSub }};background:{{ c.chipBg }};border-radius:999px;padding:2px 8px;white-space:nowrap;flex-shrink:0">+{{ mem }}</div>
-                  </sc-for>
-                </div>
+                <div onClick="{{ route.onEditStart }}" style="font-size:15.5px;font-weight:700;color:{{ c.text }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;min-width:0" title="클릭해서 제목 수정">{{ route.name }}</div>
               </sc-if>
               <sc-if value="{{ route.isDateEditing }}" hint-placeholder-val="{{ false }}">
                 <div style="position:relative;opacity:1" onClick="{{ stopClick }}">
@@ -95,15 +90,28 @@ a:hover{color:#146030}
               <sc-if value="{{ route.notDateEditing }}" hint-placeholder-val="{{ true }}">
                 <div onClick="{{ route.onDateEditStart }}" style="cursor:pointer;font-size:12px;color:{{ c.textSub }}" title="클릭해서 날짜 수정">{{ route.dateOnly }} · 방문지 {{ route.countLabel }}</div>
               </sc-if>
-              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:1px">
+              <sc-if value="{{ route.hasMembers }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:5px;margin-top:1px">
+                  <sc-for list="{{ route.memberAvatars }}" as="mem" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:4px">
+                      <div style="width:18px;height:18px;border-radius:50%;background:{{ mem.bg }};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ mem.initial }}</div>
+                      <span style="font-size:11.5px;color:{{ c.textSub }}">{{ mem.name }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:1px">
                 <sc-for list="{{ route.placeChips }}" as="chip" hint-placeholder-count="3">
                   <div style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;background:{{ c.chipBg }};color:{{ c.textSub }}">{{ chip }}</div>
                 </sc-for>
+                <sc-if value="{{ route.hasMoreChips }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:11px;font-weight:700;color:{{ c.textSub }}">+{{ route.moreChipsCount }}</div>
+                </sc-if>
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-              <a href="{{ route.openHref }}" style="font-size:12.5px;font-weight:600;color:{{ c.text }};background:transparent;border-radius:8px;padding:7px 12px;text-decoration:none;white-space:nowrap;border:1px solid {{ c.border }}">열기</a>
-              <div onClick="{{ route.onDeleteClick }}" class="mr-icon-btn" style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:12px;color:#AEB0B6">✕</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <a href="{{ route.openHref }}" style="font-size:12.5px;font-weight:700;color:#12321F;background:#EAF9EF;border-radius:8px;padding:8px 14px;text-decoration:none;white-space:nowrap">열기</a>
+              <div onClick="{{ route.onDeleteClick }}" style="width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:12px;color:{{ c.textSub }};opacity:.6">✕</div>
             </div>
           </div>
         </sc-for>
@@ -238,6 +246,8 @@ function fmtRange(start, end) {
 const LIGHT = { bg: '#FFFFFF', text: '#171719', textSub: 'rgba(23,23,25,.6)', border: '#E1E2E4', headerBg: 'rgba(255,255,255,.82)', cardBg: '#fff', chipBg: '#F4F4F5' };
 const DARK = { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)', border: '#292A2D', headerBg: 'rgba(15,15,16,.72)', cardBg: '#17181A', chipBg: 'rgba(255,255,255,.08)' };
 function pad2(n) { return String(n).padStart(2, '0'); }
+const AVATAR_COLORS = ['#7BCB93', '#8FB6E8', '#E8A87C', '#B79BE8'];
+function hashStr(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h << 5) - h + s.charCodeAt(i); return h; }
 function fmtDateLabel(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
   const dt = new Date(y, m - 1, d);
@@ -431,6 +441,10 @@ class Component extends DCLogic {
       onEditSave: this.saveEdit,
       onEditKeyDown: this.onEditKeyDown,
       memberChips: r.members || [],
+      hasMembers: !!(r.members && r.members.length),
+      memberAvatars: (r.members || []).map(name => ({ name, initial: name.slice(0, 1), bg: AVATAR_COLORS[Math.abs(hashStr(name)) % AVATAR_COLORS.length] })),
+      hasMoreChips: r.places.length > 3,
+      moreChipsCount: Math.max(0, r.places.length - 3),
       dateOnly: fmtRange(r.tripStart, r.tripEnd) || new Date(Number(r.id) || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }),
       cardOpacity: 1,
       isDone: !!(r.tripEnd && r.tripEnd < todayStr),

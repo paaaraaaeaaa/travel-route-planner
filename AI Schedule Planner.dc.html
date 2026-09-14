@@ -57,7 +57,7 @@ a:hover{color:#146030}
             <div style="text-align:center;font-size:11px;color:{{ c.textSub }};padding:4px 0">{{ wl }}</div>
           </sc-for>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);row-gap:3px;column-gap:0">
           <sc-for list="{{ calCells }}" as="cell" hint-placeholder-count="42">
             <div onClick="{{ cell.onClick }}" style="cursor:pointer;height:34px;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:{{ cell.rangeRadius }};background:{{ cell.rangeBg }};color:{{ cell.textColor }}">{{ cell.day }}</div>
           </sc-for>
@@ -230,7 +230,7 @@ function buildCalCells(viewYear, viewMonth, startStr, endStr, onDayClick, isDark
       day: cell.day,
       onClick: cell.inMonth ? () => onDayClick(cell.dateStr) : () => {},
       rangeBg: (isRangeActive && (isEdge || inRange)) || (!isRangeActive && isStart) ? '#95C898' : 'transparent',
-      rangeRadius: !isRangeActive ? '50%' : (isStart && isEnd) ? '50%' : isStart ? '50% 0 0 50%' : isEnd ? '0 50% 50% 0' : inRange ? '0' : '50%',
+      rangeRadius: !isRangeActive ? '8px' : (isStart && isEnd) ? '8px' : isStart ? '8px 0 0 8px' : isEnd ? '0 8px 8px 0' : inRange ? '0' : '8px',
       textColor: (isRangeActive && (isEdge || inRange)) || (!isRangeActive && isStart) ? '#12321F' : dayColor,
     };
   });
