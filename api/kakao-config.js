@@ -1,6 +1,9 @@
+// GET /api/kakao-config — returns ONLY the JS SDK key (never REST/Gemini keys).
 export default function handler(req, res) {
-  res.setHeader('Cache-Control', 'no-store');
   const key = process.env.KAKAO_JS_KEY;
-  if (!key) return res.status(500).json({ error: 'KAKAO_JS_KEY is not configured' });
-  return res.status(200).json({ javascriptKey: key });
+  if (!key) {
+    res.status(500).json({ error: 'Server is missing KAKAO_JS_KEY' });
+    return;
+  }
+  res.status(200).json({ javascriptKey: key });
 }

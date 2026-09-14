@@ -21,9 +21,11 @@ a:hover{color:#146030}
 .rp-panel{transition:padding .2s}
 @media (max-width:900px){
   .rp-shell{grid-template-columns:1fr;transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1)}
-  .rp-map-col{order:1;min-height:320px}
-  .rp-panel{max-height:none;order:0}
-  .rp-shell.rp-panel-collapsed{grid-template-columns:1fr;grid-template-rows:1fr 52px}
+  .rp-map-col{order:1;min-height:320px;display:none}
+  .rp-panel{max-height:none;order:0;scrollbar-width:none}
+  .rp-panel::-webkit-scrollbar{display:none;width:0;height:0}
+  .rp-shell.rp-panel-collapsed{grid-template-columns:1fr;grid-template-rows:1fr}
+  .rp-shell.rp-panel-collapsed .rp-map-col{display:flex;min-height:100vh}
   .rp-shell.rp-map-collapsed{grid-template-columns:1fr;grid-template-rows:52px 1fr}
 }
 .rp-rail{display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px 0;height:100%;cursor:pointer}
@@ -190,6 +192,19 @@ a:hover{color:#146030}
     <!-- 흐름 스텝 인디케이터 -->
     
   </div>
+
+  <!-- 로그인 필요 안내 모달 -->
+  <sc-if value="{{ loginRequiredModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div style="position:relative"><div onClick="{{ closeLoginRequiredModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div>
+        <div style="background:{{ c.panelBg }};border-radius:16px;padding:26px;width:300px;max-width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+          <div style="font-size:15px;font-weight:700;color:{{ c.text }};line-height:1.5">내 일정에 저장하려면<br>로그인이 필요해요</div>
+          <div onClick="{{ mockLoginThenSave }}" style="width:100%;text-align:center;cursor:pointer;background:#7BCB93;color:#12321F;border-radius:10px;padding:11px;font-size:13.5px;font-weight:700">로그인</div>
+          <div style="font-size:12px;color:{{ c.textSub }}">계정이 없나요? <a href="./Signup Screen.dc.html" style="color:#1F7A44;font-weight:700;text-decoration:none">회원가입</a></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
 
   <!-- 조건 설정: 경로기준 / 구간 일괄 적용 -->
   <div style="padding:18px 20px;border-bottom:1px solid {{ c.border }};display:flex;flex-direction:column;gap:14px">
@@ -403,14 +418,39 @@ a:hover{color:#146030}
 </sc-if>
 <sc-if value="{{ mapExpanded }}" hint-placeholder-val="{{ true }}">
   <div style="flex:1;position:relative;background:#EAF2FE;overflow:hidden;min-height:280px">
+    <div ref="{{ mapRef }}" style="position:absolute;inset:0"></div>
+    <sc-if value="{{ showMockOverlay }}" hint-placeholder-val="{{ true }}">
     <div style="position:absolute;inset:0;background-image:linear-gradient(#DCE7F5 1px,transparent 1px),linear-gradient(90deg,#DCE7F5 1px,transparent 1px);background-size:38px 38px;opacity:.7"></div>
-    <div style="position:absolute;top:14px;left:14px;background:rgba(23,23,25,.72);color:#fff;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.02em">MOCK MAP · 실제 지도 API 연동 전</div>
-    
+    <div style="position:absolute;top:14px;left:14px;background:rgba(23,23,25,.72);color:#fff;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.02em">{{ mapStatusLabel }}</div>
+    </sc-if>
 
     <sc-if value="{{ hasRoute }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ showMockOverlay }}" hint-placeholder-val="{{ true }}">
       <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 100 100" preserveAspectRatio="none">
         <polyline points="{{ routePolylinePoints }}" fill="none" stroke="#2C8F4A" stroke-width="1.6" stroke-dasharray="3 2.4" stroke-linecap="butt" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
       </svg>
+      </sc-if><div class="{{ aiPanelClass }}">
+  <div style="padding:14px 16px;border-bottom:1px solid #EAEBEC;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#171719;display:flex;align-items:center;gap:5px"><span>✨</span>경로 AI</div>
+      <div style="font-size:11px;color:rgba(23,23,25,.5);margin-top:2px">경로 계획을 도와드릴게요</div>
+    </div>
+    <div onClick="{{ toggleAi }}" class="rp-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C;flex-shrink:0">✕</div>
+  </div>
+  <div style="padding:8px 16px;border-bottom:1px solid #EAEBEC;flex-shrink:0">
+    <div style="font-size:11px;color:rgba(23,23,25,.45);background:#F7F7F8;border-radius:7px;padding:6px 9px">현재 경로 · {{ aiContextLabel }}</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:0">
+    <sc-for list="{{ aiMessages }}" as="msg" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:{{ msg.align }}">
+        <div style="align-self:{{ msg.align }};max-width:82%;background:{{ msg.bg }};color:{{ msg.color }};border-radius:{{ msg.radius }};padding:9px 12px;font-size:13px;line-height:1.5">{{ msg.text }}</div>
+        <sc-if value="{{ msg.showSuggestions }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;max-width:100%">
+            <sc-for list="{{ msg.suggestions }}" as="sug" hint-placeholder-count="3">
+              <div onClick="{{ sug.onClick }}" style="border:1px solid #E1E2E4;border-radius:14px;padding:6px 12px;font-size:12px;font-weight:600;color:#171719;background:#fff;cursor:pointer;white-space:nowrap" class="rp-seg-item">{{ sug.text }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
       </div>
     </sc-for>
   </div>
@@ -420,6 +460,7 @@ a:hover{color:#146030}
   </div>
 </div>
     </sc-if>
+    <sc-if value="{{ showMockOverlay }}" hint-placeholder-val="{{ true }}">
     <sc-for list="{{ mapPins }}" as="pin" hint-placeholder-count="4">
       <div style="position:absolute;left:{{ pin.left }};top:{{ pin.top }};transform:translate(-50%,-100%)">
         <div style="width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0px 2px 10px 2px #FFFFFF4D; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; background-color: #000000; border-width: 1px; overflow: visible; opacity: 1">
@@ -427,6 +468,7 @@ a:hover{color:#146030}
         </div>
       </div>
     </sc-for>
+    </sc-if>
 
     <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
       <div style="position:absolute;inset:0;background:rgba(247,247,248,.72);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px">
@@ -464,6 +506,14 @@ a:hover{color:#146030}
         <span>{{ saveLabelText }}</span>
         <sc-if value="{{ isSaved }}" hint-placeholder-val="{{ false }}"><img src="./uploads/check.png" alt="" style="width:13px;height:13px;object-fit:contain"></sc-if>
       </div>
+      <sc-if value="{{ canRequestEdit }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ requestEditPermission }}" style="height:40px;padding:0 14px;border-radius:10px;background:#F2F6ED;color:#1F7A44;display:flex;align-items:center;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">편집 권한 요청</div>
+      </sc-if>
+      <sc-if value="{{ isRequestPending }}" hint-placeholder-val="{{ false }}">
+        <div style="height:40px;padding:0 14px;border-radius:10px;background:{{ c.chipBg }};color:{{ c.textSub }};display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;white-space:nowrap">
+          <div style="width:6px;height:6px;border-radius:50%;background:#E5A83E"></div>승인 대기 중
+        </div>
+      </sc-if>
       <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
         <div onClick="{{ recalc }}" class="rp-btn-primary" style="background:{{ recalcBtnBg }};color:{{ recalcBtnColor }};border-radius:10px;height:40px;padding:0 20px;display:flex;align-items:center;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:{{ recalcOpacity }}">경로 계산</div>
       </sc-if>
@@ -645,30 +695,8 @@ a:hover{color:#146030}
   </div>
 </sc-if>
 
-<div class="{{ aiPanelClass }}">
-  <div style="padding:14px 16px;border-bottom:1px solid #EAEBEC;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-    <div>
-      <div style="font-size:14px;font-weight:700;color:#171719;display:flex;align-items:center;gap:5px"><span>✨</span>경로 AI</div>
-      <div style="font-size:11px;color:rgba(23,23,25,.5);margin-top:2px">경로 계획을 도와드릴게요</div>
-    </div>
-    <div onClick="{{ toggleAi }}" class="rp-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C;flex-shrink:0">✕</div>
-  </div>
-  <div style="padding:8px 16px;border-bottom:1px solid #EAEBEC;flex-shrink:0">
-    <div style="font-size:11px;color:rgba(23,23,25,.45);background:#F7F7F8;border-radius:7px;padding:6px 9px">현재 경로 · {{ aiContextLabel }}</div>
-  </div>
-  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:0">
-    <sc-for list="{{ aiMessages }}" as="msg" hint-placeholder-count="2">
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:{{ msg.align }}">
-        <div style="align-self:{{ msg.align }};max-width:82%;background:{{ msg.bg }};color:{{ msg.color }};border-radius:{{ msg.radius }};padding:9px 12px;font-size:13px;line-height:1.5">{{ msg.text }}</div>
-        <sc-if value="{{ msg.showSuggestions }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-wrap:wrap;gap:6px;max-width:100%">
-            <sc-for list="{{ msg.suggestions }}" as="sug" hint-placeholder-count="3">
-              <div onClick="{{ sug.onClick }}" style="border:1px solid #E1E2E4;border-radius:14px;padding:6px 12px;font-size:12px;font-weight:600;color:#171719;background:#fff;cursor:pointer;white-space:nowrap" class="rp-seg-item">{{ sug.text }}</div>
-            </sc-for>
-          </div>
-        </sc-if>
-
 <!-- AI 도우미: 평소엔 작은 진입 버튼, 클릭 시 패널로 확장 -->
+<sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
 <div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: 76px; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
   <span>✨</span><span style="white-space:nowrap">AI 도우미</span>
 </div>
@@ -858,6 +886,9 @@ class Component extends DCLogic {
     criteria: this.props.routeCriteria ?? 'time',
     loading: false,
     permissionsModalOpen: false,
+    isLoggedIn: false,
+    loginRequiredModalOpen: false,
+    editRequestStatus: 'none',
     members: [
       { id: 'm1', nickname: '유수', role: 'editor' },
       { id: 'm2', nickname: '옐', role: 'viewer' },
@@ -919,6 +950,132 @@ class Component extends DCLogic {
     ],
     // MOCK: 실제 서버 연동 시 activityLog를 API 응답으로 교체하고 logActivity를 POST 호출로 바꾸면 됨
     activityLog: [],
+    // 실제 Kakao Maps SDK 연결 상태
+    kakaoReady: false,
+    kakaoLoadFailed: false,
+    geocoding: false,
+    // 구간별 실제 API 경로 결과 캐시: { "fromId_toId_mode": { distanceKm, minutes } }
+    routeCache: {},
+  };
+
+  mapRef = { current: null };
+  kakaoMap = null;
+  kakaoMarkers = [];
+
+  componentDidMount() {
+    this.loadKakaoSdk();
+  }
+
+  loadKakaoSdk = async () => {
+    try {
+      const r = await fetch('/api/kakao-config');
+      const data = await r.json();
+      if (!r.ok || !data.javascriptKey) throw new Error(data?.error || 'no javascriptKey');
+      if (window.kakao && window.kakao.maps) { this.initKakaoMap(); return; }
+      const script = document.createElement('script');
+      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${data.javascriptKey}&autoload=false`;
+      script.onload = () => window.kakao.maps.load(() => this.initKakaoMap());
+      script.onerror = () => this.setState({ kakaoLoadFailed: true });
+      document.head.appendChild(script);
+    } catch (err) {
+      console.error('Kakao SDK load failed:', err);
+      this.setState({ kakaoLoadFailed: true });
+    }
+  };
+
+  initKakaoMap = () => {
+    if (!this.mapRef.current || !window.kakao) return;
+    this.kakaoMap = new window.kakao.maps.Map(this.mapRef.current, {
+      center: new window.kakao.maps.LatLng(37.5665, 126.9780),
+      level: 6,
+    });
+    this.setState({ kakaoReady: true });
+    this.syncKakaoMarkers();
+  };
+
+  syncKakaoMarkers = () => {
+    if (!this.kakaoMap || !window.kakao) return;
+    this.kakaoMarkers.forEach(m => m.setMap(null));
+    this.kakaoMarkers = [];
+    const withCoords = this.state.places.filter(p => p.x && p.y);
+    if (!withCoords.length) return;
+    const bounds = new window.kakao.maps.LatLngBounds();
+    withCoords.forEach((p, i) => {
+      const pos = new window.kakao.maps.LatLng(p.y, p.x);
+      const marker = new window.kakao.maps.Marker({ position: pos, map: this.kakaoMap });
+      const overlay = new window.kakao.maps.CustomOverlay({
+        position: pos,
+        content: `<div style="background:#7BCB93;color:#12321F;font-size:11px;font-weight:700;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;transform:translateY(-28px)">${this.state.places.indexOf(p) + 1}</div>`,
+      });
+      overlay.setMap(this.kakaoMap);
+      this.kakaoMarkers.push(marker, overlay);
+      bounds.extend(pos);
+    });
+    this.kakaoMap.setBounds(bounds);
+  };
+
+  // 실제 Kakao 장소 검색(keyword) → 좌표 획득. 실패 시 null 반환(주소만으로 방문지 추가는 계속 진행)
+  geocodePlace = async (query) => {
+    try {
+      const r = await fetch('/api/kakao', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'keyword', params: { query } }),
+      });
+      const data = await r.json();
+      if (!r.ok) { console.error('geocodePlace error:', data); return null; }
+      const doc = data?.documents?.[0];
+      if (!doc) return null;
+      return { x: Number(doc.x), y: Number(doc.y), roadAddress: doc.road_address_name, category: doc.category_name };
+    } catch (err) {
+      console.error('geocodePlace fetch failed:', err);
+      return null;
+    }
+  };
+
+  segmentCacheKey = (idx) => {
+    const a = this.state.places[idx], b = this.state.places[idx + 1];
+    if (!a || !b) return `_${idx}`;
+    return `${a.id}_${b.id}_${this.state.segments[idx]}`;
+  };
+
+  // 실제 Kakao 경로 API(car/walk/transit/bike) 호출 후 routeCache에 저장. 좌표 없으면 스킵(기존 mock 계산이 fallback)
+  fetchSegmentRoute = async (idx) => {
+    const { places, segments } = this.state;
+    const a = places[idx], b = places[idx + 1];
+    const mode = segments[idx];
+    if (!a || !b || !a.x || !a.y || !b.x || !b.y) return;
+    const key = this.segmentCacheKey(idx);
+    if (this.state.routeCache[key]) return;
+    try {
+      const r = await fetch('/api/kakao', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: mode, params: { originX: a.x, originY: a.y, destX: b.x, destY: b.y, priority: this.state.criteria } }),
+      });
+      const data = await r.json();
+      if (!r.ok) { console.error(`fetchSegmentRoute(${mode}) error:`, data); return; }
+      let distanceKm = null, minutes = null;
+      if (mode === 'car') {
+        const route = data?.routes?.[0];
+        distanceKm = route?.summary?.distance ? route.summary.distance / 1000 : null;
+        minutes = route?.summary?.duration ? Math.round(route.summary.duration / 60) : null;
+      } else {
+        // Kakao routing(walk/publictraffic/bicycle) 응답 형태: routes[0].summary.{distance,duration}
+        const route = data?.routes?.[0];
+        distanceKm = route?.summary?.distance ? route.summary.distance / 1000 : null;
+        minutes = route?.summary?.duration ? Math.round(route.summary.duration / 60) : null;
+      }
+      if (distanceKm != null && minutes != null) {
+        this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { distanceKm, minutes } } }));
+      }
+    } catch (err) {
+      console.error('fetchSegmentRoute fetch failed:', err);
+    }
+  };
+
+  refreshAllSegmentRoutes = () => {
+    this.state.segments.forEach((_, idx) => this.fetchSegmentRoute(idx));
   };
 
   logActivity = (text) => this.setState(s => ({
@@ -934,69 +1091,37 @@ class Component extends DCLogic {
   toggleAi = () => this.setState(s => ({ aiOpen: !s.aiOpen }));
   onAiInput = (e) => this.setState({ aiInput: e.target.value });
   onAiInputKeyDown = (e) => { if (e.key === 'Enter') this.sendAiMessage(); };
-  sendAiMessage = async (overrideText) => {
+  buildRouteContext = () => {
+    const { places, segments, criteria, tripStart, tripEnd } = this.state;
+    return {
+      places: places.map((p, i) => ({ order: i + 1, name: p.name, address: p.address, x: p.x ?? null, y: p.y ?? null, durationMin: p.duration })),
+      segments: segments.map((mode, i) => {
+        const cache = this.state.routeCache?.[this.segmentCacheKey(i)];
+        return { from: places[i]?.name, to: places[i + 1]?.name, mode, distanceKm: cache?.distanceKm ?? null, minutes: cache?.minutes ?? null, isRealData: !!cache };
+      }),
+      routeCriteria: criteria, tripStart, tripEnd,
+    };
+  };
+  // 실제 /api/chat 호출 — Gemini에 현재 경로 상태를 context로 전달
+  sendAiMessage = (overrideText) => {
     const text = (overrideText ?? this.state.aiInput).trim();
-    if (!text || this.state.aiLoading) return;
-
-    const userMessage = { role: 'user', text };
-    this.setState(s => ({
-      aiMessages: [...s.aiMessages, userMessage],
-      aiInput: '',
-      aiLoading: true,
-      aiOpen: true,
-    }));
-
-    try {
-      const routePlaces = (this.state.places || []).map((p, i) => ({
-        order: i + 1,
-        name: p.name || p.title || `방문지 ${i + 1}`,
-        address: p.address || p.roadAddress || '',
-      }));
-      const routeSegments = (this.state.segments || []).map((mode, i) => ({
-        from: routePlaces[i]?.name || '',
-        to: routePlaces[i + 1]?.name || '',
-        transport: mode,
-      }));
-      const context = {
-        places: routePlaces,
-        segments: routeSegments,
-        criteria: this.state.criteria || 'time',
-        tripStart: this.state.tripStart || '',
-        tripEnd: this.state.tripEnd || '',
-      };
-
-      const history = [...this.state.aiMessages, userMessage]
-        .slice(-12)
-        .map(m => ({ role: m.role, text: m.text }));
-
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history, context }),
+    if (!text) return;
+    const history = this.state.aiMessages.slice(-6).map(m => ({ role: m.role, text: m.text }));
+    this.setState(s => ({ aiMessages: [...s.aiMessages, { role: 'user', text }], aiInput: '', aiLoading: true }));
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, history, context: this.buildRouteContext() }),
+    })
+      .then(r => r.json().then(data => ({ ok: r.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) throw new Error(data?.error || 'AI 요청 실패');
+        this.setState(s => ({ aiMessages: [...s.aiMessages, { role: 'ai', text: data.reply, suggestions: [] }], aiLoading: false }));
+      })
+      .catch((err) => {
+        console.error('sendAiMessage error:', err);
+        this.setState(s => ({ aiMessages: [...s.aiMessages, { role: 'ai', text: 'AI 응답을 가져오지 못했어요. 잠시 후 다시 시도해주세요.' }], aiLoading: false }));
       });
-
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || `AI 요청 실패 (${response.status})`);
-
-      this.setState(s => ({
-        aiMessages: [...s.aiMessages, {
-          role: 'ai',
-          text: data.reply || '답변을 받지 못했어요. 다시 시도해주세요.',
-          suggestions: ['현재 경로 괜찮아?', '더 빠른 순서 있어?', '주변 추천해줘'],
-        }],
-        aiLoading: false,
-      }));
-    } catch (error) {
-      console.error('AI chat error:', error);
-      this.setState(s => ({
-        aiMessages: [...s.aiMessages, {
-          role: 'ai',
-          text: error?.message || 'AI 답변을 가져오지 못했어요. 잠시 후 다시 시도해주세요.',
-          suggestions: ['다시 시도해줘'],
-        }],
-        aiLoading: false,
-      }));
-    }
   };
   onSuggestionClick = (text) => this.sendAiMessage(text);
 
@@ -1141,7 +1266,24 @@ class Component extends DCLogic {
       this.showToast('내 일정에서 제거했어요');
       return;
     }
+    if (!this.state.isLoggedIn) {
+      this.setState({ loginRequiredModalOpen: true });
+      return;
+    }
     this.saveCurrentRoute();
+    this.setState({ devRole: 'savedViewer' });
+    this.showToast('내 일정에 저장했어요');
+  };
+  closeLoginRequiredModal = () => this.setState({ loginRequiredModalOpen: false });
+  mockLoginThenSave = () => {
+    this.setState({ loginRequiredModalOpen: false, isLoggedIn: true });
+    this.saveCurrentRoute();
+    this.setState({ devRole: 'savedViewer' });
+    this.showToast('내 일정에 저장했어요');
+  };
+  requestEditPermission = () => {
+    this.setState({ editRequestStatus: 'pending' });
+    this.showToast('편집 권한을 요청했어요');
   };
   deleteOriginalRoute = () => {
     this.setState({ deleteConfirmOpen: true, deleteTargetId: 'ORIGINAL_ROUTE', deleteTargetLabel: '이 원본 일정' });
@@ -1173,16 +1315,24 @@ class Component extends DCLogic {
   onPendingNameChange = (e) => this.setState({ pendingName: e.target.value });
   onPendingAddressChange = (e) => this.setState({ pendingAddress: e.target.value });
   closeAddConfirm = () => this.setState({ addConfirmOpen: false, pendingAddress: '', pendingName: '' });
-  confirmAddPlace = () => {
+  confirmAddPlace = async () => {
     const addr = this.state.pendingAddress.trim();
     const name = this.state.pendingName.trim() || addr;
     if (!addr) return;
+    this.setState({ geocoding: true });
+    const geo = await this.geocodePlace(addr); // 실제 Kakao 장소 검색 (실패 시 null → 좌표 없이 추가)
     this.setState(s => {
-      const places = [...s.places, { id: s.nextId, name, category: '미분류', address: addr, priority: 'normal', duration: 15, hours: 'unknown', hoursLabel: '영업시간 확인 필요', day: s.pendingDay || 0 }];
-      return { places, nextId: s.nextId + 1, newAddress: '', segments: this.resizeSegments(places, s.segments), addConfirmOpen: false, pendingAddress: '', pendingName: '' };
+      const places = [...s.places, {
+        id: s.nextId, name, category: '미분류', address: addr, priority: 'normal', duration: 15,
+        hours: 'unknown', hoursLabel: '영업시간 확인 필요', day: s.pendingDay || 0,
+        x: geo?.x ?? null, y: geo?.y ?? null,
+      }];
+      return { places, nextId: s.nextId + 1, newAddress: '', segments: this.resizeSegments(places, s.segments), addConfirmOpen: false, pendingAddress: '', pendingName: '', geocoding: false };
     });
+    this.syncKakaoMarkers();
+    this.refreshAllSegmentRoutes();
     this.logActivity(`${name}을 추가했습니다`);
-    this.showToast('방문지가 일정에 추가됐어요');
+    this.showToast(geo ? '방문지가 일정에 추가됐어요' : '방문지가 추가됐어요 (좌표를 찾지 못해 지도에는 표시되지 않아요)');
   };
   quickAddPlace = () => {
     this.setState(s => {
@@ -1255,7 +1405,7 @@ class Component extends DCLogic {
   cycleSegmentMode = (idx) => {
     const curMode = this.state.segments[idx];
     const nextMode = MODE_ORDER[(MODE_ORDER.indexOf(curMode) + 1) % MODE_ORDER.length];
-    this.setState(s => ({ segments: s.segments.map((m, i) => i === idx ? nextMode : m) }));
+    this.setState(s => ({ segments: s.segments.map((m, i) => i === idx ? nextMode : m) }), () => this.fetchSegmentRoute(idx));
     this.logActivity(`${idx + 1}-${idx + 2} 구간의 이동수단을 ${MODE_MAP[nextMode].label}(으)로 변경했습니다`);
   };
   applyModeToAll = (mode) => {
@@ -1299,7 +1449,7 @@ class Component extends DCLogic {
       arr.splice(idx, 0, moved);
       return { places: arr, dragIndex: null, segments: this.resizeSegments(arr, s.segments) };
     });
-    if (wasDragging) this.logActivity('방문 순서를 변경했습니다');
+    if (wasDragging) { this.logActivity('방문 순서를 변경했습니다'); this.refreshAllSegmentRoutes(); }
   };
   onDragEnd = () => this.setState({ dragIndex: null });
   setCriteria = (c) => this.setState({ criteria: c });
@@ -1367,6 +1517,12 @@ class Component extends DCLogic {
       onLoad: () => this.loadSavedRoute(r.id),
       onDelete: (e) => { this.deleteSavedRoute(r.id); },
     }));
+
+    const hasCoordPlaces = places.some(p => p.x && p.y);
+    const showMockOverlay = !(this.state.kakaoReady && hasCoordPlaces);
+    const mapStatusLabel = this.state.kakaoLoadFailed
+      ? 'MOCK MAP · Kakao 지도 로드 실패'
+      : (this.state.kakaoReady ? 'MOCK MAP · 좌표가 확인된 방문지가 없어요' : 'MOCK MAP · 실제 지도 연결 중...');
 
     const firstNonHighIdx = places.findIndex(p => p.priority !== 'high');
     const urgentPushedNames = firstNonHighIdx === -1 ? [] : places.filter((p, i) => p.priority === 'high' && i > firstNonHighIdx).map(p => p.name);
@@ -1440,8 +1596,11 @@ class Component extends DCLogic {
       const info = MODE_MAP[mode];
       const fromP = places[idx], toP = places[idx + 1];
       const pairKey = fromP && toP ? (Number(fromP.id) * 131 + Number(toP.id) * 17) : idx;
-      const dist = SEGMENT_DISTANCES[Math.abs(pairKey) % SEGMENT_DISTANCES.length];
-      const rawSteps = computeMockSteps(mode, dist, idx);
+      const cached = this.state.routeCache[this.segmentCacheKey(idx)];
+      const dist = cached ? cached.distanceKm : SEGMENT_DISTANCES[Math.abs(pairKey) % SEGMENT_DISTANCES.length];
+      const rawSteps = cached
+        ? [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: cached.minutes, distanceKm: cached.distanceKm, nodeLabel: null }]
+        : computeMockSteps(mode, dist, idx);
       const steps = rawSteps.map((st, si) => ({
         ...st,
         durationLabel: `${st.minutes}분`,
@@ -1608,6 +1767,7 @@ class Component extends DCLogic {
         color: this.state.situationSeverity === sv.id ? '#1F7A44' : c.text,
         border: this.state.situationSeverity === sv.id ? '#7BCB93' : c.border,
       })),
+      mapRef: this.mapRef, showMockOverlay, mapStatusLabel,
       aiInput, onAiInput: this.onAiInput, onAiInputKeyDown: this.onAiInputKeyDown, sendAiMessage: () => this.sendAiMessage(),
       aiMessages: enrichedAiMessages, aiContextLabel, aiLoading: this.state.aiLoading,
       aiSendOpacity: this.state.aiLoading ? 0.5 : 1,
@@ -1620,6 +1780,14 @@ class Component extends DCLogic {
       hasPlaces: places.length > 0,
       isEmpty: places.length === 0,
       canEdit, canManageInvite, canDeleteOriginal, isViewerRole, devRole, devRoleOptions,
+      loginRequiredModalOpen: this.state.loginRequiredModalOpen,
+      closeLoginRequiredModal: this.closeLoginRequiredModal,
+      mockLoginThenSave: this.mockLoginThenSave,
+      isPlainViewer: devRole === 'viewer',
+      editRequestStatus: this.state.editRequestStatus,
+      canRequestEdit: devRole === 'viewer' && this.state.editRequestStatus === 'none',
+      isRequestPending: devRole === 'viewer' && this.state.editRequestStatus === 'pending',
+      requestEditPermission: this.requestEditPermission,
       canClearAll: places.length > 0 && canEdit,
       cardCursor: canEdit ? 'grab' : 'default',
       saveOrRemoveAction: this.saveOrRemoveAction,
