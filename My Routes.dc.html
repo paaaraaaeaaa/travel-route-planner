@@ -231,8 +231,12 @@ a:hover{color:#146030}
   <sc-if value="{{ deleteConfirmOpen }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:20">
       <div style="position:relative"><div onClick="{{ closeDeleteConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D0D1D4" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.cardBg }};border-radius:16px;padding:24px;width:300px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px" onClick="{{ stopClick }}">
-        <div style="font-size:15px;font-weight:700;color:{{ c.text }}">"{{ deleteTargetName }}" 일정을 삭제하시겠습니까?</div>
-        <div style="font-size:12.5px;color:{{ c.textSub }}">삭제하면 되돌릴 수 없어요</div>
+        <div style="font-size:15px;font-weight:700;color:{{ c.text }}">내 일정에서 삭제하시겠습니까?</div>
+        <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.5">내 일정 목록에서만 제거됩니다.</div>
+        <div style="background:#EAF6EE;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:#1F7A44;line-height:1.5">
+          <div>✓ 공유된 원본 일정은 삭제되지 않습니다.</div>
+          <div>✓ 다른 참여자의 일정에는 영향을 주지 않습니다.</div>
+        </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
           <div onClick="{{ closeDeleteConfirm }}" style="cursor:pointer;font-size:13px;font-weight:600;color:{{ c.textSub }};background:{{ c.chipBg }};border-radius:8px;padding:9px 16px">취소</div>
           <div onClick="{{ confirmDelete }}" style="cursor:pointer;font-size:13px;font-weight:700;color:#fff;background:#E5484D;border-radius:8px;padding:9px 16px">삭제</div>
