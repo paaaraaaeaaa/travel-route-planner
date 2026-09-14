@@ -36,8 +36,8 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
   100%{transform:translate(0,0)}
 }
 .pd-trail{position:absolute;width:6px;height:2.5px;border-radius:2px;background:rgba(61,58,54,.55);opacity:0;z-index:1;animation-name:pd-trail-fade;animation-timing-function:ease-out;animation-iteration-count:infinite;animation-duration:var(--dur,13s);animation-delay:var(--delay,0s)}
-.pd-logo-ant2{animation:pd-logo-ant-push 20s ease-in-out 1}
-.pd-logo-text2{display:inline-flex;animation:pd-logo-text-push 20s ease-in-out 1}
+.pd-logo-ant2{animation:pd-logo-ant-push 20s ease-in-out infinite}
+.pd-logo-text2{display:inline-flex;animation:pd-logo-text-push 20s ease-in-out infinite}
 @keyframes pd-logo-ant-push{
   0%{transform:translateX(0);opacity:1}
   40%{transform:translateX(260px);opacity:1}
@@ -93,8 +93,8 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
 <!-- 헤더/네비게이션 -->
 <div class="pd-fade" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }}">
   <div style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
-    <div onClick="{{ replayLogoAnim }}" style="display:flex;align-items:center;gap:2px;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:{{ c.text }};position:relative;top:5px;cursor:pointer">
-      <img src="./uploads/pinder_ant.png" alt="" key="{{ logoAnimKey }}" class="pd-logo-ant2" style="width:31px;height:37px;object-fit:contain;filter:{{ c.antFilter }}"><span key="{{ logoAnimKey }}" class="pd-logo-text2">p<span style="color: #26AB4E;font-size:1.4em;position:relative;top:-0.3em">:</span>nder</span>
+    <div style="display:flex;align-items:center;gap:2px;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:{{ c.text }};position:relative;top:5px">
+      <img src="./uploads/pinder_ant.png" alt="" class="pd-logo-ant2" style="width:31px;height:37px;object-fit:contain;filter:{{ c.antFilter }}"><span class="pd-logo-text2">p<span style="color: #26AB4E;font-size:1.4em;position:relative;top:-0.3em">:</span>nder</span>
     </div>
     <div class="pd-nav-links" style="display:flex;align-items:center;gap:32px;margin-left:auto">
       <a href="./Explore Destinations.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none">여행지 탐색</a>
