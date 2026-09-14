@@ -427,7 +427,7 @@ a:hover{color:#146030}
     <sc-if value="{{ hasRoute }}" hint-placeholder-val="{{ true }}">
       <sc-if value="{{ showMockOverlay }}" hint-placeholder-val="{{ true }}">
       <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <polyline points="{{ routePolylinePoints }}" fill="none" stroke="#2C8F4A" stroke-width="1.6" stroke-dasharray="3 2.4" stroke-linecap="butt" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
+        <polyline ref="{{ polylineRef }}" points="0,0" fill="none" stroke="#2C8F4A" stroke-width="1.6" stroke-dasharray="3 2.4" stroke-linecap="butt" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
       </svg>
       </sc-if><div class="{{ aiPanelClass }}">
   <div style="padding:14px 16px;border-bottom:1px solid #EAEBEC;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
@@ -694,7 +694,7 @@ a:hover{color:#146030}
           <div>⚠️ 삭제한 일정은 복구할 수 없습니다.</div>
         </div>
         <div onClick="{{ toggleDeleteAgreeChecked }}" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-top:2px">
-          <div style="width:18px;height:18px;border-radius:5px;border:1.5px solid {{ deleteAgreeChecked ? '#C25454' : '#D6D7DA' }};background:{{ deleteAgreeChecked ? '#C25454' : '#fff' }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <div style="width:18px;height:18px;border-radius:5px;border:1.5px solid {{ deleteCheckBorderColor }};background:{{ deleteCheckBgColor }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <sc-if value="{{ deleteAgreeChecked }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></sc-if>
           </div>
           <span style="font-size:12.5px;color:#171719;font-weight:600">정말 삭제할 건지 확인했습니다</span>
@@ -702,7 +702,7 @@ a:hover{color:#146030}
       </sc-if>
       <div style="display:flex;gap:8px">
         <div onClick="{{ closeDeleteConfirm }}" style="flex:1;text-align:center;border:1px solid #E1E2E4;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:#171719;cursor:pointer">취소</div>
-        <div onClick="{{ confirmDelete }}" style="flex:1;text-align:center;background:{{ deleteConfirmDisabled ? '#E8B9B9' : '#C25454' }};color:#fff;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:{{ deleteConfirmDisabled ? 'not-allowed' : 'pointer' }}">{{ deleteConfirmBtnLabel }}</div>
+        <div onClick="{{ confirmDelete }}" style="flex:1;text-align:center;background:{{ deleteConfirmBg }};color:#fff;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:{{ deleteConfirmCursor }}">{{ deleteConfirmBtnLabel }}</div>
       </div>
       </div>
     </div>
@@ -974,11 +974,25 @@ class Component extends DCLogic {
   };
 
   mapRef = { current: null };
+  polylineRef = { current: null };
   kakaoMap = null;
   kakaoMarkers = [];
 
+  // The raw HTML parser evaluates SVG `points` before React mounts, and a literal
+  // "{{ routePolylinePoints }}" is not valid SVG point syntax (triggers a console error).
+  // So the template keeps a safe literal default ("0,0") and this ref applies the real,
+  // already-computed value imperatively once React has mounted/updated.
+  syncPolyline = () => {
+    if (this.polylineRef.current) this.polylineRef.current.setAttribute('points', this._routePolylinePoints || '0,0');
+  };
+
   componentDidMount() {
     this.loadKakaoSdk();
+    this.syncPolyline();
+  }
+
+  componentDidUpdate() {
+    this.syncPolyline();
   }
 
   loadKakaoSdk = async () => {
@@ -1701,6 +1715,7 @@ class Component extends DCLogic {
     const routePolylinePoints = pinLayout.length > 1
       ? pinLayout.map(pt => `${(pt.left ?? 0).toFixed(1)},${(pt.top ?? 0).toFixed(1)}`).join(' ')
       : '0,0';
+    this._routePolylinePoints = routePolylinePoints;
     const mapSegmentLabels = enrichedSegments.map((seg, i) => {
       const a = pinLayout[i], b = pinLayout[i + 1];
       if (!a || !b) return null;
@@ -1834,7 +1849,10 @@ class Component extends DCLogic {
       isDeletingOriginalRoute: this.state.deleteTargetId === 'ORIGINAL_ROUTE',
       deleteAgreeChecked: this.state.deleteAgreeChecked,
       toggleDeleteAgreeChecked: this.toggleDeleteAgreeChecked,
-      deleteConfirmDisabled: this.state.deleteTargetId === 'ORIGINAL_ROUTE' && !this.state.deleteAgreeChecked,
+      deleteCheckBorderColor: this.state.deleteAgreeChecked ? '#C25454' : '#D6D7DA',
+      deleteCheckBgColor: this.state.deleteAgreeChecked ? '#C25454' : '#fff',
+      deleteConfirmBg: (this.state.deleteTargetId === 'ORIGINAL_ROUTE' && !this.state.deleteAgreeChecked) ? '#E8B9B9' : '#C25454',
+      deleteConfirmCursor: (this.state.deleteTargetId === 'ORIGINAL_ROUTE' && !this.state.deleteAgreeChecked) ? 'not-allowed' : 'pointer',
       closeDeleteConfirm: this.closeDeleteConfirm,
       confirmDelete: this.confirmDelete,
       addConfirmOpen: this.state.addConfirmOpen,
