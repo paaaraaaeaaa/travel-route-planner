@@ -19,6 +19,7 @@ a:hover{color:#146030}
 .aip-chip:hover{transform:translateY(-1px)}
 .aip-btn:hover{filter:brightness(1.04)}
 .aip-btn:active{transform:scale(.98)}
+.aip-region-error::placeholder{color:#E5484D}
 @keyframes aip-spin{to{transform:rotate(360deg)}}
 </style>
 </helmet>
@@ -79,7 +80,7 @@ a:hover{color:#146030}
       </div>
       <sc-if value="{{ isRegionCustom }}" hint-placeholder-val="{{ false }}">
         <div style="max-width:300px;margin:14px auto 0">
-          <input value="{{ regionCustom }}" onInput="{{ onRegionCustomChange }}" placeholder="지역을 직접 입력해주세요" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1px solid {{ c.border }};background:{{ c.cardBg }};color:{{ c.text }};font-size:14px;font-family:inherit;outline:none">
+          <input value="{{ regionCustom }}" onInput="{{ onRegionCustomChange }}" placeholder="{{ regionCustomPlaceholder }}" class="{{ regionCustomInputClass }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1px solid {{ regionCustomBorder }};background:{{ c.cardBg }};color:{{ c.text }};font-size:14px;font-family:inherit;outline:none">
         </div>
       </sc-if>
     </sc-if>
@@ -266,8 +267,8 @@ class Component extends DCLogic {
     return { tripEnd: dateStr };
   });
 
-  selectRegion = (v) => this.setState({ region: v, regionCustom: v === '기타' ? this.state.regionCustom : '' });
-  onRegionCustomChange = (e) => this.setState({ regionCustom: e.target.value });
+  selectRegion = (v) => this.setState({ region: v, regionCustom: v === '기타' ? this.state.regionCustom : '', showValidationError: false });
+  onRegionCustomChange = (e) => this.setState({ regionCustom: e.target.value, showValidationError: false });
   selectStyle = (v) => this.setState({ style: v });
   toggleInterest = (v) => this.setState(s => ({ interests: s.interests.includes(v) ? s.interests.filter(x => x !== v) : [...s.interests, v] }));
   selectCompanion = (v) => this.setState({ companion: v });
@@ -281,9 +282,9 @@ class Component extends DCLogic {
   ][s.step];
   goNext = () => {
     const s = this.state;
-    if (!this.isStepValid(s)) return;
+    if (!this.isStepValid(s)) { this.setState({ showValidationError: true }); return; }
     if (s.step === 5) { this.generate(); return; }
-    this.setState({ step: s.step + 1 });
+    this.setState({ step: s.step + 1, showValidationError: false });
   };
 
   generate = () => {
@@ -333,7 +334,7 @@ class Component extends DCLogic {
       !!s.transport,
     ];
 
-    const regionOptions = ['서울', '경기', '강원', '충남', '충북', '전남', '전북', '경남', '경북', '제주', '기타'].map(v => ({
+    const regionOptions = ['서울', '경기', '인천', '강원', '대전', '충남', '충북', '광주', '전남', '전북', '대구', '경남', '경북', '부산', '울산', '세종', '제주', '기타'].map(v => ({
       label: v, onSelect: () => this.selectRegion(v),
       bg: s.region === v ? '#7BCB93' : c.chipBg, color: s.region === v ? '#12321F' : c.text,
       border: s.region === v ? '#7BCB93' : c.border,
@@ -384,6 +385,10 @@ class Component extends DCLogic {
       weekLabels: ['일', '월', '화', '수', '목', '금', '토'],
       dateRangeLabel: s.tripStart && s.tripEnd ? `${s.tripStart} ~ ${s.tripEnd}` : s.tripStart ? `${s.tripStart} ~ 종료일을 선택해주세요` : '날짜를 선택해주세요',
       regionOptions, isRegionCustom, regionCustom: s.regionCustom, onRegionCustomChange: this.onRegionCustomChange,
+      showRegionCustomError: !!(s.showValidationError && s.region === '기타' && !s.regionCustom.trim()),
+      regionCustomBorder: (s.showValidationError && s.region === '기타' && !s.regionCustom.trim()) ? '#E5484D' : c.border,
+      regionCustomPlaceholder: (s.showValidationError && s.region === '기타' && !s.regionCustom.trim()) ? '지역을 입력해주세요!' : '지역을 직접 입력해주세요',
+      regionCustomInputClass: (s.showValidationError && s.region === '기타' && !s.regionCustom.trim()) ? 'aip-region-error' : '',
       styleOptions, interestOptions, companionOptions, transportOptions,
       progressDots,
       showNav: step <= 5,

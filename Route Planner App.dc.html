@@ -141,8 +141,8 @@ a:hover{color:#146030}
     </sc-if>
     <!-- 권한 관리 모달 -->
     <sc-if value="{{ permissionsModalOpen }}" hint-placeholder-val="{{ false }}">
-      <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
-        <div style="position:relative"><div onClick="{{ closePermissionsModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:380px;max-width:100%;display:flex;flex-direction:column;gap:16px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+      <div onClick="{{ closePermissionsModal }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
+        <div onClick="{{ stopPropagation }}" style="position:relative"><div onClick="{{ closePermissionsModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:380px;max-width:100%;display:flex;flex-direction:column;gap:16px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
           <div style="font-size:15px;font-weight:700;color:{{ c.text }}">권한 관리</div>
           <div style="display:flex;flex-direction:column;gap:8px">
             <div style="font-size:12px;font-weight:700;color:{{ c.textSub }}">현재 편집 가능한 일행</div>
@@ -176,8 +176,8 @@ a:hover{color:#146030}
     </sc-if>
     <!-- 권한 승인/거절 확인 -->
     <sc-if value="{{ requestConfirmOpen }}" hint-placeholder-val="{{ false }}">
-      <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:55;display:flex;align-items:center;justify-content:center;padding:20px">
-        <div style="position:relative"><div onClick="{{ closeRequestConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:320px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+      <div onClick="{{ closeRequestConfirm }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:55;display:flex;align-items:center;justify-content:center;padding:20px">
+        <div onClick="{{ stopPropagation }}" style="position:relative"><div onClick="{{ closeRequestConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:320px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
           <div style="font-size:14.5px;font-weight:700;color:{{ c.text }}">{{ requestConfirmMessage }}</div>
           <div style="display:flex;gap:8px">
             <div onClick="{{ closeRequestConfirm }}" style="flex:1;text-align:center;border:1px solid {{ c.border }};border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:{{ c.text }};cursor:pointer">취소</div>
@@ -402,35 +402,15 @@ a:hover{color:#146030}
   </div>
 </sc-if>
 <sc-if value="{{ mapExpanded }}" hint-placeholder-val="{{ true }}">
-  <div id="kakao-map" style="flex:1;position:relative;background:#EAF2FE;overflow:hidden;min-height:280px">
-    <div id="kakao-map-status" style="position:absolute;top:14px;left:14px;z-index:5;background:rgba(23,23,25,.72);color:#fff;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.02em">KAKAO MAP · 연결 준비 중</div>
+  <div style="flex:1;position:relative;background:#EAF2FE;overflow:hidden;min-height:280px">
+    <div style="position:absolute;inset:0;background-image:linear-gradient(#DCE7F5 1px,transparent 1px),linear-gradient(90deg,#DCE7F5 1px,transparent 1px);background-size:38px 38px;opacity:.7"></div>
+    <div style="position:absolute;top:14px;left:14px;background:rgba(23,23,25,.72);color:#fff;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.02em">MOCK MAP · 실제 지도 API 연동 전</div>
     
 
     <sc-if value="{{ hasRoute }}" hint-placeholder-val="{{ true }}">
       <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 100 100" preserveAspectRatio="none">
         <polyline points="{{ routePolylinePoints }}" fill="none" stroke="#2C8F4A" stroke-width="1.6" stroke-dasharray="3 2.4" stroke-linecap="butt" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
-      </svg><div class="{{ aiPanelClass }}">
-  <div style="padding:14px 16px;border-bottom:1px solid #EAEBEC;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-    <div>
-      <div style="font-size:14px;font-weight:700;color:#171719;display:flex;align-items:center;gap:5px"><span>✨</span>경로 AI</div>
-      <div style="font-size:11px;color:rgba(23,23,25,.5);margin-top:2px">경로 계획을 도와드릴게요</div>
-    </div>
-    <div onClick="{{ toggleAi }}" class="rp-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C;flex-shrink:0">✕</div>
-  </div>
-  <div style="padding:8px 16px;border-bottom:1px solid #EAEBEC;flex-shrink:0">
-    <div style="font-size:11px;color:rgba(23,23,25,.45);background:#F7F7F8;border-radius:7px;padding:6px 9px">현재 경로 · {{ aiContextLabel }}</div>
-  </div>
-  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:0">
-    <sc-for list="{{ aiMessages }}" as="msg" hint-placeholder-count="2">
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:{{ msg.align }}">
-        <div style="align-self:{{ msg.align }};max-width:82%;background:{{ msg.bg }};color:{{ msg.color }};border-radius:{{ msg.radius }};padding:9px 12px;font-size:13px;line-height:1.5">{{ msg.text }}</div>
-        <sc-if value="{{ msg.showSuggestions }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-wrap:wrap;gap:6px;max-width:100%">
-            <sc-for list="{{ msg.suggestions }}" as="sug" hint-placeholder-count="3">
-              <div onClick="{{ sug.onClick }}" style="border:1px solid #E1E2E4;border-radius:14px;padding:6px 12px;font-size:12px;font-weight:600;color:#171719;background:#fff;cursor:pointer;white-space:nowrap" class="rp-seg-item">{{ sug.text }}</div>
-            </sc-for>
-          </div>
-        </sc-if>
+      </svg>
       </div>
     </sc-for>
   </div>
@@ -550,8 +530,8 @@ a:hover{color:#146030}
 
 <!-- 주소 수정 팝업 -->
 <sc-if value="{{ editModalOpen }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px">
-    <div style="position:relative"><div onClick="{{ closeEditModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:360px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+  <div onClick="{{ closeEditModal }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ stopPropagation }}" style="position:relative"><div onClick="{{ closeEditModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:360px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
       <div style="font-size:15px;font-weight:700;color:{{ c.text }}">방문지 수정</div>
       <div style="display:flex;flex-direction:column;gap:6px">
         <div style="font-size:12px;font-weight:600;color:{{ c.textSub }}">이름</div>
@@ -572,8 +552,8 @@ a:hover{color:#146030}
 
 <!-- 카테고리 선택 팝업 -->
 <sc-if value="{{ categoryModalOpen }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px">
-    <div style="position:relative"><div onClick="{{ closeCategoryModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:#fff;border-radius:16px;padding:22px;width:320px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+  <div onClick="{{ closeCategoryModal }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ stopPropagation }}" style="position:relative"><div onClick="{{ closeCategoryModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:#fff;border-radius:16px;padding:22px;width:320px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
       <div style="font-size:15px;font-weight:700;color:#171719">카테고리 선택</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
         <sc-for list="{{ categoryOptions }}" as="co" hint-placeholder-count="6">
@@ -587,8 +567,8 @@ a:hover{color:#146030}
 
 <!-- 방문지 추가 확인 팝업 -->
 <sc-if value="{{ addConfirmOpen }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
-    <div style="position:relative"><div onClick="{{ closeAddConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:#fff;border-radius:16px;padding:22px;width:340px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+  <div onClick="{{ closeAddConfirm }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ stopPropagation }}" style="position:relative"><div onClick="{{ closeAddConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:#fff;border-radius:16px;padding:22px;width:340px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
       <div style="font-size: 15.5px; font-weight: 700; color: #171719; padding-top: 5px; padding-bottom: 5px">방문지를 추가할까요?</div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;flex-direction:column;gap:4px">
@@ -611,8 +591,8 @@ a:hover{color:#146030}
 
 <!-- 상황 변경 팝업 -->
 <sc-if value="{{ situationModalOpen }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
-    <div style="position:relative"><div onClick="{{ closeSituationModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:360px;max-width:100%;display:flex;flex-direction:column;gap:16px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+  <div onClick="{{ closeSituationModal }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ stopPropagation }}" style="position:relative"><div onClick="{{ closeSituationModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:360px;max-width:100%;display:flex;flex-direction:column;gap:16px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
       <div style="font-size:15px;font-weight:700;color:{{ c.text }}">변수 추가</div>
       <div>
         <div style="font-size:12px;font-weight:700;color:{{ c.textSub }};margin-bottom:8px">어떤 상황이 생겼나요?</div>
@@ -653,8 +633,8 @@ a:hover{color:#146030}
 
 <!-- 삭제 확인 팝업 -->
 <sc-if value="{{ deleteConfirmOpen }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
-    <div style="position:relative"><div onClick="{{ closeDeleteConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:#fff;border-radius:16px;padding:22px;width:340px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+  <div onClick="{{ closeDeleteConfirm }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ stopPropagation }}" style="position:relative"><div onClick="{{ closeDeleteConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:#fff;border-radius:16px;padding:22px;width:340px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
       <div style="font-size:15px;font-weight:700;color:#171719">{{ deleteConfirmMessage }}</div>
       <div style="display:flex;gap:8px">
         <div onClick="{{ closeDeleteConfirm }}" style="flex:1;text-align:center;border:1px solid #E1E2E4;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:#171719;cursor:pointer">취소</div>
@@ -665,8 +645,30 @@ a:hover{color:#146030}
   </div>
 </sc-if>
 
+<div class="{{ aiPanelClass }}">
+  <div style="padding:14px 16px;border-bottom:1px solid #EAEBEC;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#171719;display:flex;align-items:center;gap:5px"><span>✨</span>경로 AI</div>
+      <div style="font-size:11px;color:rgba(23,23,25,.5);margin-top:2px">경로 계획을 도와드릴게요</div>
+    </div>
+    <div onClick="{{ toggleAi }}" class="rp-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C;flex-shrink:0">✕</div>
+  </div>
+  <div style="padding:8px 16px;border-bottom:1px solid #EAEBEC;flex-shrink:0">
+    <div style="font-size:11px;color:rgba(23,23,25,.45);background:#F7F7F8;border-radius:7px;padding:6px 9px">현재 경로 · {{ aiContextLabel }}</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:0">
+    <sc-for list="{{ aiMessages }}" as="msg" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:{{ msg.align }}">
+        <div style="align-self:{{ msg.align }};max-width:82%;background:{{ msg.bg }};color:{{ msg.color }};border-radius:{{ msg.radius }};padding:9px 12px;font-size:13px;line-height:1.5">{{ msg.text }}</div>
+        <sc-if value="{{ msg.showSuggestions }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;max-width:100%">
+            <sc-for list="{{ msg.suggestions }}" as="sug" hint-placeholder-count="3">
+              <div onClick="{{ sug.onClick }}" style="border:1px solid #E1E2E4;border-radius:14px;padding:6px 12px;font-size:12px;font-weight:600;color:#171719;background:#fff;cursor:pointer;white-space:nowrap" class="rp-seg-item">{{ sug.text }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+
 <!-- AI 도우미: 평소엔 작은 진입 버튼, 클릭 시 패널로 확장 -->
-<sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
 <div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: 76px; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
   <span>✨</span><span style="white-space:nowrap">AI 도우미</span>
 </div>
@@ -917,82 +919,7 @@ class Component extends DCLogic {
     ],
     // MOCK: 실제 서버 연동 시 activityLog를 API 응답으로 교체하고 logActivity를 POST 호출로 바꾸면 됨
     activityLog: [],
-    kakaoMapReady: false,
-    kakaoMap: null,
-    kakaoOverlays: [],
   };
-
-  componentDidMount() {
-    this.initKakaoMap();
-  }
-
-  async initKakaoMap() {
-    try {
-      const cfgRes = await fetch('/api/kakao-config');
-      if (!cfgRes.ok) throw new Error('Kakao config를 불러오지 못했습니다.');
-      const cfg = await cfgRes.json();
-      if (!cfg.javascriptKey) throw new Error('KAKAO_JS_KEY 환경변수가 없습니다.');
-      if (!window.kakao || !window.kakao.maps) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(cfg.javascriptKey)}&autoload=false`;
-          script.onload = resolve;
-          script.onerror = () => reject(new Error('카카오 지도 SDK를 불러오지 못했습니다.'));
-          document.head.appendChild(script);
-        });
-      }
-      await new Promise(resolve => window.kakao.maps.load(resolve));
-      const el = document.getElementById('kakao-map');
-      if (!el) return;
-      const center = new window.kakao.maps.LatLng(37.5665, 126.9780);
-      const map = new window.kakao.maps.Map(el, { center, level: 7 });
-      this.kakaoMap = map;
-      this.setState({ kakaoMapReady: true, kakaoMap: map });
-      const status = document.getElementById('kakao-map-status');
-      if (status) status.textContent = 'KAKAO MAP · 실제 지도 연결 완료';
-      this.syncKakaoPlaces();
-    } catch (e) {
-      console.error(e);
-      const status = document.getElementById('kakao-map-status');
-      if (status) status.textContent = 'KAKAO MAP · JavaScript 키 설정 필요';
-    }
-  }
-
-  async syncKakaoPlaces() {
-    if (!this.kakaoMap || !this.state.places.length) return;
-    try {
-      const resolved = [];
-      for (const place of this.state.places) {
-        if (place.x && place.y) { resolved.push(place); continue; }
-        const res = await fetch(`/api/kakao?type=search&query=${encodeURIComponent(place.address || place.name)}`);
-        const data = await res.json();
-        const doc = data.documents && data.documents[0];
-        if (doc) {
-          resolved.push({ ...place, x: Number(doc.x), y: Number(doc.y), kakaoPlaceId: doc.id, kakaoUrl: doc.place_url, address: doc.road_address_name || doc.address_name || place.address });
-        } else resolved.push(place);
-      }
-      this.setState({ places: resolved });
-      this.drawKakaoMarkers();
-    } catch (e) { console.error('Kakao 장소 좌표 변환 실패', e); }
-  }
-
-  drawKakaoMarkers() {
-    if (!this.kakaoMap || !window.kakao?.maps) return;
-    this.state.kakaoOverlays.forEach(o => o.setMap(null));
-    const overlays = [];
-    const bounds = new window.kakao.maps.LatLngBounds();
-    this.state.places.forEach((p, idx) => {
-      if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
-      const pos = new window.kakao.maps.LatLng(p.y, p.x);
-      const marker = new window.kakao.maps.Marker({ position: pos, map: this.kakaoMap });
-      const label = new window.kakao.maps.CustomOverlay({ position: pos, content: `<div style="background:#171719;color:#fff;padding:4px 7px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;transform:translateY(-42px)">${idx + 1}. ${String(p.name || '').replace(/</g,'&lt;')}</div>`, yAnchor: 1 });
-      label.setMap(this.kakaoMap);
-      overlays.push(marker, label);
-      bounds.extend(pos);
-    });
-    if (this.state.places.some(p => Number.isFinite(p.x) && Number.isFinite(p.y))) this.kakaoMap.setBounds(bounds);
-    this.setState({ kakaoOverlays: overlays });
-  }
 
   logActivity = (text) => this.setState(s => ({
     activityLog: [{
@@ -1007,15 +934,69 @@ class Component extends DCLogic {
   toggleAi = () => this.setState(s => ({ aiOpen: !s.aiOpen }));
   onAiInput = (e) => this.setState({ aiInput: e.target.value });
   onAiInputKeyDown = (e) => { if (e.key === 'Enter') this.sendAiMessage(); };
-  // MOCK: 실제 연동 시 이 함수를 현재 경로 상태를 컨텍스트로 넘기는 API 호출로 교체
-  sendAiMessage = (overrideText) => {
+  sendAiMessage = async (overrideText) => {
     const text = (overrideText ?? this.state.aiInput).trim();
-    if (!text) return;
-    this.setState(s => ({ aiMessages: [...s.aiMessages, { role: 'user', text }], aiInput: '' }));
-    setTimeout(() => {
-      // MOCK: 다음 예상 질문 제안도 실제로는 API 응답에 함께 포함되는 형태로 교체
-      this.setState(s => ({ aiMessages: [...s.aiMessages, { role: 'ai', text: '현재 설정된 경로를 기준으로 확인해볼게요. (mock 응답)', suggestions: ['거리 얼마나 줄어?', '이동수단 바꿔볼까?', '경유지 추천해줘'] }] }));
-    }, 500);
+    if (!text || this.state.aiLoading) return;
+
+    const userMessage = { role: 'user', text };
+    this.setState(s => ({
+      aiMessages: [...s.aiMessages, userMessage],
+      aiInput: '',
+      aiLoading: true,
+      aiOpen: true,
+    }));
+
+    try {
+      const routePlaces = (this.state.places || []).map((p, i) => ({
+        order: i + 1,
+        name: p.name || p.title || `방문지 ${i + 1}`,
+        address: p.address || p.roadAddress || '',
+      }));
+      const routeSegments = (this.state.segments || []).map((mode, i) => ({
+        from: routePlaces[i]?.name || '',
+        to: routePlaces[i + 1]?.name || '',
+        transport: mode,
+      }));
+      const context = {
+        places: routePlaces,
+        segments: routeSegments,
+        criteria: this.state.criteria || 'time',
+        tripStart: this.state.tripStart || '',
+        tripEnd: this.state.tripEnd || '',
+      };
+
+      const history = [...this.state.aiMessages, userMessage]
+        .slice(-12)
+        .map(m => ({ role: m.role, text: m.text }));
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history, context }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || `AI 요청 실패 (${response.status})`);
+
+      this.setState(s => ({
+        aiMessages: [...s.aiMessages, {
+          role: 'ai',
+          text: data.reply || '답변을 받지 못했어요. 다시 시도해주세요.',
+          suggestions: ['현재 경로 괜찮아?', '더 빠른 순서 있어?', '주변 추천해줘'],
+        }],
+        aiLoading: false,
+      }));
+    } catch (error) {
+      console.error('AI chat error:', error);
+      this.setState(s => ({
+        aiMessages: [...s.aiMessages, {
+          role: 'ai',
+          text: error?.message || 'AI 답변을 가져오지 못했어요. 잠시 후 다시 시도해주세요.',
+          suggestions: ['다시 시도해줘'],
+        }],
+        aiLoading: false,
+      }));
+    }
   };
   onSuggestionClick = (text) => this.sendAiMessage(text);
 
@@ -1037,6 +1018,18 @@ class Component extends DCLogic {
 
   // MOCK: 실제 연동 시 localStorage 대신 서버 API로 내 일정 목록을 저장/조회
   componentDidMount() {
+    this._onKeyDown = (e) => {
+      if (e.key !== 'Escape') return;
+      const s = this.state;
+      if (s.permissionsModalOpen) this.closePermissionsModal();
+      else if (s.requestConfirmOpen) this.closeRequestConfirm();
+      else if (s.editModalOpen) this.closeEditModal();
+      else if (s.categoryModalOpen) this.closeCategoryModal();
+      else if (s.addConfirmOpen) this.closeAddConfirm();
+      else if (s.situationModalOpen) this.closeSituationModal();
+      else if (s.deleteConfirmOpen) this.closeDeleteConfirm();
+    };
+    window.addEventListener('keydown', this._onKeyDown);
     try {
       const raw = localStorage.getItem('rp-saved-routes');
       if (raw) this.setState({ savedRoutes: JSON.parse(raw) });
@@ -1247,7 +1240,6 @@ class Component extends DCLogic {
       editModalOpen: false, editingId: null,
     }));
     this.logActivity(`방문지 정보를 "${name}"(으)로 수정했습니다`);
-    setTimeout(() => this.syncKakaoPlaces(), 0);
   };
   openCategoryModal = (id) => this.setState({ categoryModalOpen: true, categoryTargetId: id });
   closeCategoryModal = () => this.setState({ categoryModalOpen: false, categoryTargetId: null });
@@ -1307,7 +1299,7 @@ class Component extends DCLogic {
       arr.splice(idx, 0, moved);
       return { places: arr, dragIndex: null, segments: this.resizeSegments(arr, s.segments) };
     });
-    if (wasDragging) { this.logActivity('방문 순서를 변경했습니다'); setTimeout(() => this.drawKakaoMarkers(), 0); }
+    if (wasDragging) this.logActivity('방문 순서를 변경했습니다');
   };
   onDragEnd = () => this.setState({ dragIndex: null });
   setCriteria = (c) => this.setState({ criteria: c });
@@ -1343,6 +1335,10 @@ class Component extends DCLogic {
     return active
       ? { bg: '#171719', color: '#fff', shadow: '0px 1px 2px -1px rgba(23,23,25,.2)' }
       : { bg: 'transparent', color: this.state.theme === 'dark' ? 'rgba(247,247,248,.75)' : 'rgba(23,23,25,.55)', shadow: 'none' };
+  }
+
+  componentWillUnmount() {
+    if (this._onKeyDown) window.removeEventListener('keydown', this._onKeyDown);
   }
 
   renderVals() {

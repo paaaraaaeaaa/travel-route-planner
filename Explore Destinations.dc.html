@@ -49,6 +49,16 @@ a:hover{color:#146030}
 .ed-legend-col{width:180px;flex-shrink:0;background:#fff;border:1px solid #E1E2E4;border-radius:14px;padding:10px;max-height:520px;overflow-y:auto}
 @media (max-width:700px){ .ed-map-row{flex-direction:column}
   .ed-legend-col{width:100%;max-height:none;display:grid;grid-template-columns:repeat(3,1fr);gap:6px} }
+@media (max-width:767px){
+  .ed-nav-links{display:none!important}
+  .ed-mobile-menu-wrap{display:block!important}
+  .ed-map-wrap{height:auto!important;width:100%!important;max-width:340px;aspect-ratio:524/631}
+  .ed-legend-col{width:100%!important;max-height:none!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;flex-wrap:unset!important;gap:4px!important;padding:8px!important}
+  .ed-legend-item{font-size:11.5px!important;padding:6px 10px!important}
+}
+@media (max-width:480px){
+  .ed-legend-col{grid-template-columns:repeat(2,1fr)}
+}
 .ed-region:hover{transform:scale(1.04)}
 .ed-region-active{background:#95C898;border-color:#95C898;color:#12321F}
 @media (max-width:760px){ .ed-grid{grid-template-columns:1fr} }
@@ -64,17 +74,28 @@ a:hover{color:#146030}
 
   <div style="position:sticky;top:0;z-index:5;background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }};box-shadow:0 1px 8px rgba(23,23,25,.04);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
     <a href="./main(home).dc.html" style="font-size:20px;font-weight:800;letter-spacing:-0.01em;color:{{ c.text }};text-decoration:none;display:flex;align-items:center;gap:2px">p<span style="color:#26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</a>
-    <div style="display:flex;align-items:center;gap:32px;margin-left:auto">
-      <a href="./Explore Destinations.dc.html" class="ed-nav-link ed-nav-link-active" style="font-size:14px;font-weight:700;color:#7BCB93;text-decoration:none;border-bottom:2px solid #7BCB93;padding-bottom:20px;margin-bottom:-21px">여행지 탐색</a>
-      <a href="./My Routes.dc.html" class="ed-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">내 일정</a>
-      <a href="./Community.dc.html" class="ed-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">커뮤니티</a>
+    <div class="ed-nav-links" style="display:flex;align-items:center;gap:32px;margin-left:auto">
+      <a href="./Explore Destinations.dc.html" class="ed-nav-link ed-nav-link-active" style="font-size:14px;font-weight:700;color:#7BCB93;text-decoration:none;border-bottom:2px solid #7BCB93;padding-bottom:20px;margin-bottom:-21px;white-space:nowrap">여행지 탐색</a>
+      <a href="./My Routes.dc.html" class="ed-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">내 일정</a>
+      <a href="./Community.dc.html" class="ed-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">커뮤니티</a>
     </div>
     <div style="display:flex;align-items:center;gap:10px">
       <div onClick="{{ toggleTheme }}" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">
         <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
         <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:15px;height:15px;object-fit:contain"></sc-if>
       </div>
-      
+    </div>
+    <div class="ed-mobile-menu-wrap" style="position:relative;display:none">
+      <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:{{ c.text }};letter-spacing:1px">···</div>
+      <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:fixed;inset:0;z-index:9" onClick="{{ toggleMobileMenu }}"></div>
+        <div style="position:absolute;top:44px;right:0;z-index:10;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;min-width:140px">
+          <a href="./Explore Destinations.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:700;color:#7BCB93;text-decoration:none;white-space:nowrap">여행지 탐색</a>
+          <a href="./My Routes.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">내 일정</a>
+          <a href="./Community.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">커뮤니티</a>
+          <a href="./Login Screen.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">로그인</a>
+        </div>
+      </sc-if>
     </div>
   </div>
 
@@ -107,11 +128,18 @@ a:hover{color:#146030}
     <div style="font-size:13px;color:{{ c.textSub }};margin-bottom:20px">지도의 핀이나 아래 목록에서 지역을 눌러 여행지를 추천받아보세요</div>
 
     <div class="ed-map-row" style="margin-bottom:32px">
-      <div class="ed-legend-col" style="border-color: {{ c.border }}; background-color: {{ legendColBg }}">
-        <div onClick="{{ selectAll }}" class="ed-legend-item {{ allActiveClass }}" style="{{ allActiveStyleObj }}">전체</div>
-        <sc-for list="{{ mapRegions }}" as="mr" hint-placeholder-count="17">
-          <div onClick="{{ mr.onSelect }}" class="ed-legend-item {{ mr.legendActiveClass }}" style="color:{{ c.text }}">{{ mr.label }}</div>
-        </sc-for>
+      <div class="ed-legend-outer">
+        <div onClick="{{ toggleRegionCollapsed }}" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
+          <span>카테고리</span><span>{{ regionCollapseIcon }}</span>
+        </div>
+        <sc-if value="{{ regionExpanded }}" hint-placeholder-val="{{ true }}">
+          <div class="ed-legend-col" style="border-color: {{ c.border }}; background-color: {{ legendColBg }}">
+            <div onClick="{{ selectAll }}" class="ed-legend-item {{ allActiveClass }}" style="{{ allActiveStyleObj }}">전체</div>
+            <sc-for list="{{ mapRegions }}" as="mr" hint-placeholder-count="17">
+              <div onClick="{{ mr.onSelect }}" class="ed-legend-item {{ mr.legendActiveClass }}" style="color:{{ c.text }}">{{ mr.label }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
       </div>
       <div class="ed-map-wrap" style="flex: 1; background: {{ c.mapGlow }}; border-radius: 16px; height: 626px; width: 520px; overflow: visible">
         <img class="ed-map-svg" src="./korea-map.svg" alt="대한민국 지도" style="padding-top: 7px; padding-bottom: 7px; border-radius: 50px">
@@ -225,6 +253,8 @@ class Component extends DCLogic {
   };
   selectRegion = (key) => this.setState({ activeRegion: key });
   setSectionPage = (si, page) => this.setState(s => ({ sectionPages: { ...s.sectionPages, [si]: page } }));
+  toggleRegionCollapsed = () => this.setState(s => ({ regionCollapsed: !s.regionCollapsed }));
+  toggleMobileMenu = () => this.setState(s => ({ mobileMenuOpen: !s.mobileMenuOpen }));
   selectAll = () => this.setState({ activeRegion: null });
   openNewTripModal = () => this.setState({ newTripModalOpen: true });
   closeNewTripModal = () => this.setState({ newTripModalOpen: false });
@@ -272,6 +302,9 @@ class Component extends DCLogic {
     const noResults = sections.every(s => !s.hasItems);
     return {
       c, isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
+      regionExpanded: !this.state.regionCollapsed, toggleRegionCollapsed: this.toggleRegionCollapsed,
+      regionCollapseIcon: this.state.regionCollapsed ? '▾' : '▴',
+      mobileMenuOpen: this.state.mobileMenuOpen, toggleMobileMenu: this.toggleMobileMenu,
       darkClass: this.state.theme === 'dark' ? 'ed-dark' : '',
       legendColBg: this.state.theme === 'dark' ? '#D6E0D9' : '#fff',
       colorScheme: this.state.theme === 'dark' ? 'dark' : 'light',

@@ -19,8 +19,8 @@ a:hover{color:#146030}
 .cm-icon-btn:hover{background-color:#EAEBEC}
 .cm-like:hover{opacity:.8}
 .cm-btn{background:#7BCB93;color:#12321F;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer;border:none;font-family:inherit}
-.cm-region-col{width:180px;flex-shrink:0;background:#fff;border:1px solid #E1E2E4;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px;max-height:520px;overflow-y:auto}
-.cm-region-item{cursor:pointer;border-radius:8px;padding:8px 11px;font-size:13px;font-weight:700;color:#171719;background:transparent;transition:background-color .15s,color .15s}
+.cm-region-col{width:180px;flex-shrink:0;background:#fff;border:1px solid #E1E2E4;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:4px;max-height:520px;overflow-y:auto}
+.cm-region-item{cursor:pointer;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700;color:#171719;background:transparent;transition:background-color .15s,color .15s}
 .cm-region-item:hover{background:#EAEBEC}
 .cm-region-active{background:#7BCB93 !important;color:#12321F !important}
 .cm-dark .cm-region-col{background:#17181A;border-color:#292A2D;border-width:1px}
@@ -40,6 +40,20 @@ a:hover{color:#146030}
   .cm-row{flex-direction:column}
   .cm-region-col{width:100%;max-height:none;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 }
+@media (max-width:767px){
+  body{overflow-x:hidden}
+  .cm-nav-links{display:none!important}
+  .cm-mobile-menu-wrap{display:block!important}
+  .cm-sort-row{flex-wrap:wrap!important;row-gap:10px!important}
+  .cm-region-col{width:100%!important;max-height:none!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;flex-wrap:unset!important;gap:4px!important;padding:8px!important}
+  .cm-region-item{font-size:11.5px!important;padding:6px 10px!important}
+  .cm-btn{padding:9px 12px!important;font-size:12.5px!important}
+  .cm-like,.cm-comment-input{min-height:28px}
+  input[type="text"],textarea{font-size:14px}
+}
+@media (max-width:480px){
+  .cm-region-col{grid-template-columns:repeat(2,1fr)}
+}
 .cm-comment-input::placeholder{color:rgba(23,23,25,.4)}
 .cm-dark .cm-comment-input::placeholder{color:rgba(247,247,248,.4)}
 .cm-nav-link{transition:color .15s ease}
@@ -53,15 +67,29 @@ a:hover{color:#146030}
 <div class="{{ darkClass }}" style="min-height:100vh;color:{{ c.text }};background:{{ c.bg }};transition:background-color .2s,color .2s" data-screen-label="커뮤니티">
 
   <div style="position:sticky;top:0;z-index:5;background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }};box-shadow:0 1px 8px rgba(23,23,25,.04);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
-    <a href="./main(home).dc.html" style="font-size:20px;font-weight:800;letter-spacing:-0.01em;color:{{ c.text }};text-decoration:none;display:flex;align-items:center;gap:2px">p<span style="color: #26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</a>
-    <div style="display:flex;align-items:center;gap:32px">
-      <a href="./Explore Destinations.dc.html" class="cm-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">여행지 탐색</a>
-      <a href="./My Routes.dc.html" class="cm-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">내 일정</a>
-      <a href="./Community.dc.html" class="cm-nav-link-active" style="font-size:14px;font-weight:700;color:#7BCB93;text-decoration:none;border-bottom:2px solid #7BCB93;padding-bottom:20px;margin-bottom:-21px">커뮤니티</a>
+    <a href="./main(home).dc.html" class="cm-logo" style="font-size:20px;font-weight:800;letter-spacing:-0.01em;color:{{ c.text }};text-decoration:none;display:flex;align-items:center;gap:2px;flex-shrink:0">p<span style="color: #26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</a>
+    <div class="cm-nav-links" style="display:flex;align-items:center;gap:32px;flex-shrink:0;margin-left:auto">
+      <a href="./Explore Destinations.dc.html" class="cm-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">여행지 탐색</a>
+      <a href="./My Routes.dc.html" class="cm-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">내 일정</a>
+      <a href="./Community.dc.html" class="cm-nav-link-active" style="font-size:14px;font-weight:700;color:#7BCB93;text-decoration:none;border-bottom:2px solid #7BCB93;padding-bottom:20px;margin-bottom:-21px;white-space:nowrap">커뮤니티</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
       <div onClick="{{ toggleTheme }}" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">
         <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
         <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:15px;height:15px;object-fit:contain"></sc-if>
       </div>
+    <div class="cm-mobile-menu-wrap" style="position:relative;display:none">
+      <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:{{ c.text }}">☰</div>
+      <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:fixed;inset:0;z-index:9" onClick="{{ toggleMobileMenu }}"></div>
+        <div style="position:absolute;top:44px;right:0;z-index:10;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;min-width:140px">
+          <a href="./Explore Destinations.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none">여행지 탐색</a>
+          <a href="./My Routes.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none">내 일정</a>
+          <a href="./Community.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:700;color:#7BCB93;text-decoration:none">커뮤니티</a>
+          <a href="./Login Screen.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none">로그인</a>
+        </div>
+      </sc-if>
+    </div>
     </div>
   </div><div style="max-width:1080px;margin:0 auto;padding:28px 24px 80px">
 
@@ -100,18 +128,27 @@ a:hover{color:#146030}
     </div>
 
     <div class="cm-row">
-      <div class="cm-region-col" style="background-color: {{ legendColBg }}">
-        <sc-for list="{{ regions }}" as="rg" hint-placeholder-count="18">
-          <div onClick="{{ rg.onSelect }}" class="cm-region-item {{ rg.activeClass }}">{{ rg.label }}</div>
-        </sc-for>
+      <div class="cm-region-outer">
+        <div onClick="{{ toggleRegionCollapsed }}" class="cm-region-toggle" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
+          <span>카테고리</span><span>{{ regionCollapseIcon }}</span>
+        </div>
+        <sc-if value="{{ regionExpanded }}" hint-placeholder-val="{{ true }}">
+          <div class="cm-region-col" style="background-color: {{ legendColBg }}">
+            <sc-for list="{{ regions }}" as="rg" hint-placeholder-count="18">
+              <div onClick="{{ rg.onSelect }}" class="cm-region-item {{ rg.activeClass }}">{{ rg.label }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
       </div>
 
       <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:flex-end;gap:2px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid {{ c.border }}">
+        <div class="cm-sort-row" style="display:flex;align-items:flex-end;justify-content:space-between;gap:2px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid {{ c.border }}">
+          <div style="display:flex;align-items:flex-end;gap:2px">
           <sc-for list="{{ sortOptions }}" as="so" hint-placeholder-count="3">
             <div onClick="{{ so.onSelect }}" style="cursor: pointer; padding: 6px 12px; border-radius: 8px; font-size: 12.2px; font-weight: 600; background: {{ so.bg }}; color: {{ so.color }}; padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px">{{ so.label }}</div>
           </sc-for>
-          <div style="display: flex; align-items: flex-end; gap: 14px; margin-left: auto; padding-top: 5px; padding-bottom: 5px">
+          </div>
+          <div style="display: flex; align-items: flex-end; gap: 14px; padding-top: 5px; padding-bottom: 5px">
             <div onClick="{{ setViewList }}" style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:12.2px;font-weight:600;color:{{ listViewColor }}">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"></circle><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"></circle><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"></circle></svg>
               목록
@@ -123,6 +160,7 @@ a:hover{color:#146030}
             </div>
           </div>
         </div>
+
 
         <sc-if value="{{ viewingProfile }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;align-items:center;gap:10px;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:14px;padding:14px;margin-bottom:16px">
@@ -447,6 +485,8 @@ class Component extends DCLogic {
   openCommentModal = (id) => this.setState({ commentModalId: id });
   closeCommentModal = () => this.setState({ commentModalId: null });
   toggleComments = (id) => this.setState(s => ({ expandedComments: { ...s.expandedComments, [id]: !s.expandedComments[id] } }));
+  toggleMobileMenu = () => this.setState(s => ({ mobileMenuOpen: !s.mobileMenuOpen }));
+  toggleRegionCollapsed = () => this.setState(s => ({ regionCollapsed: !s.regionCollapsed }));
   toggleCommentLike = (postId, commentId) => this.setState(s => ({
     posts: s.posts.map(p => p.id !== postId ? p : {
       ...p,
@@ -649,6 +689,9 @@ class Component extends DCLogic {
     const popularTags = POPULAR_TAGS.map(t => ({ label: t, onClick: () => this.filterByTagOrPlace(t) }));
     return {
       c, isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
+      mobileMenuOpen: this.state.mobileMenuOpen, toggleMobileMenu: this.toggleMobileMenu,
+      regionExpanded: !this.state.regionCollapsed, toggleRegionCollapsed: this.toggleRegionCollapsed,
+      regionCollapseIcon: this.state.regionCollapsed ? '▾' : '▴',
       darkClass: this.state.theme === 'dark' ? 'cm-dark' : '',
       legendColBg: this.state.theme === 'dark' ? '#17181A' : '#fff',
       trending, popularTags,

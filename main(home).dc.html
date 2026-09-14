@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 <style>
-body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+body{margin:0;font-family:'Pretendard',-apple-system,sans-serif;overflow-x:hidden}
 .pd-fade{transition:background-color .35s ease,color .35s ease,border-color .35s ease}
 .pd-nav-link{transition:color .15s ease}
 .pd-nav-link:hover{color:#95C898 !important}
@@ -76,11 +76,17 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
   94%{left:86.5%;top:25.5%;opacity:.2}
   100%{left:87%;top:25%;opacity:0}
 }
-@media (max-width:760px){
-  .pd-nav-links{display:none}
-  .pd-hero-title{font-size:34px !important;line-height:1.3 !important}
+@media (max-width:767px){
+  .pd-nav-links{display:none!important}
+  .pd-mobile-menu-wrap{display:block!important}
+  .pd-hero-title{font-size:34px !important;line-height:1.15 !important}
   .pd-stats{flex-direction:column;gap:20px !important}
   .pd-steps-grid{grid-template-columns:1fr !important}
+  .pd-cta-card{padding:40px 26px !important;gap:20px !important;margin-top:28px !important}
+  .pd-cta-title{margin-top:6px !important;line-height:1.4 !important}
+  .pd-cta-sub{margin-bottom:8px !important}
+  .pd-cta-btn{margin-top:14px !important}
+  .pd-step-card{padding:30px 24px !important}
 }
 [style*="cursor:pointer"],[style*="cursor: pointer"]{transition:transform .06s ease,filter .1s ease}
 [style*="cursor:pointer"]:hover,[style*="cursor: pointer"]:hover{filter:brightness(1.03)}
@@ -93,20 +99,32 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
 <!-- 헤더/네비게이션 -->
 <div class="pd-fade" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }}">
   <div style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
-    <div style="display:flex;align-items:center;gap:2px;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:{{ c.text }};position:relative;top:5px">
+    <div style="display:flex;align-items:center;gap:2px;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:{{ c.text }};position:relative;top:5px;flex-shrink:0">
       <img src="./uploads/pinder_ant.png" alt="" class="pd-logo-ant2" style="width:31px;height:37px;object-fit:contain;filter:{{ c.antFilter }}"><span class="pd-logo-text2">p<span style="color: #26AB4E;font-size:1.4em;position:relative;top:-0.3em">:</span>nder</span>
     </div>
-    <div class="pd-nav-links" style="display:flex;align-items:center;gap:32px;margin-left:auto">
-      <a href="./Explore Destinations.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none">여행지 탐색</a>
-      <a href="./My Routes.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none">내 일정</a>
-      <a href="./Community.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none">커뮤니티</a>
+    <div class="pd-nav-links" style="display:flex;align-items:center;gap:32px;margin-left:auto;flex-shrink:0">
+      <a href="./Explore Destinations.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none; white-space: nowrap">여행지 탐색</a>
+      <a href="./My Routes.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none; white-space: nowrap">내 일정</a>
+      <a href="./Community.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none; white-space: nowrap">커뮤니티</a>
     </div>
     <div style="display:flex;align-items:center;gap:10px">
       <div onClick="{{ toggleTheme }}" class="pd-icon-btn" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:16px;color:{{ c.text }};line-height:1">
         <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
         <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:16px;height:16px;object-fit:contain"></sc-if>
       </div>
-      <a href="./Login Screen.dc.html" style="text-decoration:none;background:#7BCB93;color:#12321F;border-radius:10px;padding:9px 18px;font-size:13.5px;font-weight:700;white-space:nowrap" class="pd-btn">로그인</a>
+      <a href="./Login Screen.dc.html" class="pd-nav-links pd-btn" style="text-decoration:none;background:#7BCB93;color:#12321F;border-radius:10px;padding:9px 18px;font-size:13.5px;font-weight:700;white-space:nowrap">로그인</a>
+    </div>
+    <div class="pd-mobile-menu-wrap" style="position:relative;display:none">
+      <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:16px;color:{{ c.text }}">☰</div>
+      <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:fixed;inset:0;z-index:9" onClick="{{ toggleMobileMenu }}"></div>
+        <div style="position:absolute;top:44px;right:0;z-index:10;background:{{ c.headerBg2 }};border:1px solid {{ c.border }};border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;min-width:140px">
+          <a href="./Explore Destinations.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">여행지 탐색</a>
+          <a href="./My Routes.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">내 일정</a>
+          <a href="./Community.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">커뮤니티</a>
+          <a href="./Login Screen.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:700;color:#1F7A44;text-decoration:none;white-space:nowrap">로그인</a>
+        </div>
+      </sc-if>
     </div>
   </div>
 </div>
@@ -114,11 +132,11 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
 <!-- 히어로 + CTA 결합 영역 -->
 <div style="max-width:900px;margin:0 auto;padding:72px 24px 40px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:20px">
   <div style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;background:{{ c.badgeBg }};color:{{ c.badgeText }};border-radius:999px;padding:6px 16px;font-size:12.5px;font-weight:700">AI 기반 동선 플래너</div>
-  <div class="pd-hero-title" style="font-size: 44px; line-height: 1.35; font-weight: 800; letter-spacing: -0.02em; color: {{ c.text }}; margin-bottom: 6px; padding-top: 0px; padding-bottom: 0px">최적의 동선,<br><span style="color: #63BD7E; font-size: 50px; padding-top: 1px; padding-bottom: 1px; padding-left: 3px; padding-right: 3px">p<span style="color: #7BCB93; font-size: 1.4em; position: relative; top: -0.05em">:</span>nder</span>와 함께</div>
+  <div class="pd-hero-title" style="font-size: 44px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; color: {{ c.text }}; margin-bottom: 6px; padding-top: 0px; padding-bottom: 0px">최적의 동선,<br><span style="color: #63BD7E; font-size: 50px; padding-top: 1px; padding-bottom: 1px; padding-left: 3px; padding-right: 3px">p<span style="color: #7BCB93; font-size: 1.4em; position: relative; top: -0.05em">:</span>nder</span>와 함께</div>
   <div style="font-size:16px;color:{{ c.textSub }};line-height:1.6;max-width:520px">목적지를 입력하면 최적화된 일정과 이동 동선을 자동으로 생성해드립니다.</div>
 
   <!-- CTA 카드 -->
-  <div class="pd-fade" style="margin-top: 20px; width: 100%; position: relative; overflow: hidden; background: {{ c.ctaBg }}; border: 1px solid {{ c.border }}; border-radius: 20px; padding: 44px 32px; display: flex; flex-direction: column; align-items: center; gap: 14px; border-width: 2px">
+  <div class="pd-fade pd-cta-card" style="margin-top: 20px; width: 100%; position: relative; overflow: hidden; background: {{ c.ctaBg }}; border: 1px solid {{ c.border }}; border-radius: 20px; padding: 44px 32px; display: flex; flex-direction: column; align-items: center; gap: 14px; border-width: 2px; box-sizing: border-box">
     <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:{{ c.ctaBlob }}"></div>
     <div style="position:absolute;left:14px;bottom:14px;width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:rgba(123,203,147,.35);display:flex;align-items:center;justify-content:center;z-index:1">
       <div style="width:8px;height:8px;border-radius:50%;background:#fff;transform:rotate(45deg)"></div>
@@ -131,9 +149,9 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
         <div class="pd-ant-crawl" style="--dur:{{ ant.dur }};--delay:{{ ant.delay }}"><div class="pd-ant-mark" style="background:{{ c.antColor }}"></div></div>
       </div>
     </sc-for>
-    <div style="position:relative;z-index:2;font-size:26px;font-weight:800;color:{{ c.ctaText }};white-space:nowrap">지금 바로 시작하세요</div>
-    <div style="position:relative;z-index:2;font-size:14px;color:{{ c.ctaSubText }};white-space:nowrap">무료로 나만의 여행 일정을 만들어보세요</div>
-    <a href="./My Routes.dc.html" class="pd-btn" style="position:relative;z-index:2;margin-top:8px;text-decoration:none;background:#7BCB93;color:#12321F;border-radius:999px;padding:14px 28px;font-size:15px;font-weight:800;white-space:nowrap">최적 동선 생성하기 →</a>
+    <div class="pd-cta-title" style="position:relative;z-index:2;font-size:26px;font-weight:800;color:{{ c.ctaText }};white-space:nowrap">지금 바로 시작하세요</div>
+    <div class="pd-cta-sub" style="position:relative;z-index:2;font-size:14px;color:{{ c.ctaSubText }};white-space:nowrap">무료로 나만의 여행 일정을 만들어보세요</div>
+    <a href="./My Routes.dc.html" class="pd-btn pd-cta-btn" style="position:relative;z-index:2;margin-top:8px;text-decoration:none;background:#7BCB93;color:#12321F;border-radius:999px;padding:14px 28px;font-size:15px;font-weight:800;white-space:nowrap">최적 동선 생성하기 →</a>
   </div>
 
   <!-- 통계 -->
@@ -207,6 +225,7 @@ class Component extends DCLogic {
     try { localStorage.setItem('pd-theme', next); } catch (e) {}
     return { theme: next };
   });
+  toggleMobileMenu = () => this.setState(s => ({ mobileMenuOpen: !s.mobileMenuOpen }));
 
   renderVals() {
     const c = this.state.theme === 'dark' ? DARK : LIGHT;
@@ -215,6 +234,8 @@ class Component extends DCLogic {
       isDark: this.state.theme === 'dark',
       isLight: this.state.theme !== 'dark',
       toggleTheme: this.toggleTheme,
+      mobileMenuOpen: this.state.mobileMenuOpen, toggleMobileMenu: this.toggleMobileMenu,
+      headerBg2: this.state.theme === 'dark' ? '#17181A' : '#fff',
       replayLogoAnim: this.replayLogoAnim,
       logoAnimKey: this.state.logoAnimKey,
       ants: [
