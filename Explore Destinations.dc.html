@@ -131,12 +131,21 @@ a:hover{color:#146030}
     <sc-for list="{{ sections }}" as="section" hint-placeholder-count="2">
       <sc-if value="{{ section.hasItems }}" hint-placeholder-val="{{ true }}">
       <div style="margin-bottom:36px">
-        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-bottom:14px">
-          <div style="font-size:17px;font-weight:700;color:{{ c.text }};white-space:nowrap">{{ section.title }}</div>
-          <div style="font-size:12.5px;color:{{ c.textSub }}">{{ section.subtitle }}</div>
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:14px">
+          <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px">
+            <div style="font-size:17px;font-weight:700;color:{{ c.text }};white-space:nowrap">{{ section.title }}</div>
+            <div style="font-size:12.5px;color:{{ c.textSub }}">{{ section.subtitle }}</div>
+          </div>
+          <sc-if value="{{ section.hasMultiplePages }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div onClick="{{ section.onPrevPage }}" style="cursor:pointer;width:26px;height:26px;border-radius:8px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;color:{{ c.text }};opacity:{{ section.prevOpacity }}">‹</div>
+              <div style="font-size:11.5px;color:{{ c.textSub }}">{{ section.pageLabel }}</div>
+              <div onClick="{{ section.onNextPage }}" style="cursor:pointer;width:26px;height:26px;border-radius:8px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;color:{{ c.text }};opacity:{{ section.nextOpacity }}">›</div>
+            </div>
+          </sc-if>
         </div>
         <div class="ed-grid">
-          <sc-for list="{{ section.items }}" as="dest" hint-placeholder-count="3">
+          <sc-for list="{{ section.pagedItems }}" as="dest" hint-placeholder-count="3">
             <div class="ed-card" style="background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
               <div style="position:relative;width:100%;aspect-ratio:4/3">
                 <image-slot id="{{ dest.imgId }}" shape="rect" placeholder="{{ dest.name }} 사진"></image-slot>
@@ -210,11 +219,12 @@ const DARK = { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)',
 
 class Component extends DCLogic {
   state = {
-    activeRegion: null, newTripModalOpen: false,
+    activeRegion: null, newTripModalOpen: false, sectionPages: {},
     newTripStartDate: new Date().toISOString().slice(0, 10), newTripEndDate: new Date().toISOString().slice(0, 10),
     theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || 'light',
   };
   selectRegion = (key) => this.setState({ activeRegion: key });
+  setSectionPage = (si, page) => this.setState(s => ({ sectionPages: { ...s.sectionPages, [si]: page } }));
   selectAll = () => this.setState({ activeRegion: null });
   openNewTripModal = () => this.setState({ newTripModalOpen: true });
   closeNewTripModal = () => this.setState({ newTripModalOpen: false });
@@ -245,7 +255,19 @@ class Component extends DCLogic {
           imgId: `dest-${si}-${di}`,
           planHref: `./Route Planner App.dc.html?destination=${encodeURIComponent(d.name)}`,
         }));
-      return { ...sec, items, hasItems: items.length > 0 };
+      const PAGE_SIZE = 6;
+      const pageCount = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+      const page = Math.min(this.state.sectionPages[si] || 0, pageCount - 1);
+      const pagedItems = items.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+      return {
+        ...sec, items, pagedItems, hasItems: items.length > 0,
+        hasMultiplePages: pageCount > 1,
+        pageLabel: `${page + 1} / ${pageCount}`,
+        prevOpacity: page === 0 ? 0.4 : 1,
+        nextOpacity: page === pageCount - 1 ? 0.4 : 1,
+        onPrevPage: () => this.setSectionPage(si, Math.max(0, page - 1)),
+        onNextPage: () => this.setSectionPage(si, Math.min(pageCount - 1, page + 1)),
+      };
     });
     const noResults = sections.every(s => !s.hasItems);
     return {
