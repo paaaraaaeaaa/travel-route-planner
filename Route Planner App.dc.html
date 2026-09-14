@@ -667,6 +667,7 @@ a:hover{color:#146030}
 </sc-if>
 
 <!-- AI 도우미: 평소엔 작은 진입 버튼, 클릭 시 패널로 확장 -->
+<sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
 <div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: 76px; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
   <span>✨</span><span style="white-space:nowrap">AI 도우미</span>
 </div>

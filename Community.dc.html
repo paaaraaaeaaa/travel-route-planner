@@ -203,13 +203,13 @@ a:hover{color:#146030}
               <div style="display:flex;flex-direction:column;gap:3px">
                 <div style="display:flex;align-items:center;gap:8px">
                   <div style="font-size:12.5px;line-height:1.5;color:{{ c.text }};flex:1"><b>{{ cmt.author }}</b> {{ cmt.text }}</div>
-                  <div onClick="{{ cmt.onLike }}" style="cursor:pointer;font-size:11px;font-weight:700;color:{{ cmt.likeColor }};white-space:nowrap">♥ {{ cmt.likeCount }}</div>
+                  <div onClick="{{ cmt.onLike }}" style="cursor:pointer;font-size:11px;font-weight:700;color:{{ cmt.likeColor }};white-space:nowrap">{{ cmt.heartIcon }} {{ cmt.likeCount }}</div>
                   <div onClick="{{ cmt.onReplyToggle }}" style="cursor:pointer;font-size:11px;color:{{ c.textSub }};white-space:nowrap">답글</div>
                 </div>
                 <sc-for list="{{ cmt.replies }}" as="rep" hint-placeholder-count="0">
                   <div style="display:flex;align-items:center;gap:8px;margin-left:16px">
                     <div style="font-size:12px;line-height:1.5;color:{{ c.text }};flex:1"><b>{{ rep.author }}</b> {{ rep.text }}</div>
-                    <div onClick="{{ rep.onLike }}" style="cursor:pointer;font-size:10.5px;font-weight:700;color:{{ rep.likeColor }};white-space:nowrap">♥ {{ rep.likeCount }}</div>
+                    <div onClick="{{ rep.onLike }}" style="cursor:pointer;font-size:10.5px;font-weight:700;color:{{ rep.likeColor }};white-space:nowrap">{{ rep.heartIcon }} {{ rep.likeCount }}</div>
                   </div>
                 </sc-for>
                 <sc-if value="{{ cmt.replyOpen }}" hint-placeholder-val="{{ false }}">
@@ -332,8 +332,26 @@ a:hover{color:#146030}
         </div>
         <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px">
           <div style="font-size:13px;line-height:1.6;color:{{ c.text }}"><b>{{ commentModalPost.displayAuthor }}</b> {{ commentModalPost.captionEl }}</div>
-          <sc-for list="{{ commentModalPost.comments }}" as="cmt" hint-placeholder-count="2">
-            <div style="font-size:13px;line-height:1.5;color:{{ c.text }}"><b>{{ cmt.author }}</b> {{ cmt.text }}</div>
+          <sc-for list="{{ commentModalPost.allCommentsEnriched }}" as="cmt" hint-placeholder-count="2">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="font-size:13px;line-height:1.5;color:{{ c.text }};flex:1"><b>{{ cmt.author }}</b> {{ cmt.text }}</div>
+                <div onClick="{{ cmt.onLike }}" style="cursor:pointer;font-size:11.5px;font-weight:700;color:{{ cmt.likeColor }};white-space:nowrap">{{ cmt.heartIcon }} {{ cmt.likeCount }}</div>
+                <div onClick="{{ cmt.onReplyToggle }}" style="cursor:pointer;font-size:11.5px;color:{{ c.textSub }};white-space:nowrap">답글</div>
+              </div>
+              <sc-for list="{{ cmt.replies }}" as="rep" hint-placeholder-count="0">
+                <div style="display:flex;align-items:center;gap:8px;margin-left:18px">
+                  <div style="font-size:12.5px;line-height:1.5;color:{{ c.text }};flex:1"><b>{{ rep.author }}</b> {{ rep.text }}</div>
+                  <div onClick="{{ rep.onLike }}" style="cursor:pointer;font-size:11px;font-weight:700;color:{{ rep.likeColor }};white-space:nowrap">{{ rep.heartIcon }} {{ rep.likeCount }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ cmt.replyOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:6px;margin-left:18px">
+                  <input value="{{ cmt.replyDraft }}" onChange="{{ cmt.onReplyInput }}" onKeyDown="{{ cmt.onReplyKeyDown }}" placeholder="답글 달기..." class="cm-comment-input" style="flex:1;min-width:0;border:none;border-bottom:1px solid {{ c.border }};padding:4px 2px;font-size:12.5px;font-family:inherit;color:{{ c.text }};background:transparent;outline:none">
+                  <div onClick="{{ cmt.onReplySubmit }}" style="font-size:12px;font-weight:700;color:#1F7A44;cursor:pointer;padding:5px 4px;white-space:nowrap">게시</div>
+                </div>
+              </sc-if>
+            </div>
           </sc-for>
           <sc-if value="{{ commentModalPost.commentsEmpty }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:12.5px;color:{{ c.textSub }}">아직 댓글이 없어요</div>
@@ -392,7 +410,11 @@ const DARK = { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)',
 
 class Component extends DCLogic {
   state = {
-    posts: SEED_POSTS.map(p => ({ ...p, commentDraft: '' })),
+    posts: SEED_POSTS.map(p => ({
+      ...p,
+      commentDraft: '',
+      comments: (p.comments || []).map((c, i) => ({ id: `${p.id}-c${i}`, liked: false, likeCount: 0, replies: [], ...c })),
+    })),
     composerOpen: false,
     editingId: null,
     draftPlace: '',
@@ -428,7 +450,7 @@ class Component extends DCLogic {
   toggleCommentLike = (postId, commentId) => this.setState(s => ({
     posts: s.posts.map(p => p.id !== postId ? p : {
       ...p,
-      comments: p.comments.map(c => c.id !== commentId ? c : { ...c, liked: !c.liked, likeCount: c.likeCount + (c.liked ? -1 : 1) }),
+      comments: p.comments.map(c => c.id !== commentId ? c : { ...c, liked: !c.liked, likeCount: (c.likeCount || 0) + (c.liked ? -1 : 1) }),
     }),
   }));
   toggleReplyLike = (postId, commentId, replyId) => this.setState(s => ({
@@ -436,7 +458,7 @@ class Component extends DCLogic {
       ...p,
       comments: p.comments.map(c => c.id !== commentId ? c : {
         ...c,
-        replies: (c.replies || []).map(r => r.id !== replyId ? r : { ...r, liked: !r.liked, likeCount: r.likeCount + (r.liked ? -1 : 1) }),
+        replies: (c.replies || []).map(r => r.id !== replyId ? r : { ...r, liked: !r.liked, likeCount: (r.likeCount || 0) + (r.liked ? -1 : 1) }),
       }),
     }),
   }));
@@ -531,6 +553,7 @@ class Component extends DCLogic {
   }
 
   renderVals() {
+    const c = this.state.theme === 'dark' ? DARK : LIGHT;
     const { posts, composerOpen, editingId, draftPlace, draftCaption, draftRegion, selectedRegion, sortMode, deleteConfirmOpen, profileAuthor, visibleCount, viewMode, myNickname, myNicknameDraft, myProfileEditOpen, searchQuery, expandedComments, commentModalId, showBookmarksOnly } = this.state;
     const myPostCount = posts.filter(p => p.isMine).length;
     const byRegion = selectedRegion === '전체' ? posts : posts.filter(p => p.region === selectedRegion);
@@ -563,7 +586,27 @@ class Component extends DCLogic {
     }));
     const enriched = sorted.map(p => {
       const expanded = !!expandedComments[p.id];
-      const visibleComments = expanded ? p.comments : p.comments.slice(0, 1);
+      const enrichComment = (cmt) => {
+      return {
+        ...cmt,
+        likeColor: cmt.liked ? '#E5484D' : c.textSub,
+        heartIcon: cmt.liked ? '♥' : '♡',
+        onLike: () => this.toggleCommentLike(p.id, cmt.id),
+        onReplyToggle: () => this.toggleReplyBox(p.id, cmt.id),
+        replyOpen: !!this.state.openReplyBoxes[cmt.id],
+        replyDraft: this.state.replyDrafts[cmt.id] || '',
+        onReplyInput: (e) => this.onReplyInput(cmt.id, e),
+        onReplyKeyDown: (e) => this.onReplyKeyDown(p.id, cmt.id, e),
+        onReplySubmit: () => this.submitReply(p.id, cmt.id),
+        replies: (cmt.replies || []).map(r => ({
+          liked: false, likeCount: 0, ...r,
+          likeColor: r.liked ? '#E5484D' : c.textSub,
+          heartIcon: r.liked ? '♥' : '♡',
+          onLike: () => this.toggleReplyLike(p.id, cmt.id, r.id),
+        })),
+      };
+      };
+      const visibleComments = (expanded ? p.comments : p.comments.slice(0, 1)).map(enrichComment);
       return {
         ...p,
         imgId: `post-${p.id}`,
@@ -574,6 +617,7 @@ class Component extends DCLogic {
         notLiked: !p.liked,
         commentCountLabel: `${p.comments.length}`,
         visibleComments,
+        allCommentsEnriched: p.comments.map(enrichComment),
         hasMoreComments: !expanded && p.comments.length > 1,
         hiddenCommentCount: p.comments.length - 1,
         canCollapseComments: expanded && p.comments.length > 1,
@@ -603,7 +647,6 @@ class Component extends DCLogic {
       onClick: () => this.filterByTagOrPlace(t.name.split(' ')[0]),
     }));
     const popularTags = POPULAR_TAGS.map(t => ({ label: t, onClick: () => this.filterByTagOrPlace(t) }));
-    const c = this.state.theme === 'dark' ? DARK : LIGHT;
     return {
       c, isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
       darkClass: this.state.theme === 'dark' ? 'cm-dark' : '',
