@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>p:nder - 회원가입</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <style>
+    body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .pd-fade{transition:background-color .35s ease,color .35s ease,border-color .35s ease}
+    .pd-btn{transition:transform .12s ease,opacity .15s ease}
+    .pd-btn:hover{opacity:.92}
+    .pd-btn:active{transform:scale(0.98)}
+    .pd-btn:disabled{opacity:.45;cursor:not-allowed}
+    .pd-icon-btn:hover{opacity:.75}
+    .pd-input:focus-within{box-shadow:inset 0 0 0 1.5px #7BCB93 !important}
+  </style>
+</helmet>
+
+<div class="pd-fade" style="width:100%;min-height:100vh;display:flex;justify-content:center;background:{{ c.bg }};color:{{ c.text }};box-sizing:border-box;padding:48px 16px">
+  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:28px;animation:fadeUp .4s ease">
+
+    <div style="display:flex;justify-content:flex-end">
+      <div onClick="{{ toggleTheme }}" class="pd-icon-btn" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ themeIcon }}</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:4px">
+      <div style="display:flex;align-items:center;gap:6px;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:{{ c.text }}">
+        <span>✈</span><span>p:nder</span>
+      </div>
+      <p style="margin:0;font-size:14px;color:{{ c.textSub }};text-align:center">회원가입하고 나만의 여행 동선을 만들어보세요</p>
+    </div>
+
+    <form style="display:flex;flex-direction:column;gap:16px" onsubmit="{{ handleSubmit }}">
+
+      <!-- 이름 -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">이름</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+          <input type="text" placeholder="실명을 입력해주세요" value="{{ name }}" oninput="{{ onNameChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
+        </div>
+      </div>
+
+      <!-- 아이디 + 중복확인 -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">아이디</label>
+        <div style="display:flex;gap:8px">
+          <div class="pd-input pd-fade" style="flex:1;display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ usernameBorderColor }}">
+            <input type="text" placeholder="영문, 숫자 조합 4~16자" value="{{ username }}" oninput="{{ onUsernameChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
+          </div>
+          <button type="button" class="pd-btn" onclick="{{ checkUsername }}" disabled="{{ usernameCheckDisabled }}" style="white-space:nowrap;border:none;padding:0 16px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }};color:{{ c.text }};font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">중복확인</button>
+        </div>
+        <sc-if value="{{ usernameStatus }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:12px;color:{{ usernameStatusColor }}">{{ usernameStatusText }}</span>
+        </sc-if>
+      </div>
+
+      <!-- 별명 -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">별명</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+          <input type="text" placeholder="다른 여행자에게 보여질 이름이에요" value="{{ nickname }}" oninput="{{ onNicknameChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
+        </div>
+      </div>
+
+      <!-- 이메일 -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">이메일</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+          <svg viewBox="0 0 24 24" width="18" height="18" style="flex-shrink:0"><path fill="{{ c.textSub }}" fill-rule="evenodd" clip-rule="evenodd" d="M4 5.5C2.89543 5.5 2 6.39543 2 7.5V16.5C2 17.6046 2.89543 18.5 4 18.5H20C21.1046 18.5 22 17.6046 22 16.5V7.5C22 6.39543 21.1046 5.5 20 5.5H4ZM4.6 7.3L12 12.5L19.4 7.3H4.6Z"/></svg>
+          <input type="email" placeholder="you@example.com" value="{{ email }}" oninput="{{ onEmailChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
+        </div>
+      </div>
+
+      <!-- 비밀번호 -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">비밀번호</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+          <svg viewBox="0 0 24 24" width="18" height="18" style="flex-shrink:0"><path fill="{{ c.textSub }}" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C9.79086 2 8 3.79086 8 6V9H7C5.89543 9 5 9.89543 5 11V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11C19 9.89543 18.1046 9 17 9H16V6C16 3.79086 14.2091 2 12 2ZM14 9V6C14 4.89543 13.1046 4 12 4C10.8954 4 10 4.89543 10 6V9H14Z"/></svg>
+          <input type="password" placeholder="영문, 숫자, 특수문자 포함 8자 이상" value="{{ password }}" oninput="{{ onPasswordChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
+        </div>
+      </div>
+
+      <!-- 비밀번호 확인 -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">비밀번호 확인</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ passwordConfirmBorderColor }}">
+          <svg viewBox="0 0 24 24" width="18" height="18" style="flex-shrink:0"><path fill="{{ c.textSub }}" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C9.79086 2 8 3.79086 8 6V9H7C5.89543 9 5 9.89543 5 11V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11C19 9.89543 18.1046 9 17 9H16V6C16 3.79086 14.2091 2 12 2ZM14 9V6C14 4.89543 13.1046 4 12 4C10.8954 4 10 4.89543 10 6V9H14Z"/></svg>
+          <input type="password" placeholder="비밀번호를 다시 입력해주세요" value="{{ passwordConfirm }}" oninput="{{ onPasswordConfirmChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
+        </div>
+        <sc-if value="{{ showPasswordMismatch }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:12px;color:#E5484D">비밀번호가 일치하지 않습니다.</span>
+        </sc-if>
+      </div>
+
+      <!-- 본인인증 -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">본인인증</label>
+        <sc-if value="{{ phoneVerified }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:#EAF9EF">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#1F7A44" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span style="font-size:13px;color:#1F7A44;font-weight:600">휴대폰 인증이 완료되었습니다 ({{ phoneNumberMasked }})</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ phoneVerified }}" hint-placeholder-val="{{ true }}">
+          <button type="button" class="pd-btn" onclick="{{ openVerifyModal }}" style="border:none;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }};color:{{ c.text }};font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;width:100%;text-align:left">휴대폰 번호로 인증하기 →</button>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ error }}" hint-placeholder-val="{{ false }}">
+        <span style="font-size:12px;color:#E5484D">{{ error }}</span>
+      </sc-if>
+
+      <button type="submit" class="pd-btn" style="border:none;padding:13px 20px;border-radius:999px;background:#7BCB93;color:#12321F;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;width:100%;margin-top:4px">
+        회원가입
+      </button>
+    </form>
+
+    <p style="margin:0;text-align:center;font-size:13px;color:{{ c.textSub }}">
+      이미 계정이 있으신가요? <a href="Login Screen.dc.html" style="color:#1F7A44;font-weight:700;text-decoration:none">로그인</a>
+    </p>
+  </div>
+
+  <!-- 본인인증 모달 -->
+  <sc-if value="{{ showVerifyModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1300" onclick="{{ closeVerifyModal }}">
+      <div onclick="{{ stopPropagation }}" class="pd-fade" style="width:320px;background:{{ c.bg }};border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:24px;display:flex;flex-direction:column;gap:16px">
+
+        <sc-if value="{{ verifyStep }}" hint-placeholder-val="{{ 'phone' }}">
+          <span style="font-size:15px;font-weight:700;color:{{ c.text }}">휴대폰 번호 입력</span>
+          <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+            <input type="tel" placeholder="010-0000-0000" value="{{ phoneNumber }}" oninput="{{ onPhoneNumberChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
+          </div>
+          <button type="button" class="pd-btn" onclick="{{ sendVerifyCode }}" disabled="{{ sendCodeDisabled }}" style="border:none;padding:12px 20px;border-radius:999px;background:#7BCB93;color:#12321F;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;width:100%">인증번호 받기</button>
+        </sc-if>
+
+        <sc-if value="{{ verifyStep }}" hint-placeholder-val="{{ 'code' }}">
+          <span style="font-size:15px;font-weight:700;color:{{ c.text }}">인증번호 입력</span>
+          <span style="font-size:12px;color:{{ c.textSub }};margin-top:-8px">{{ phoneNumber }}(으)로 전송된 6자리 번호를 입력해주세요.</span>
+          <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+            <input type="text" maxlength="6" placeholder="123456" value="{{ verifyCode }}" oninput="{{ onVerifyCodeChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;letter-spacing:4px;color:{{ c.text }};width:100%">
+          </div>
+          <button type="button" class="pd-btn" onclick="{{ confirmVerifyCode }}" style="border:none;padding:12px 20px;border-radius:999px;background:#7BCB93;color:#12321F;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;width:100%">확인</button>
+        </sc-if>
+
+        <span style="font-size:11px;color:{{ c.textSub }};text-align:center">이 화면은 실제 서비스와 연동된 것이 아닌 프로토타입 시뮬레이션입니다.</span>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;section&quot;:&quot;기본값&quot;}}">
+const LIGHT = {
+  bg: '#FFFFFF', text: '#171719', textSub: 'rgba(23,23,25,.6)', border: '#E1E2E4',
+  cardBg: '#F7F7F8',
+};
+const DARK = {
+  bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)', border: '#292A2D',
+  cardBg: '#17181A',
+};
+
+const TAKEN_USERNAMES = ['pnder', 'admin', 'traveler', 'test'];
+
+class Component extends DCLogic {
+  state = {
+    theme: this.props.defaultTheme ?? 'light',
+    name: '', username: '', nickname: '', email: '', password: '', passwordConfirm: '',
+    usernameStatus: '', // '', 'checking', 'available', 'taken'
+    phoneVerified: false, phoneNumber: '', phoneNumberMasked: '',
+    showVerifyModal: false, verifyStep: 'phone', verifyCode: '',
+    error: '',
+  };
+
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' }));
+
+  onNameChange = (e) => this.setState({ name: e.target.value, error: '' });
+  onNicknameChange = (e) => this.setState({ nickname: e.target.value, error: '' });
+  onEmailChange = (e) => this.setState({ email: e.target.value, error: '' });
+  onPasswordChange = (e) => this.setState({ password: e.target.value, error: '' });
+  onPasswordConfirmChange = (e) => this.setState({ passwordConfirm: e.target.value, error: '' });
+
+  onUsernameChange = (e) => this.setState({ username: e.target.value, usernameStatus: '', error: '' });
+
+  checkUsername = () => {
+    if (!this.state.username || this.state.username.length < 4) {
+      this.setState({ usernameStatus: 'invalid' });
+      return;
+    }
+    this.setState({ usernameStatus: 'checking' });
+    setTimeout(() => {
+      const taken = TAKEN_USERNAMES.includes(this.state.username.toLowerCase());
+      this.setState({ usernameStatus: taken ? 'taken' : 'available' });
+    }, 500);
+  };
+
+  openVerifyModal = () => this.setState({ showVerifyModal: true, verifyStep: 'phone', phoneNumber: '', verifyCode: '' });
+  closeVerifyModal = () => this.setState({ showVerifyModal: false });
+  stopPropagation = (e) => e.stopPropagation();
+
+  onPhoneNumberChange = (e) => this.setState({ phoneNumber: e.target.value });
+  sendVerifyCode = () => {
+    if (!this.state.phoneNumber) return;
+    this.setState({ verifyStep: 'code' });
+  };
+
+  onVerifyCodeChange = (e) => this.setState({ verifyCode: e.target.value });
+  confirmVerifyCode = () => {
+    const masked = this.state.phoneNumber.replace(/(\d{3})-?(\d{2,4})-?(\d{4})/, '$1-****-$3');
+    this.setState({
+      showVerifyModal: false,
+      phoneVerified: true,
+      phoneNumberMasked: masked || this.state.phoneNumber,
+      error: '',
+    });
+  };
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const s = this.state;
+    if (!s.name || !s.username || !s.nickname || !s.email || !s.password || !s.passwordConfirm) {
+      this.setState({ error: '모든 항목을 입력해주세요.' });
+      return;
+    }
+    if (s.usernameStatus !== 'available') {
+      this.setState({ error: '아이디 중복확인을 완료해주세요.' });
+      return;
+    }
+    if (s.password !== s.passwordConfirm) {
+      this.setState({ error: '비밀번호가 일치하지 않습니다.' });
+      return;
+    }
+    if (!s.phoneVerified) {
+      this.setState({ error: '본인인증을 완료해주세요.' });
+      return;
+    }
+    this.setState({ error: '' });
+    window.location.href = 'Login Screen.dc.html';
+  };
+
+  renderVals() {
+    const c = this.state.theme === 'dark' ? DARK : LIGHT;
+    const s = this.state;
+
+    const usernameStatusMap = {
+      checking: { text: '확인 중...', color: c.textSub },
+      available: { text: '사용 가능한 아이디입니다.', color: '#1F7A44' },
+      taken: { text: '이미 사용 중인 아이디입니다.', color: '#E5484D' },
+      invalid: { text: '아이디는 4자 이상 입력해주세요.', color: '#E5484D' },
+    };
+    const statusInfo = usernameStatusMap[s.usernameStatus];
+
+    return {
+      c,
+      themeIcon: s.theme === 'dark' ? '☀' : '☾',
+      toggleTheme: this.toggleTheme,
+
+      name: s.name, onNameChange: this.onNameChange,
+      nickname: s.nickname, onNicknameChange: this.onNicknameChange,
+      email: s.email, onEmailChange: this.onEmailChange,
+      password: s.password, onPasswordChange: this.onPasswordChange,
+      passwordConfirm: s.passwordConfirm, onPasswordConfirmChange: this.onPasswordConfirmChange,
+      passwordConfirmBorderColor: (s.passwordConfirm && s.password !== s.passwordConfirm) ? '#E5484D' : c.border,
+      showPasswordMismatch: !!(s.passwordConfirm && s.password !== s.passwordConfirm),
+
+      username: s.username, onUsernameChange: this.onUsernameChange,
+      checkUsername: this.checkUsername,
+      usernameCheckDisabled: s.usernameStatus === 'checking',
+      usernameStatus: !!statusInfo,
+      usernameStatusText: statusInfo ? statusInfo.text : '',
+      usernameStatusColor: statusInfo ? statusInfo.color : c.textSub,
+      usernameBorderColor: s.usernameStatus === 'taken' || s.usernameStatus === 'invalid' ? '#E5484D' : (s.usernameStatus === 'available' ? '#1F7A44' : c.border),
+
+      phoneVerified: s.phoneVerified,
+      phoneNumberMasked: s.phoneNumberMasked,
+      openVerifyModal: this.openVerifyModal,
+      closeVerifyModal: this.closeVerifyModal,
+      stopPropagation: this.stopPropagation,
+      showVerifyModal: s.showVerifyModal,
+      verifyStep: s.verifyStep,
+      phoneNumber: s.phoneNumber,
+      onPhoneNumberChange: this.onPhoneNumberChange,
+      sendVerifyCode: this.sendVerifyCode,
+      sendCodeDisabled: !s.phoneNumber,
+      verifyCode: s.verifyCode,
+      onVerifyCodeChange: this.onVerifyCodeChange,
+      confirmVerifyCode: this.confirmVerifyCode,
+
+      error: s.error,
+      handleSubmit: this.handleSubmit,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

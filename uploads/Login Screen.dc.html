@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>p:nder - 로그인</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <style>
+    body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .pd-fade{transition:background-color .35s ease,color .35s ease,border-color .35s ease}
+    .pd-btn{transition:transform .12s ease,opacity .15s ease}
+    .pd-btn:hover{opacity:.92}
+    .pd-btn:active{transform:scale(0.98)}
+    .pd-icon-btn:hover{opacity:.75}
+    .pd-input:focus-within{box-shadow:inset 0 0 0 1.5px #7BCB93 !important}
+  </style>
+</helmet>
+
+<div class="pd-fade" style="width:100%;min-height:100vh;display:flex;justify-content:center;background:{{ c.bg }};color:{{ c.text }};box-sizing:border-box;padding:48px 16px">
+  <div style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:32px;animation:fadeUp .4s ease">
+
+    <!-- 테마 토글 -->
+    <div style="display:flex;justify-content:flex-end">
+      <div onClick="{{ toggleTheme }}" class="pd-icon-btn" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ themeIcon }}</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:4px">
+      <div style="display:flex;align-items:center;gap:6px;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:{{ c.text }}">
+        <span>✈</span><span>p:nder</span>
+      </div>
+      <p style="margin:0;font-size:14px;color:{{ c.textSub }};text-align:center">로그인하고 최적의 동선을 만들어보세요</p>
+    </div>
+
+    <form style="display:flex;flex-direction:column;gap:16px" onsubmit="{{ handleSubmit }}">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">이메일</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ emailBorderColor }}">
+          <svg viewBox="0 0 24 24" width="18" height="18" style="flex-shrink:0"><path fill="{{ c.textSub }}" fill-rule="evenodd" clip-rule="evenodd" d="M4 5.5C2.89543 5.5 2 6.39543 2 7.5V16.5C2 17.6046 2.89543 18.5 4 18.5H20C21.1046 18.5 22 17.6046 22 16.5V7.5C22 6.39543 21.1046 5.5 20 5.5H4ZM4.6 7.3L12 12.5L19.4 7.3H4.6Z"/></svg>
+          <input type="email" placeholder="you@example.com" value="{{ email }}" oninput="{{ onEmailChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">비밀번호</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+          <svg viewBox="0 0 24 24" width="18" height="18" style="flex-shrink:0"><path fill="{{ c.textSub }}" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C9.79086 2 8 3.79086 8 6V9H7C5.89543 9 5 9.89543 5 11V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11C19 9.89543 18.1046 9 17 9H16V6C16 3.79086 14.2091 2 12 2ZM14 9V6C14 4.89543 13.1046 4 12 4C10.8954 4 10 4.89543 10 6V9H14Z"/></svg>
+          <input type="password" placeholder="비밀번호를 입력하세요" value="{{ password }}" oninput="{{ onPasswordChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
+        </div>
+      </div>
+
+      <sc-if value="{{ error }}" hint-placeholder-val="{{ false }}">
+        <span style="font-size:12px;color:#E5484D">{{ error }}</span>
+      </sc-if>
+
+      <div style="display:flex;justify-content:flex-end">
+        <a href="#" style="font-size:13px;font-weight:600;color:#1F7A44;text-decoration:none">비밀번호를 잊으셨나요?</a>
+      </div>
+
+      <button type="submit" class="pd-btn" style="border:none;padding:13px 20px;border-radius:999px;background:#7BCB93;color:#12321F;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;width:100%">
+        로그인
+      </button>
+    </form>
+
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="flex:1;height:1px;background:{{ c.border }}"></div>
+      <span style="font-size:12px;color:{{ c.textSub }}">또는</span>
+      <div style="flex:1;height:1px;background:{{ c.border }}"></div>
+    </div>
+
+    <button type="button" class="pd-btn" onclick="{{ handleGoogleLogin }}" disabled="{{ googleLoading }}" style="border:none;padding:12px 20px;border-radius:999px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }};color:{{ c.text }};font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;opacity:{{ googleButtonOpacity }}">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      {{ googleButtonLabel }}
+    </button>
+
+    <sc-if value="{{ showGooglePicker }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1300" onclick="{{ closeGooglePicker }}">
+        <div onclick="{{ stopPropagation }}" class="pd-fade" style="width:320px;background:{{ c.bg }};border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:24px;display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center">
+          <span style="font-size:15px;font-weight:700;color:{{ c.text }}">계정 선택</span>
+          <button type="button" onclick="{{ pickGoogleAccount }}" class="pd-fade" style="width:100%;border:none;background:{{ c.cardBg }};border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left">
+            <div style="width:32px;height:32px;border-radius:50%;background:#7BCB93;color:#12321F;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0">여</div>
+            <div style="display:flex;flex-direction:column">
+              <span style="font-size:14px;font-weight:600;color:{{ c.text }}">여행자</span>
+              <span style="font-size:12px;color:{{ c.textSub }}">traveler@gmail.com</span>
+            </div>
+          </button>
+          <span style="font-size:12px;color:{{ c.textSub }}">이 화면은 실제 서비스와 연동된 것이 아닌 프로토타입 시뮬레이션입니다.</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ googleUser }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:#EAF9EF">
+        <div style="width:28px;height:28px;border-radius:50%;background:#7BCB93;color:#12321F;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">여</div>
+        <span style="font-size:13px;color:#12321F">{{ googleUser }}(으)로 로그인되었습니다</span>
+      </div>
+    </sc-if>
+
+    <p style="margin:0;text-align:center;font-size:13px;color:{{ c.textSub }}">
+      아직 계정이 없으신가요? <a href="#" style="color:#1F7A44;font-weight:700;text-decoration:none">회원가입</a>
+    </p>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;section&quot;:&quot;기본값&quot;}}">
+const LIGHT = {
+  bg: '#FFFFFF', text: '#171719', textSub: 'rgba(23,23,25,.6)', border: '#E1E2E4',
+  cardBg: '#F7F7F8',
+};
+const DARK = {
+  bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)', border: '#292A2D',
+  cardBg: '#17181A',
+};
+
+class Component extends DCLogic {
+  state = { theme: this.props.defaultTheme ?? 'light', email: '', password: '', error: '', googleLoading: false, showGooglePicker: false, googleUser: '' };
+
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' }));
+
+  handleGoogleLogin = () => {
+    this.setState({ googleLoading: true });
+    setTimeout(() => this.setState({ googleLoading: false, showGooglePicker: true }), 700);
+  };
+
+  closeGooglePicker = () => this.setState({ showGooglePicker: false });
+  stopPropagation = (e) => e.stopPropagation();
+
+  pickGoogleAccount = () => {
+    this.setState({ showGooglePicker: false, googleUser: 'traveler@gmail.com', error: '' });
+    setTimeout(() => { window.location.href = 'Pnder Landing.dc.html'; }, 500);
+  };
+
+  onEmailChange = (e) => this.setState({ email: e.target.value, error: '' });
+  onPasswordChange = (e) => this.setState({ password: e.target.value, error: '' });
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    if (!this.state.email || !this.state.password) {
+      this.setState({ error: '이메일과 비밀번호를 모두 입력해주세요.' });
+      return;
+    }
+    this.setState({ error: '' });
+    window.location.href = 'Pnder Landing.dc.html';
+  };
+
+  renderVals() {
+    const c = this.state.theme === 'dark' ? DARK : LIGHT;
+    return {
+      c,
+      themeIcon: this.state.theme === 'dark' ? '☀' : '☾',
+      toggleTheme: this.toggleTheme,
+      email: this.state.email,
+      password: this.state.password,
+      error: this.state.error,
+      emailBorderColor: this.state.error ? '#E5484D' : c.border,
+      onEmailChange: this.onEmailChange,
+      onPasswordChange: this.onPasswordChange,
+      handleSubmit: this.handleSubmit,
+      googleLoading: this.state.googleLoading,
+      googleButtonOpacity: this.state.googleLoading ? 0.6 : 1,
+      googleButtonLabel: this.state.googleLoading ? '연결 중...' : (this.state.googleUser ? 'Google 계정 연결됨' : 'Google로 계속하기'),
+      showGooglePicker: this.state.showGooglePicker,
+      closeGooglePicker: this.closeGooglePicker,
+      stopPropagation: this.stopPropagation,
+      pickGoogleAccount: this.pickGoogleAccount,
+      googleUser: this.state.googleUser,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

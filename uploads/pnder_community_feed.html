@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>p:nder - 커뮤니티</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts (Noto Sans KR) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans KR', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f2f8f4',
+              100: '#e1f0e4',
+              200: '#c3e1ca',
+              500: '#78b185',
+              600: '#5b9e69',
+              700: '#478153',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar for Region Selector */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- Header / Navigation -->
+  <header class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center space-x-12">
+        <a href="#" class="text-2xl font-black tracking-tight text-gray-900 flex items-center">
+          p<span class="text-brand-600">:</span>nder
+        </a>
+        <!-- Central Navigation -->
+        <nav class="hidden md:flex space-x-8">
+          <a href="#" class="text-gray-600 hover:text-gray-900 font-medium py-2 text-sm transition-colors">여행지 탐색</a>
+          <a href="#" class="text-gray-600 hover:text-gray-900 font-medium py-2 text-sm transition-colors">내 일정</a>
+          <a href="#" class="text-brand-600 font-bold border-b-2 border-brand-600 py-2 text-sm">커뮤니티</a>
+        </nav>
+      </div>
+
+      <!-- Header Action -->
+      <div class="flex items-center space-x-4">
+        <button class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow flex items-center gap-2">
+          <i class="fa-solid fa-pen text-xs"></i>
+          <span>여행 후기 쓰기</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+    
+    <!-- Title & Search Area -->
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">커뮤니티</h1>
+          <p class="text-gray-500 text-sm mt-1">다녀온 여행지의 감상평을 공유하고 다양한 여행 꿀팁을 나누어보세요.</p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative w-full md:w-80">
+          <input 
+            type="text" 
+            placeholder="게시글 키워드로 검색 (여행지, 내용 등)" 
+            class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm text-gray-800 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition-all shadow-sm"
+          >
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        </div>
+      </div>
+
+      <!-- Sort & View Switch Bar -->
+      <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+        <!-- Sort Filters -->
+        <div class="flex items-center space-x-4 text-xs sm:text-sm">
+          <button class="font-bold text-gray-900 hover:text-brand-600 transition-colors">인기순</button>
+          <span class="text-gray-300">|</span>
+          <button class="text-gray-500 hover:text-gray-900 transition-colors">최신순</button>
+          <span class="text-gray-300">|</span>
+          <button class="text-gray-500 hover:text-gray-900 transition-colors">오래된순</button>
+        </div>
+
+        <!-- View Mode Switch -->
+        <div class="flex items-center bg-gray-100 p-1 rounded-lg text-xs font-medium text-gray-600">
+          <button id="viewListBtn" onclick="switchView('list')" class="px-3 py-1 rounded-md transition-all flex items-center gap-1.5 text-gray-600">
+            <i class="fa-solid fa-list text-xs"></i>
+            <span>목록</span>
+          </button>
+          <button id="viewPhotoBtn" onclick="switchView('photo')" class="px-3 py-1 rounded-md transition-all flex items-center gap-1.5 bg-white text-brand-600 shadow-sm font-semibold">
+            <i class="fa-solid fa-image text-xs"></i>
+            <span>사진</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Layout Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- LEFT SIDEBAR: Region Selector -->
+      <aside class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-3 shadow-sm sticky top-24">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 py-2">지역 선택</h3>
+        <div class="space-y-1 max-h-[520px] overflow-y-auto custom-scrollbar pr-1 text-sm font-medium" id="regionList">
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl bg-brand-500 text-white font-semibold transition-all">전체</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">서울</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">강원</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">경기</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">경남</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">경북</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">광주</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">대구</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">대전</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">부산</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">세종</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">울산</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">인천</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">전남</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">전북</button>
+          <button onclick="selectRegion(this)" class="region-btn w-full text-left px-3 py-2 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">제주</button>
+        </div>
+      </aside>
+
+      <!-- MAIN FEED AREA (1 Feed Per Row - Single Stream Mode) -->
+      <section class="lg:col-span-7 flex flex-col items-center w-full">
+        <div id="feedContainer" class="w-full max-w-[680px] space-y-6">
+          
+          <!-- POST CARD 1 -->
+          <article class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <!-- Card Header -->
+            <div class="p-4 flex items-center justify-between border-b border-gray-50">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-sm ring-2 ring-brand-50">
+                  나
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-bold text-gray-900 text-sm">나</span>
+                    <span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-md font-medium">부산</span>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-0.5">5일 전 • 해운대구</p>
+                </div>
+              </div>
+              <!-- Options dropdown simulated -->
+              <div class="flex items-center space-x-2 text-xs text-gray-400">
+                <button class="hover:text-gray-600 px-1 py-1">수정</button>
+                <span>•</span>
+                <button class="hover:text-red-500 px-1 py-1 text-red-400">삭제</button>
+              </div>
+            </div>
+
+            <!-- Card Image Box (Single Post Banner Focus) -->
+            <div class="relative bg-gray-900 aspect-[4/3] w-full overflow-hidden group">
+              <img 
+                src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1000&q=80" 
+                alt="부산 바다 야경" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <span class="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-full font-medium">
+                1/3
+              </span>
+              <!-- Carousel Navigation simulation -->
+              <button class="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-800 flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+              </button>
+              <button class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-800 flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+              </button>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="px-5 pt-4 pb-2 flex items-center justify-between text-gray-600">
+              <div class="flex items-center space-x-5">
+                <button onclick="toggleLike(this)" class="flex items-center space-x-1.5 hover:text-red-500 transition-colors group">
+                  <i class="fa-regular fa-heart text-xl group-hover:scale-110 transition-transform"></i>
+                  <span class="text-sm font-semibold text-gray-700 count">128</span>
+                </button>
+                <button class="flex items-center space-x-1.5 hover:text-brand-600 transition-colors">
+                  <i class="fa-regular fa-comment text-xl"></i>
+                  <span class="text-sm font-semibold text-gray-700">24</span>
+                </button>
+                <button class="hover:text-brand-600 transition-colors">
+                  <i class="fa-regular fa-paper-plane text-xl"></i>
+                </button>
+              </div>
+              <button onclick="toggleBookmark(this)" class="hover:text-yellow-500 transition-colors">
+                <i class="fa-regular fa-bookmark text-xl"></i>
+              </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="px-5 py-3 space-y-2">
+              <h2 class="font-bold text-gray-900 text-base leading-snug">
+                부산 해운대의 노을과 황홀했던 야경 스팟 🌅
+              </h2>
+              <p class="text-gray-600 text-sm leading-relaxed line-clamp-2">
+                지난 주말 다녀온 부산 여행에서 가장 기억에 남는 순간이었어요. 광안대교가 한눈에 보이는 카페에서 바닷바람 맞으며 마시는 커피 한 잔이 정말 힐링이었습니다! 다들 꼭 가보시길 추천해요.
+              </p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="text-xs font-medium text-brand-600 hover:underline cursor-pointer">#부산여행</span>
+                <span class="text-xs font-medium text-brand-600 hover:underline cursor-pointer">#해운대</span>
+                <span class="text-xs font-medium text-brand-600 hover:underline cursor-pointer">#야경맛집</span>
+                <span class="text-xs font-medium text-brand-600 hover:underline cursor-pointer">#국내여행</span>
+              </div>
+            </div>
+
+            <!-- Comment Input Box -->
+            <div class="px-5 py-3 bg-gray-50/70 border-t border-gray-100 flex items-center space-x-3">
+              <input 
+                type="text" 
+                placeholder="댓글을 입력하세요..." 
+                class="w-full bg-white border border-gray-200 rounded-full px-4 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-brand-500"
+              >
+              <button class="text-xs font-bold text-brand-600 hover:text-brand-700 whitespace-nowrap px-1">등록</button>
+            </div>
+          </article>
+
+
+          <!-- POST CARD 2 -->
+          <article class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <!-- Card Header -->
+            <div class="p-4 flex items-center justify-between border-b border-gray-50">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-sm ring-2 ring-amber-50">
+                  제
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-bold text-gray-900 text-sm">제주돌담</span>
+                    <span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-md font-medium">제주</span>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-0.5">1일 전 • 애월읍</p>
+                </div>
+              </div>
+              <button class="text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+              </button>
+            </div>
+
+            <!-- Card Image Box -->
+            <div class="relative bg-gray-900 aspect-[4/3] w-full overflow-hidden group">
+              <img 
+                src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80" 
+                alt="제주도 에메랄드빛 바다" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <span class="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-full font-medium">
+                1/5
+              </span>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="px-5 pt-4 pb-2 flex items-center justify-between text-gray-600">
+              <div class="flex items-center space-x-5">
+                <button onclick="toggleLike(this)" class="flex items-center space-x-1.5 hover:text-red-500 transition-colors group">
+                  <i class="fa-regular fa-heart text-xl group-hover:scale-110 transition-transform"></i>
+                  <span class="text-sm font-semibold text-gray-700 count">342</span>
+                </button>
+                <button class="flex items-center space-x-1.5 hover:text-brand-600 transition-colors">
+                  <i class="fa-regular fa-comment text-xl"></i>
+                  <span class="text-sm font-semibold text-gray-700">56</span>
+                </button>
+                <button class="hover:text-brand-600 transition-colors">
+                  <i class="fa-regular fa-paper-plane text-xl"></i>
+                </button>
+              </div>
+              <button onclick="toggleBookmark(this)" class="hover:text-yellow-500 transition-colors">
+                <i class="fa-regular fa-bookmark text-xl"></i>
+              </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="px-5 py-3 space-y-2">
+              <h2 class="font-bold text-gray-900 text-base leading-snug">
+                에메랄드빛 물물 애월 바다에서 스노클링 한 날 🌊
+              </h2>
+              <p class="text-gray-600 text-sm leading-relaxed line-clamp-2">
+                날씨가 너무 좋아서 바닷속까지 훤히 다 보였어요! 에메랄드빛 해변에서 물놀이하고 먹는 해물라면은 진짜 최고입니다. 애월 한담해안산책로 코스 추천드려요!
+              </p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="text-xs font-medium text-brand-600 hover:underline cursor-pointer">#제주여행</span>
+                <span class="text-xs font-medium text-brand-600 hover:underline cursor-pointer">#애월</span>
+                <span class="text-xs font-medium text-brand-600 hover:underline cursor-pointer">#제주카페</span>
+              </div>
+            </div>
+
+            <!-- Comment Input Box -->
+            <div class="px-5 py-3 bg-gray-50/70 border-t border-gray-100 flex items-center space-x-3">
+              <input 
+                type="text" 
+                placeholder="댓글을 입력하세요..." 
+                class="w-full bg-white border border-gray-200 rounded-full px-4 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-brand-500"
+              >
+              <button class="text-xs font-bold text-brand-600 hover:text-brand-700 whitespace-nowrap px-1">등록</button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- RIGHT SIDEBAR: Trending Destinations & Popular Tags -->
+      <aside class="lg:col-span-3 space-y-6 sticky top-24">
+        
+        <!-- Trending Destinations Widget -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+              <span>🔥</span> 이번 주 인기 여행지
+            </h3>
+            <span class="text-xs text-gray-400">실시간</span>
+          </div>
+          
+          <div class="space-y-3">
+            <!-- Rank 1 -->
+            <div class="flex items-center space-x-3 group cursor-pointer">
+              <span class="font-black text-brand-600 text-base italic w-4 text-center">1</span>
+              <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=120&q=80" class="w-11 h-11 rounded-lg object-cover group-hover:opacity-90 transition-opacity" alt="부산">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-gray-900 truncate group-hover:text-brand-600 transition-colors">부산 해운대 & 광안리</p>
+                <p class="text-[11px] text-gray-400">게시글 1,420개</p>
+              </div>
+            </div>
+
+            <!-- Rank 2 -->
+            <div class="flex items-center space-x-3 group cursor-pointer">
+              <span class="font-black text-gray-400 text-base italic w-4 text-center">2</span>
+              <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=120&q=80" class="w-11 h-11 rounded-lg object-cover group-hover:opacity-90 transition-opacity" alt="제주">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-gray-900 truncate group-hover:text-brand-600 transition-colors">제주 애월 한담해안길</p>
+                <p class="text-[11px] text-gray-400">게시글 980개</p>
+              </div>
+            </div>
+
+            <!-- Rank 3 -->
+            <div class="flex items-center space-x-3 group cursor-pointer">
+              <span class="font-black text-gray-400 text-base italic w-4 text-center">3</span>
+              <img src="https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=120&q=80" class="w-11 h-11 rounded-lg object-cover group-hover:opacity-90 transition-opacity" alt="강릉">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-gray-900 truncate group-hover:text-brand-600 transition-colors">강릉 안목해변 카페거리</p>
+                <p class="text-[11px] text-gray-400">게시글 750개</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Popular Tags Widget -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+          <h3 class="font-bold text-gray-900 text-sm mb-3 flex items-center gap-1.5">
+            <span>🏷️</span> 추천 태그
+          </h3>
+          <div class="flex flex-wrap gap-2">
+            <a href="#" class="px-3 py-1.5 bg-gray-50 hover:bg-brand-50 text-gray-700 hover:text-brand-600 rounded-lg text-xs font-medium transition-colors">#부산야경</a>
+            <a href="#" class="px-3 py-1.5 bg-gray-50 hover:bg-brand-50 text-gray-700 hover:text-brand-600 rounded-lg text-xs font-medium transition-colors">#제주카페투어</a>
+            <a href="#" class="px-3 py-1.5 bg-gray-50 hover:bg-brand-50 text-gray-700 hover:text-brand-600 rounded-lg text-xs font-medium transition-colors">#국내서핑</a>
+            <a href="#" class="px-3 py-1.5 bg-gray-50 hover:bg-brand-50 text-gray-700 hover:text-brand-600 rounded-lg text-xs font-medium transition-colors">#감성숙소</a>
+            <a href="#" class="px-3 py-1.5 bg-gray-50 hover:bg-brand-50 text-gray-700 hover:text-brand-600 rounded-lg text-xs font-medium transition-colors">#주말드라이브</a>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    // Region Selection Switcher
+    function selectRegion(selectedBtn) {
+      const buttons = document.querySelectorAll('.region-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('bg-brand-500', 'text-white', 'font-semibold');
+        btn.classList.add('text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+      });
+      selectedBtn.classList.remove('text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+      selectedBtn.classList.add('bg-brand-500', 'text-white', 'font-semibold');
+    }
+
+    // Toggle Like Button Action
+    function toggleLike(btn) {
+      const icon = btn.querySelector('i');
+      const countSpan = btn.querySelector('.count');
+      let currentCount = parseInt(countSpan.textContent);
+
+      if (icon.classList.contains('fa-regular')) {
+        icon.classList.remove('fa-regular');
+        icon.classList.add('fa-solid', 'text-red-500');
+        countSpan.textContent = currentCount + 1;
+      } else {
+        icon.classList.remove('fa-solid', 'text-red-500');
+        icon.classList.add('fa-regular');
+        countSpan.textContent = currentCount - 1;
+      }
+    }
+
+    // Toggle Bookmark Action
+    function toggleBookmark(btn) {
+      const icon = btn.querySelector('i');
+      if (icon.classList.contains('fa-regular')) {
+        icon.classList.remove('fa-regular');
+        icon.classList.add('fa-solid', 'text-yellow-500');
+      } else {
+        icon.classList.remove('fa-solid', 'text-yellow-500');
+        icon.classList.add('fa-regular');
+      }
+    }
+
+    // Switch View Mode (List / Photo)
+    function switchView(mode) {
+      const listBtn = document.getElementById('viewListBtn');
+      const photoBtn = document.getElementById('viewPhotoBtn');
+
+      if (mode === 'photo') {
+        photoBtn.className = "px-3 py-1 rounded-md transition-all flex items-center gap-1.5 bg-white text-brand-600 shadow-sm font-semibold";
+        listBtn.className = "px-3 py-1 rounded-md transition-all flex items-center gap-1.5 text-gray-600";
+      } else {
+        listBtn.className = "px-3 py-1 rounded-md transition-all flex items-center gap-1.5 bg-white text-brand-600 shadow-sm font-semibold";
+        photoBtn.className = "px-3 py-1 rounded-md transition-all flex items-center gap-1.5 text-gray-600";
+      }
+    }
+  </script>
+</body>
+</html>
