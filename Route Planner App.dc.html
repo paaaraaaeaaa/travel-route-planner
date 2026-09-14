@@ -1689,7 +1689,9 @@ class Component extends DCLogic {
     const mapOrderedPlaces = mapOrderIds.map(id => places.find(p => p.id === id)).filter(Boolean);
     const pinLayout = mapOrderedPlaces.map(p => getMockCoordForId(p.id));
     const mapPins = mapOrderedPlaces.map((p, i) => ({ order: i + 1, left: `${pinLayout[i].left}%`, top: `${pinLayout[i].top}%` }));
-    const routePolylinePoints = pinLayout.map(pt => `${pt.left.toFixed(1)},${pt.top.toFixed(1)}`).join(' ');
+    const routePolylinePoints = pinLayout.length > 1
+      ? pinLayout.map(pt => `${(pt.left ?? 0).toFixed(1)},${(pt.top ?? 0).toFixed(1)}`).join(' ')
+      : '0,0';
     const mapSegmentLabels = enrichedSegments.map((seg, i) => {
       const a = pinLayout[i], b = pinLayout[i + 1];
       if (!a || !b) return null;

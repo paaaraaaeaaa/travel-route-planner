@@ -76,7 +76,8 @@ a:hover{color:#146030}
       </div>
       <div style="display:flex;flex-direction:column;gap:14px">
         <sc-for list="{{ pagedRoutes }}" as="route" hint-placeholder-count="3">
-          <div class="pd-fade mr-card" style="background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;padding:16px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;opacity:{{ route.cardOpacity }}">
+          <div class="pd-fade mr-card" style="position:relative;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;padding:16px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;opacity:{{ route.cardOpacity }}">
+            <div onClick="{{ route.onDeleteClick }}" style="position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:{{ c.textSub }};opacity:.6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></div>
             <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:7px">
               <sc-if value="{{ route.isEditing }}" hint-placeholder-val="{{ false }}">
                 <input value="{{ route.editValue }}" onChange="{{ route.onEditChange }}" onBlur="{{ route.onEditSave }}" onKeyDown="{{ route.onEditKeyDown }}" autoFocus="{{ true }}" style="font-size:15.5px;font-weight:700;color:{{ c.text }};background:{{ c.bg }};border:1px solid {{ c.border }};border-radius:6px;padding:2px 6px;width:100%;box-sizing:border-box;font-family:inherit">
@@ -127,7 +128,6 @@ a:hover{color:#146030}
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
               <a href="{{ route.openHref }}" style="font-size:12.5px;font-weight:700;color:#12321F;background:#EAF9EF;border-radius:8px;padding:8px 14px;text-decoration:none;white-space:nowrap">열기</a>
-              <div onClick="{{ route.onDeleteClick }}" style="width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:12px;color:{{ c.textSub }};opacity:.6">✕</div>
             </div>
           </div>
         </sc-for>
@@ -239,7 +239,7 @@ a:hover{color:#146030}
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
           <div onClick="{{ closeDeleteConfirm }}" style="cursor:pointer;font-size:13px;font-weight:600;color:{{ c.textSub }};background:{{ c.chipBg }};border-radius:8px;padding:9px 16px">취소</div>
-          <div onClick="{{ confirmDelete }}" style="cursor:pointer;font-size:13px;font-weight:700;color:#fff;background:#E5484D;border-radius:8px;padding:9px 16px">삭제</div>
+          <div onClick="{{ confirmDelete }}" style="cursor:pointer;font-size:13px;font-weight:700;color:#fff;background:#C25454;border-radius:8px;padding:9px 16px">내 일정에서 삭제</div>
         </div>
       </div>
       </div>
