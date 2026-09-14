@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>p:nder - 회원가입</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <script src="./image-slot.js"></script>
+  <style>
+    body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .pd-fade{transition:background-color .35s ease,color .35s ease,border-color .35s ease}
+    .pd-btn{transition:transform .12s ease,opacity .15s ease}
+    .pd-btn:hover{opacity:.92}
+    .pd-btn:active{transform:scale(0.98)}
+    .pd-btn:disabled{opacity:.45;cursor:not-allowed}
+    .pd-icon-btn:hover{opacity:.75}
+    .pd-input:focus-within{box-shadow:inset 0 0 0 1.5px #7BCB93 !important}
+    .pd-avatar-slot{width:88px;height:88px;border-radius:50%;overflow:visible}
+    .pd-avatar-slot image-slot{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden}
+    [style*="cursor:pointer"],[style*="cursor: pointer"]{transition:transform .06s ease,filter .1s ease}
+    [style*="cursor:pointer"]:hover,[style*="cursor: pointer"]:hover{filter:brightness(1.03)}
+    [style*="cursor:pointer"]:active,[style*="cursor: pointer"]:active{transform:scale(0.95)}
+    .pd-logo-link,.pd-logo-link:hover,.pd-logo-link:active{transform:none !important;filter:none !important}
+  </style>
+</helmet>
+
+<div class="pd-fade" style="width:100%;min-height:100vh;display:flex;justify-content:center;background:{{ c.bg }};color:{{ c.text }};box-sizing:border-box;padding:48px 16px">
+  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:28px;animation:fadeUp .4s ease">
+
+    <div style="display:flex;justify-content:flex-end">
+      <div onClick="{{ toggleTheme }}" class="pd-icon-btn" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:15px;height:15px;object-fit:contain"></sc-if>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:-8px">
+      <a href="./main(home).dc.html" class="pd-logo-link" style="display:flex;align-items:center;gap:3px;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:{{ c.text }};text-decoration:none;cursor:pointer;margin-left:-10px">
+        <img src="./uploads/pinder_ant.png" alt="" style="width:55px;height:55px;object-fit:contain;filter:{{ c.antFilter }}"><span style="font-size: 35px; padding-top: 0px; padding-bottom: 0px">p<span style="color:#26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</span>
+      </a>
+      <p style="margin: 0; font-size: 14px; color: {{ c.textSub }}; text-align: center; margin-top: 3px; margin-bottom: 5px">회원가입하고 나만의 여행 동선을 만들어보세요!</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <div class="pd-avatar-slot" style="position:relative">
+        <image-slot id="signup-avatar" shape="circle" placeholder="프로필 사진"></image-slot>
+        <div style="position:absolute;inset:0;border-radius:50%;cursor:pointer" onClick="{{ onAvatarPencilClick }}"></div>
+        <div onClick="{{ onAvatarPencilClick }}" style="position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;background:#7BCB93;display:flex;align-items:center;justify-content:center;box-shadow:0px 2px 6px rgba(23,23,25,.18);cursor:pointer;z-index:2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#12321F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        </div>
+      </div>
+      <sc-if value="{{ avatarActionsOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:8px">
+          <div onClick="{{ onAvatarReplace }}" style="cursor:pointer;font-size:12px;font-weight:600;color:{{ c.text }};background:{{ c.chipBg }};border-radius:8px;padding:6px 14px">Replace</div>
+          <div onClick="{{ onAvatarEdit }}" style="cursor:pointer;font-size:12px;font-weight:600;color:{{ c.text }};background:{{ c.chipBg }};border-radius:8px;padding:6px 14px">Edit</div>
+        </div>
+      </sc-if>
+      <span style="font-size:12px;color:{{ c.textSub }}">프로필 사진 (선택)</span>
+    </div>
+
+    <form style="display:flex;flex-direction:column;gap:16px" onsubmit="{{ handleSubmit }}">
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">이름</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+          <input type="text" placeholder="실명을 입력해주세요" value="{{ name }}" oninput="{{ onNameChange }}" style="border: none; outline: none; background: transparent; font: inherit; font-size: 14px; color: {{ c.text }}; width: 100%">
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">아이디</label>
+        <div style="display:flex;gap:8px">
+          <div class="pd-input pd-fade" style="flex:1;display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ usernameBorderColor }}">
+            <input type="text" placeholder="영문, 숫자 조합 4~16자" value="{{ username }}" oninput="{{ onUsernameChange }}" style="border: none; outline: none; background: transparent; font: inherit; font-size: 14px; color: {{ c.text }}; width: 100%">
+          </div>
+          <button type="button" class="pd-btn" onclick="{{ checkUsername }}" disabled="{{ usernameCheckDisabled }}" style="white-space:nowrap;border:none;padding:0 16px;border-radius:12px;background:{{ usernameCheckBg }};box-shadow:{{ usernameCheckShadow }};color:{{ usernameCheckTextColor }};font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">{{ usernameCheckLabel }}</button>
+        </div>
+        <sc-if value="{{ usernameStatus }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:12px;color:{{ usernameStatusColor }}">{{ usernameStatusText }}</span>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">별명</label>
+        <div style="display:flex;gap:8px">
+          <div class="pd-input pd-fade" style="flex:1;display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ nicknameBorderColor }}">
+            <input type="text" placeholder="다른 여행자에게 보여질 이름이에요" value="{{ nickname }}" oninput="{{ onNicknameChange }}" style="border: none; outline: none; background: transparent; font: inherit; font-size: 14px; color: {{ c.text }}; width: 100%">
+          </div>
+          <button type="button" class="pd-btn" onclick="{{ checkNickname }}" disabled="{{ nicknameCheckDisabled }}" style="white-space:nowrap;border:none;padding:0 16px;border-radius:12px;background:{{ nicknameCheckBg }};color:{{ nicknameCheckTextColor }};font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">{{ nicknameCheckLabel }}</button>
+        </div>
+        <sc-if value="{{ nicknameStatus }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:12px;color:{{ nicknameStatusColor }}">{{ nicknameStatusText }}</span>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">이메일</label>
+        <div style="display:flex;gap:8px">
+          <div class="pd-input pd-fade" style="flex:1;display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+            <svg viewBox="0 0 24 24" width="18" height="18" style="flex-shrink:0"><path fill="{{ c.textSub }}" fill-rule="evenodd" clip-rule="evenodd" d="M4 5.5C2.89543 5.5 2 6.39543 2 7.5V16.5C2 17.6046 2.89543 18.5 4 18.5H20C21.1046 18.5 22 17.6046 22 16.5V7.5C22 6.39543 21.1046 5.5 20 5.5H4ZM4.6 7.3L12 12.5L19.4 7.3H4.6Z"></path></svg>
+            <input type="email" placeholder="you@example.com" value="{{ email }}" oninput="{{ onEmailChange }}" disabled="{{ emailVerified }}" style="border: none; outline: none; background: transparent; font: inherit; font-size: 14px; color: {{ c.text }}; width: 100%">
+          </div>
+          <sc-if value="{{ emailVerified }}" hint-placeholder-val="{{ false }}">
+            <button type="button" class="pd-btn" onclick="{{ onEmailChangeRequest }}" style="white-space:nowrap;border:none;padding:0 16px;border-radius:12px;background:{{ c.chipBg }};color:{{ c.textSub }};font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">이메일 변경</button>
+          </sc-if>
+          <sc-if value="{{ emailNotVerified }}" hint-placeholder-val="{{ true }}">
+            <button type="button" class="pd-btn" onclick="{{ sendEmailCode }}" disabled="{{ sendCodeDisabled }}" style="white-space:nowrap;border:none;padding:0 16px;border-radius:12px;background:#7BCB93;color:#12321F;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">{{ sendCodeLabel }}</button>
+          </sc-if>
+        </div>
+        <sc-if value="{{ emailVerified }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:12px;color:#1F7A44;font-weight:600">✓ 이메일 인증이 완료되었습니다.</span>
+        </sc-if>
+        <sc-if value="{{ codeStepVisible }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:8px;margin-top:2px">
+            <div class="pd-input pd-fade" style="flex:1;display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+              <input type="text" maxlength="6" placeholder="인증번호 6자리" value="{{ emailCode }}" oninput="{{ onEmailCodeChange }}" style="border: none; outline: none; background: transparent; font: inherit; font-size: 14px; letter-spacing: 3px; color: {{ c.text }}; width: 100%">
+            </div>
+            <button type="button" class="pd-btn" onclick="{{ verifyEmailCode }}" style="white-space:nowrap;border:none;padding:0 16px;border-radius:12px;background:#7BCB93;color:#12321F;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">인증하기</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:11.5px;color:{{ emailCodeMsgColor }}">{{ emailCodeMsg }}</span>
+            <span onclick="{{ resendDisabled ? null : sendEmailCode }}" style="font-size:11.5px;font-weight:600;color:{{ resendDisabled ? c.textSub : '#1F7A44' }};cursor:{{ resendDisabled ? 'default' : 'pointer' }}">{{ resendLabel }}</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">비밀번호</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ c.border }}">
+          <svg viewBox="0 0 24 24" width="18" height="18" style="flex-shrink:0"><path fill="{{ c.textSub }}" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C9.79086 2 8 3.79086 8 6V9H7C5.89543 9 5 9.89543 5 11V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11C19 9.89543 18.1046 9 17 9H16V6C16 3.79086 14.2091 2 12 2ZM14 9V6C14 4.89543 13.1046 4 12 4C10.8954 4 10 4.89543 10 6V9H14Z"></path></svg>
+          <input type="{{ passwordInputType }}" placeholder="영문, 숫자, 특수문자 포함 8자 이상" value="{{ password }}" oninput="{{ onPasswordChange }}" style="border: none; outline: none; background: transparent; font: inherit; font-size: 14px; color: {{ c.text }}; width: 100%">
+          <div onclick="{{ togglePasswordVisible }}" style="cursor:pointer;flex-shrink:0;display:flex;align-items:center;color:{{ c.textSub }}">{{ passwordEyeIcon }}</div>
+        </div>
+        <span style="font-size:12px;color:{{ passwordHintColor }}">{{ passwordHint }}</span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:13px;font-weight:600;color:{{ c.text }}">비밀번호 확인</label>
+        <div class="pd-input pd-fade" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:{{ c.cardBg }};box-shadow:inset 0 0 0 1px {{ passwordConfirmBorderColor }}">
+          <svg viewBox="0 0 24 24" width="18" height="18" style="flex-shrink:0"><path fill="{{ c.textSub }}" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C9.79086 2 8 3.79086 8 6V9H7C5.89543 9 5 9.89543 5 11V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11C19 9.89543 18.1046 9 17 9H16V6C16 3.79086 14.2091 2 12 2ZM14 9V6C14 4.89543 13.1046 4 12 4C10.8954 4 10 4.89543 10 6V9H14Z"></path></svg>
+          <input type="{{ passwordConfirmInputType }}" placeholder="비밀번호를 다시 입력해주세요" value="{{ passwordConfirm }}" oninput="{{ onPasswordConfirmChange }}" style="border: none; outline: none; background: transparent; font: inherit; font-size: 14px; color: {{ c.text }}; width: 100%">
+          <div onclick="{{ togglePasswordConfirmVisible }}" style="cursor:pointer;flex-shrink:0;display:flex;align-items:center;color:{{ c.textSub }}">{{ passwordConfirmEyeIcon }}</div>
+        </div>
+        <sc-if value="{{ showPasswordMismatch }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:12px;color:#E5484D">비밀번호가 일치하지 않습니다.</span>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ error }}" hint-placeholder-val="{{ false }}">
+        <span style="font-size:12px;color:#E5484D">{{ error }}</span>
+      </sc-if>
+
+      <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px;border-top:1px solid {{ c.border }}">
+        <div onclick="{{ toggleTermsSectionOpen }}" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-bottom:8px">
+          <div onclick="{{ toggleAllTermsStop }}" style="display:flex;align-items:center;gap:8px">
+            <div onclick="{{ toggleAllTerms }}" style="width:20px;height:20px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ allTermsBg }};box-shadow:inset 0 0 0 1.5px {{ allTermsBorder }};cursor:pointer">
+              <sc-if value="{{ allTermsChecked }}" hint-placeholder-val="{{ false }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+              </sc-if>
+            </div>
+            <span style="font-size:14px;font-weight:700;color:{{ c.text }}">약관 전체 동의</span>
+          </div>
+          <span style="color:{{ c.textSub }};font-size:13px;transform:{{ termsSectionArrow }}">⌄</span>
+        </div>
+        <sc-if value="{{ termsSectionOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:6px;border-bottom:1px solid {{ c.border }}">
+        <sc-for list="{{ termsList }}" as="term" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <div onclick="{{ term.onToggle }}" style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1">
+              <div style="width:18px;height:18px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ term.bg }};box-shadow:inset 0 0 0 1.5px {{ term.border }}">
+                <sc-if value="{{ term.checked }}" hint-placeholder-val="{{ false }}">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                </sc-if>
+              </div>
+              <span style="font-size:13px;color:{{ c.text }}">{{ term.label }}</span>
+            </div>
+            <span onclick="{{ term.onOpenDetail }}" style="cursor:pointer;color:{{ c.textSub }};font-size:14px;padding:2px 6px">›</span>
+          </div>
+        </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ !termsSectionOpen }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:12px;color:{{ c.textSub }}">{{ termsSummaryText }}</div>
+        </sc-if>
+      </div>
+
+      <button type="submit" class="pd-btn" disabled="{{ submitDisabled }}" style="border:none;padding:13px 20px;border-radius:999px;background:#7BCB93;color:#12321F;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;width:100%;margin-top:4px;opacity:{{ submitOpacity }}">
+        회원가입
+      </button>
+    </form>
+
+    <p style="margin:0;text-align:center;font-size:13px;color:{{ c.textSub }}">
+      이미 계정이 있으신가요? <a href="./Login Screen.dc.html" style="color:#1F7A44;font-weight:700;text-decoration:none">로그인</a>
+    </p>
+  </div>
+
+  <sc-if value="{{ termsModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:30;padding:20px" onclick="{{ closeTermsModal }}">
+      <div onclick="{{ stopPropagation }}" style="background:{{ c.bg }};border-radius:16px;padding:22px;width:400px;max-width:100%;max-height:70vh;overflow-y:auto;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+        <div style="font-size:15px;font-weight:700;color:{{ c.text }}">{{ termsModalTitle }}</div>
+        <div style="font-size:12.5px;line-height:1.7;color:{{ c.textSub }};white-space:pre-line">{{ termsModalBody }}</div>
+        <button type="button" class="pd-btn" onclick="{{ closeTermsModal }}" style="border:none;padding:11px;border-radius:10px;background:#7BCB93;color:#12321F;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:8px">확인</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;section&quot;:&quot;기본값&quot;}}">
+const LIGHT = {
+  bg: '#FFFFFF', text: '#171719', textSub: 'rgba(23,23,25,.6)', border: '#E1E2E4',
+  cardBg: '#F7F7F8', antFilter: 'brightness(0) saturate(100%)',
+};
+const DARK = {
+  bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)', border: '#292A2D',
+  cardBg: '#17181A', antFilter: 'brightness(0) saturate(100%) invert(1)',
+};
+
+const TAKEN_USERNAMES = ['pnder', 'admin', 'traveler', 'test'];
+const TAKEN_NICKNAMES = ['여행자', '관리자'];
+
+// 약관 데이터 — 실제 확정 문서로 교체 시 이 배열만 수정하면 됨
+const TERMS_DATA = [
+  { key: 'service', required: true, label: '[필수] 이용약관 동의', title: '이용약관', body: 'p:nder 서비스 이용에 관한 기본 약관입니다.\n\n1. 서비스 이용 조건\n2. 이용자의 의무\n3. 서비스 제공 및 변경\n4. 계약 해지' },
+  { key: 'privacy', required: true, label: '[필수] 개인정보 수집·이용 동의', title: '개인정보 수집 및 이용 동의', body: '회원가입 및 서비스 제공을 위해 아래 정보를 수집합니다.\n\n수집 항목: 이름, 이메일, 아이디, 닉네임, 비밀번호\n이용 목적: 회원 식별, 서비스 제공\n보유 기간: 회원 탈퇴 시까지' },
+  { key: 'marketing', required: false, label: '[선택] 마케팅 정보 수신 동의', title: '마케팅 정보 수신 동의', body: '신규 기능, 이벤트, 프로모션 등의 마케팅 정보를 이메일로 받아보실 수 있습니다.\n\n동의하지 않아도 서비스 이용에 제한이 없습니다.' },
+];
+
+// MOCK 이메일 인증 서비스 — 실제 배포 시 이 객체의 세 메서드만 서버 API 호출로 교체하면 됨.
+// sendCode(email) -> Promise<{ok, cooldownSec, expiresInSec}>
+// verifyCode(email, code) -> Promise<{ok, reason?: 'invalid'|'expired'|'too_many_attempts'}>
+// isVerified(email) -> boolean (실제로는 서버가 세션/토큰으로 판단)
+const EmailVerificationService = (() => {
+  const CODE_TTL_SEC = 300;
+  const RESEND_COOLDOWN_SEC = 60;
+  const MAX_ATTEMPTS = 5;
+  let store = {}; // { [email]: { code, expiresAt, attempts } } — 서버에서는 DB/캐시에 보관, 클라이언트에 code 노출 금지
+  return {
+    sendCode(email) {
+      const code = String(Math.floor(100000 + Math.random() * 900000)); // MOCK: 실제로는 서버가 생성/발송, 클라이언트로 값 전달 안 함
+      store[email] = { code, expiresAt: Date.now() + CODE_TTL_SEC * 1000, attempts: 0 };
+      console.log('[MOCK] 이메일 인증번호 발송:', email, code); // 실제 서비스에서는 로그로 노출하지 않음
+      return Promise.resolve({ ok: true, cooldownSec: RESEND_COOLDOWN_SEC, expiresInSec: CODE_TTL_SEC });
+    },
+    verifyCode(email, code) {
+      const rec = store[email];
+      if (!rec) return Promise.resolve({ ok: false, reason: 'expired' });
+      if (Date.now() > rec.expiresAt) return Promise.resolve({ ok: false, reason: 'expired' });
+      rec.attempts += 1;
+      if (rec.attempts > MAX_ATTEMPTS) return Promise.resolve({ ok: false, reason: 'too_many_attempts' });
+      if (rec.code !== code) return Promise.resolve({ ok: false, reason: 'invalid' });
+      delete store[email];
+      return Promise.resolve({ ok: true });
+    },
+  };
+})();
+
+class Component extends DCLogic {
+  state = {
+    theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || this.props.defaultTheme || 'light',
+    avatarActionsOpen: false,
+    name: '', username: '', nickname: '', email: '', password: '', passwordConfirm: '',
+    passwordVisible: false, passwordConfirmVisible: false, termsAgreed: false,
+    usernameStatus: '',
+    nicknameStatus: '',
+    emailVerified: false, emailCode: '', codeStepVisible: false,
+    emailCodeMsg: '', emailCodeMsgColor: '', resendDisabled: false, resendSecLeft: 0,
+    termsChecked: { service: false, privacy: false, marketing: false },
+    termsSectionOpen: false,
+    termsModalOpen: false, termsModalKey: null,
+    error: '',
+  };
+  _resendTimer = null;
+  _expireTimer = null;
+
+  toggleTheme = () => this.setState(s => {
+    const next = s.theme === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('pd-theme', next); } catch (e) {}
+    return { theme: next };
+  });
+
+  onNameChange = (e) => this.setState({ name: e.target.value, error: '' });
+  onNicknameChange = (e) => this.setState({ nickname: e.target.value, nicknameStatus: '', error: '' });
+  checkNickname = () => {
+    if (!this.state.nickname || this.state.nickname.length < 2) {
+      this.setState({ nicknameStatus: 'invalid' });
+      return;
+    }
+    this.setState({ nicknameStatus: 'checking' });
+    setTimeout(() => {
+      const taken = TAKEN_NICKNAMES.includes(this.state.nickname);
+      this.setState({ nicknameStatus: taken ? 'taken' : 'available' });
+    }, 500);
+  };
+  toggleTerm = (key) => this.setState(s => ({ termsChecked: { ...s.termsChecked, [key]: !s.termsChecked[key] }, error: '' }));
+  toggleTermsSectionOpen = () => this.setState(s => ({ termsSectionOpen: !s.termsSectionOpen }));
+  toggleAllTermsStop = (e) => e.stopPropagation();
+  toggleAllTerms = () => this.setState(s => {
+    const allChecked = TERMS_DATA.every(t => s.termsChecked[t.key]);
+    const next = {};
+    TERMS_DATA.forEach(t => { next[t.key] = !allChecked; });
+    return { termsChecked: next, error: '' };
+  });
+  openTermsModal = (key) => this.setState({ termsModalOpen: true, termsModalKey: key });
+  closeTermsModal = () => this.setState({ termsModalOpen: false });
+  onEmailChange = (e) => this.setState({ email: e.target.value, error: '' });
+  onEmailChangeRequest = () => {
+    clearInterval(this._resendTimer); clearTimeout(this._expireTimer);
+    this.setState({ emailVerified: false, codeStepVisible: false, emailCode: '', emailCodeMsg: '', resendDisabled: false });
+  };
+  onEmailCodeChange = (e) => this.setState({ emailCode: e.target.value.replace(/\D/g, ''), error: '' });
+  sendEmailCode = () => {
+    const s = this.state;
+    if (!s.email || s.resendDisabled) return;
+    EmailVerificationService.sendCode(s.email).then(res => {
+      clearInterval(this._resendTimer); clearTimeout(this._expireTimer);
+      this.setState({
+        codeStepVisible: true, emailCode: '',
+        emailCodeMsg: `인증번호가 발송되었습니다. 인증번호는 ${Math.floor(res.expiresInSec / 60)}분 동안 유효합니다.`,
+        emailCodeMsgColor: this.currentTheme().textSub,
+        resendDisabled: true, resendSecLeft: res.cooldownSec,
+      });
+      this._resendTimer = setInterval(() => {
+        this.setState(st => {
+          const left = st.resendSecLeft - 1;
+          if (left <= 0) { clearInterval(this._resendTimer); return { resendSecLeft: 0, resendDisabled: false }; }
+          return { resendSecLeft: left };
+        });
+      }, 1000);
+      this._expireTimer = setTimeout(() => {
+        this.setState(st => st.emailVerified ? {} : { emailCodeMsg: '인증번호가 만료되었습니다. 인증번호를 다시 받아주세요.', emailCodeMsgColor: '#E5484D' });
+      }, res.expiresInSec * 1000);
+    });
+  };
+  verifyEmailCode = () => {
+    const s = this.state;
+    if (!s.emailCode) return;
+    EmailVerificationService.verifyCode(s.email, s.emailCode).then(res => {
+      if (res.ok) {
+        clearInterval(this._resendTimer); clearTimeout(this._expireTimer);
+        this.setState({ emailVerified: true, codeStepVisible: false, error: '' });
+      } else {
+        const msg = res.reason === 'expired' ? '인증번호가 만료되었습니다. 인증번호를 다시 받아주세요.'
+          : res.reason === 'too_many_attempts' ? '시도 횟수를 초과했습니다. 인증번호를 다시 받아주세요.'
+          : '인증번호가 올바르지 않습니다.';
+        this.setState({ emailCodeMsg: msg, emailCodeMsgColor: '#E5484D' });
+      }
+    });
+  };
+  currentTheme = () => this.state.theme === 'dark' ? DARK : LIGHT;
+  onPasswordChange = (e) => this.setState({ password: e.target.value, error: '' });
+  onPasswordConfirmChange = (e) => this.setState({ passwordConfirm: e.target.value, error: '' });
+  togglePasswordVisible = () => this.setState(s => ({ passwordVisible: !s.passwordVisible }));
+  togglePasswordConfirmVisible = () => this.setState(s => ({ passwordConfirmVisible: !s.passwordConfirmVisible }));
+  toggleTermsAgree = () => this.setState(s => ({ termsAgreed: !s.termsAgreed, error: '' }));
+  stopPropagation = (e) => e.stopPropagation();
+
+  onUsernameChange = (e) => this.setState({ username: e.target.value, usernameStatus: '', error: '' });
+
+  checkUsername = () => {
+    if (!this.state.username || this.state.username.length < 4) {
+      this.setState({ usernameStatus: 'invalid' });
+      return;
+    }
+    this.setState({ usernameStatus: 'checking' });
+    setTimeout(() => {
+      const taken = TAKEN_USERNAMES.includes(this.state.username.toLowerCase());
+      this.setState({ usernameStatus: taken ? 'taken' : 'available' });
+    }, 500);
+  };
+
+  stopPropagation = (e) => e.stopPropagation();
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const s = this.state;
+    if (!s.name || !s.username || !s.nickname || !s.email || !s.password || !s.passwordConfirm) {
+      this.setState({ error: '모든 항목을 입력해주세요.' });
+      return;
+    }
+    if (s.password.length < 8) {
+      this.setState({ error: '비밀번호는 8자 이상 입력해주세요.' });
+      return;
+    }
+    if (s.usernameStatus !== 'available') {
+      this.setState({ error: '아이디 중복확인을 완료해주세요.' });
+      return;
+    }
+    if (!s.emailVerified) {
+      this.setState({ error: '이메일 인증을 완료해주세요.' });
+      return;
+    }
+    if (s.password !== s.passwordConfirm) {
+      this.setState({ error: '비밀번호가 일치하지 않습니다.' });
+      return;
+    }
+    if (!TERMS_DATA.filter(t => t.required).every(t => s.termsChecked[t.key])) {
+      this.setState({ error: '필수 약관에 동의해주세요.' });
+      return;
+    }
+    this.setState({ error: '' });
+    // MOCK: 실제 연동 시 서버 회원가입 API로 교체. 지금은 localStorage에 계정을 저장해 로그인 화면에서 검증에 사용.
+    try {
+      const raw = localStorage.getItem('pnder-users');
+      const users = raw ? JSON.parse(raw) : [];
+      users.push({ email: s.email, password: s.password, username: s.username, nickname: s.nickname, name: s.name });
+      localStorage.setItem('pnder-users', JSON.stringify(users));
+    } catch (e) {}
+    window.location.href = './Route Planner App.dc.html';
+  };
+
+  renderVals() {
+    const c = this.state.theme === 'dark' ? DARK : LIGHT;
+    const s = this.state;
+    const onAvatarPencilClick = () => this.setState(st => ({ avatarActionsOpen: !st.avatarActionsOpen }));
+    const onAvatarReplace = () => {
+      const slot = document.getElementById('signup-avatar');
+      if (slot && slot.openFilePicker) slot.openFilePicker();
+    };
+    const onAvatarEdit = () => {
+      const slot = document.getElementById('signup-avatar');
+      if (slot) slot.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    };
+
+    const usernameStatusMap = {
+      checking: { text: '확인 중...', color: c.textSub },
+      available: { text: '사용 가능한 아이디입니다.', color: '#1F7A44' },
+      taken: { text: '이미 사용 중인 아이디입니다.', color: '#E5484D' },
+      invalid: { text: '아이디는 4자 이상 입력해주세요.', color: '#E5484D' },
+    };
+    const statusInfo = usernameStatusMap[s.usernameStatus];
+    const nicknameStatusMap = {
+      checking: { text: '확인 중...', color: c.textSub },
+      available: { text: '사용 가능한 닉네임입니다.', color: '#1F7A44' },
+      taken: { text: '이미 사용 중인 닉네임입니다.', color: '#E5484D' },
+      invalid: { text: '닉네임은 2자 이상 입력해주세요.', color: '#E5484D' },
+    };
+    const nicknameStatusInfo = nicknameStatusMap[s.nicknameStatus];
+    const allTermsChecked = TERMS_DATA.every(t => s.termsChecked[t.key]);
+    const termsList = TERMS_DATA.map(t => ({
+      label: t.label, checked: s.termsChecked[t.key],
+      onToggle: () => this.toggleTerm(t.key),
+      onOpenDetail: () => this.openTermsModal(t.key),
+      bg: s.termsChecked[t.key] ? '#7BCB93' : 'transparent',
+      border: s.termsChecked[t.key] ? '#7BCB93' : c.border,
+    }));
+    const activeTerm = TERMS_DATA.find(t => t.key === s.termsModalKey);
+    const requiredOk = TERMS_DATA.filter(t => t.required).every(t => s.termsChecked[t.key]);
+    const eyeIcon = (open) => open
+      ? React.createElement('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' },
+          React.createElement('path', { d: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z' }),
+          React.createElement('circle', { cx: 12, cy: 12, r: 3 }))
+      : React.createElement('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' },
+          React.createElement('path', { d: 'M3 3l18 18' }),
+          React.createElement('path', { d: 'M10.6 10.6a2 2 0 0 0 2.8 2.8' }),
+          React.createElement('path', { d: 'M9.3 5.3A9.9 9.9 0 0 1 12 5c6.5 0 10 7 10 7a13.2 13.2 0 0 1-2.2 3.1M6.5 6.5A13.4 13.4 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 3.5-.6' }));
+
+    return {
+      c,
+      avatarActionsOpen: s.avatarActionsOpen, onAvatarPencilClick, onAvatarReplace, onAvatarEdit,
+      isDark: s.theme === 'dark', isLight: s.theme !== 'dark',
+      toggleTheme: this.toggleTheme,
+
+      name: s.name, onNameChange: this.onNameChange,
+      nickname: s.nickname, onNicknameChange: this.onNicknameChange,
+      checkNickname: this.checkNickname,
+      nicknameCheckDisabled: s.nicknameStatus === 'checking',
+      nicknameStatus: !!nicknameStatusInfo,
+      nicknameStatusText: nicknameStatusInfo ? nicknameStatusInfo.text : '',
+      nicknameStatusColor: nicknameStatusInfo ? nicknameStatusInfo.color : c.textSub,
+      nicknameBorderColor: s.nicknameStatus === 'taken' || s.nicknameStatus === 'invalid' ? '#E5484D' : (s.nicknameStatus === 'available' ? '#1F7A44' : c.border),
+      nicknameCheckLabel: s.nicknameStatus === 'available' ? '확인 완료' : '중복확인',
+      nicknameCheckBg: s.nicknameStatus === 'available' ? c.chipBg : '#7BCB93',
+      nicknameCheckTextColor: s.nicknameStatus === 'available' ? c.textSub : '#12321F',
+      email: s.email, onEmailChange: this.onEmailChange,
+      emailVerified: s.emailVerified, emailNotVerified: !s.emailVerified, onEmailChangeRequest: this.onEmailChangeRequest,
+      codeStepVisible: s.codeStepVisible,
+      emailCode: s.emailCode, onEmailCodeChange: this.onEmailCodeChange,
+      sendEmailCode: this.sendEmailCode, verifyEmailCode: this.verifyEmailCode,
+      sendCodeDisabled: !s.email || s.resendDisabled,
+      sendCodeLabel: s.codeStepVisible ? '재전송' : '인증번호 받기',
+      resendDisabled: s.resendDisabled,
+      resendLabel: s.resendDisabled ? `재전송 (${s.resendSecLeft}s)` : '인증번호 재전송',
+      emailCodeMsg: s.emailCodeMsg, emailCodeMsgColor: s.emailCodeMsgColor,
+      password: s.password, onPasswordChange: this.onPasswordChange,
+      passwordConfirm: s.passwordConfirm, onPasswordConfirmChange: this.onPasswordConfirmChange,
+      passwordConfirmBorderColor: (s.passwordConfirm && s.password !== s.passwordConfirm) ? '#E5484D' : c.border,
+      showPasswordMismatch: !!(s.passwordConfirm && s.password !== s.passwordConfirm),
+      passwordInputType: s.passwordVisible ? 'text' : 'password',
+      passwordConfirmInputType: s.passwordConfirmVisible ? 'text' : 'password',
+      togglePasswordVisible: this.togglePasswordVisible,
+      togglePasswordConfirmVisible: this.togglePasswordConfirmVisible,
+      passwordEyeIcon: eyeIcon(s.passwordVisible),
+      passwordConfirmEyeIcon: eyeIcon(s.passwordConfirmVisible),
+      termsAgreed: s.termsAgreed, toggleTermsAgree: this.toggleTermsAgree,
+      termsCheckBg: s.termsAgreed ? '#7BCB93' : 'transparent',
+      termsCheckBorder: s.termsAgreed ? '#7BCB93' : c.border,
+      termsList, allTermsChecked, toggleAllTerms: this.toggleAllTerms,
+      allTermsBg: allTermsChecked ? '#7BCB93' : 'transparent',
+      allTermsBorder: allTermsChecked ? '#7BCB93' : c.border,
+      termsSectionOpen: s.termsSectionOpen, toggleTermsSectionOpen: this.toggleTermsSectionOpen,
+      toggleAllTermsStop: this.toggleAllTermsStop,
+      termsSectionArrow: s.termsSectionOpen ? 'rotate(180deg)' : 'none',
+      termsSummaryText: requiredOk ? '필수 약관에 모두 동의했어요' : '필수 약관에 동의해주세요',
+      termsModalOpen: s.termsModalOpen, closeTermsModal: this.closeTermsModal, stopPropagation: this.stopPropagation,
+      termsModalTitle: activeTerm ? activeTerm.title : '',
+      termsModalBody: activeTerm ? activeTerm.body : '',
+      submitDisabled: !requiredOk || !s.emailVerified || s.password.length < 8 || s.password !== s.passwordConfirm || !s.nickname,
+      submitOpacity: (requiredOk && s.emailVerified && s.password.length >= 8 && s.password === s.passwordConfirm && s.nickname) ? 1 : 0.55,
+      passwordHint: s.password && s.password.length < 8 ? '8자 이상 입력해주세요.' : '영문, 숫자, 특수문자 포함 8자 이상',
+      passwordHintColor: s.password && s.password.length < 8 ? '#E5484D' : c.textSub,
+
+
+      username: s.username, onUsernameChange: this.onUsernameChange,
+      checkUsername: this.checkUsername,
+      usernameCheckDisabled: s.usernameStatus === 'checking',
+      usernameStatus: !!statusInfo,
+      usernameStatusText: statusInfo ? statusInfo.text : '',
+      usernameStatusColor: statusInfo ? statusInfo.color : c.textSub,
+      usernameBorderColor: s.usernameStatus === 'taken' || s.usernameStatus === 'invalid' ? '#E5484D' : (s.usernameStatus === 'available' ? '#1F7A44' : c.border),
+      usernameCheckLabel: s.usernameStatus === 'available' ? '확인 완료' : '중복확인',
+      usernameCheckBg: s.usernameStatus === 'available' ? c.chipBg : '#7BCB93',
+      usernameCheckShadow: 'none',
+      usernameCheckTextColor: s.usernameStatus === 'available' ? c.textSub : '#12321F',
+
+      error: s.error,
+      handleSubmit: this.handleSubmit,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

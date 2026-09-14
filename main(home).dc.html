@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<style>
+body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+.pd-fade{transition:background-color .35s ease,color .35s ease,border-color .35s ease}
+.pd-nav-link{transition:color .15s ease}
+.pd-nav-link:hover{color:#95C898 !important}
+.pd-btn{transition:transform .12s ease,opacity .15s ease}
+.pd-btn:hover{opacity:.92}
+.pd-btn:active{transform:scale(0.98)}
+.pd-icon-btn:hover{opacity:.75}
+.pd-step-card{transition:transform .2s ease,box-shadow .2s ease}
+.pd-step-card:hover{transform:translateY(-3px)}
+.pd-ant{position:absolute;width:20px;height:20px;animation-name:pd-ant-move;animation-timing-function:linear;animation-iteration-count:infinite;animation-duration:var(--dur,32s);animation-delay:var(--delay,0s)}
+.pd-ant-crawl{width:100%;height:100%;animation-name:pd-ant-crawl;animation-timing-function:linear;animation-iteration-count:infinite;animation-duration:var(--dur,32s);animation-delay:var(--delay,0s)}
+.pd-ant-mark{width:100%;height:100%;background:#3D3A36;-webkit-mask:url('./uploads/pinder_ant.png') center/contain no-repeat;mask:url('./uploads/pinder_ant.png') center/contain no-repeat}
+@keyframes pd-ant-crawl{
+  0%{transform:translate(0,0)}
+  12.5%{transform:translate(0.4px,-0.5px)}
+  25%{transform:translate(-0.3px,0.3px)}
+  37.5%{transform:translate(0.3px,0.4px)}
+  50%{transform:translate(0,0)}
+  62.5%{transform:translate(-0.4px,-0.3px)}
+  75%{transform:translate(0.3px,0.4px)}
+  87.5%{transform:translate(-0.3px,0.3px)}
+  100%{transform:translate(0,0)}
+}
+.pd-trail{position:absolute;width:6px;height:2.5px;border-radius:2px;background:rgba(61,58,54,.55);opacity:0;z-index:1;animation-name:pd-trail-fade;animation-timing-function:ease-out;animation-iteration-count:infinite;animation-duration:var(--dur,13s);animation-delay:var(--delay,0s)}
+.pd-logo-ant2{animation:pd-logo-ant-push 20s ease-in-out 3}
+.pd-logo-text2{display:inline-flex;animation:pd-logo-text-push 20s ease-in-out 3}
+@keyframes pd-logo-ant-push{
+  0%{transform:translateX(0);opacity:1}
+  40%{transform:translateX(260px);opacity:1}
+  50%{transform:translateX(300px);opacity:0}
+  62%{transform:translateX(-4px);opacity:0}
+  64%{transform:translateX(-4px);opacity:1}
+  100%{transform:translateX(0);opacity:1}
+}
+@keyframes pd-logo-text-push{
+  0%{transform:translateX(0);opacity:1}
+  40%{transform:translateX(260px);opacity:1}
+  50%{transform:translateX(300px);opacity:0}
+  62%{transform:translateX(0);opacity:0}
+  64%{transform:translateX(0);opacity:1}
+  100%{transform:translateX(0);opacity:1}
+}
+.pd-ant{z-index:2}
+@keyframes pd-trail-fade{
+  0%{opacity:0}
+  0.6%{opacity:.6}
+  5%{opacity:.6}
+  11%{opacity:0}
+  100%{opacity:0}
+}
+@keyframes pd-ant-move{
+  0%{left:3%;top:93%;opacity:0}
+  4%{left:8%;top:86%;opacity:.9}
+  15%{left:15%;top:66%}
+  28%{left:26%;top:55%}
+  40%{left:38%;top:52%}
+  55%{left:55%;top:53%}
+  68%{left:70%;top:52%}
+  78%{left:80%;top:44%}
+  84%{left:84%;top:30%;opacity:.8}
+  90%{left:86%;top:26%;opacity:.5}
+  94%{left:86.5%;top:25.5%;opacity:.2}
+  100%{left:87%;top:25%;opacity:0}
+}
+@media (max-width:760px){
+  .pd-nav-links{display:none}
+  .pd-hero-title{font-size:34px !important;line-height:1.3 !important}
+  .pd-stats{flex-direction:column;gap:20px !important}
+  .pd-steps-grid{grid-template-columns:1fr !important}
+}
+[style*="cursor:pointer"],[style*="cursor: pointer"]{transition:transform .06s ease,filter .1s ease}
+[style*="cursor:pointer"]:hover,[style*="cursor: pointer"]:hover{filter:brightness(1.03)}
+[style*="cursor:pointer"]:active,[style*="cursor: pointer"]:active{transform:scale(0.95)}
+</style>
+</helmet>
+
+<div class="pd-fade" style="min-height:100vh;background:{{ c.bg }};color:{{ c.text }}">
+
+<!-- 헤더/네비게이션 -->
+<div class="pd-fade" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }}">
+  <div style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
+    <div onClick="{{ replayLogoAnim }}" style="display:flex;align-items:center;gap:2px;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:{{ c.text }};position:relative;top:5px;cursor:pointer">
+      <img src="./uploads/pinder_ant.png" alt="" key="{{ logoAnimKey }}" class="pd-logo-ant2" style="width:31px;height:37px;object-fit:contain;filter:{{ c.antFilter }}"><span key="{{ logoAnimKey }}" class="pd-logo-text2">p<span style="color: #26AB4E;font-size:1.4em;position:relative;top:-0.3em">:</span>nder</span>
+    </div>
+    <div class="pd-nav-links" style="display:flex;align-items:center;gap:32px;margin-left:auto">
+      <a href="./Explore Destinations.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none">여행지 탐색</a>
+      <a href="./My Routes.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none">내 일정</a>
+      <a href="./Community.dc.html" class="pd-nav-link" style="font-size: 14px; font-weight: 600; color: {{ c.textSub }}; text-decoration: none">커뮤니티</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div onClick="{{ toggleTheme }}" class="pd-icon-btn" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:16px;color:{{ c.text }};line-height:1">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:16px;height:16px;object-fit:contain"></sc-if>
+      </div>
+      <a href="./Login Screen.dc.html" style="text-decoration:none;background:#7BCB93;color:#12321F;border-radius:10px;padding:9px 18px;font-size:13.5px;font-weight:700;white-space:nowrap" class="pd-btn">로그인</a>
+    </div>
+  </div>
+</div>
+
+<!-- 히어로 + CTA 결합 영역 -->
+<div style="max-width:900px;margin:0 auto;padding:72px 24px 40px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:20px">
+  <div style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;background:{{ c.badgeBg }};color:{{ c.badgeText }};border-radius:999px;padding:6px 16px;font-size:12.5px;font-weight:700">AI 기반 동선 플래너</div>
+  <div class="pd-hero-title" style="font-size: 44px; line-height: 1.35; font-weight: 800; letter-spacing: -0.02em; color: {{ c.text }}; margin-bottom: 6px; padding-top: 0px; padding-bottom: 0px">최적의 동선,<br><span style="color: #63BD7E; font-size: 50px; padding-top: 1px; padding-bottom: 1px; padding-left: 3px; padding-right: 3px">p<span style="color: #7BCB93; font-size: 1.4em; position: relative; top: -0.05em">:</span>nder</span>와 함께</div>
+  <div style="font-size:16px;color:{{ c.textSub }};line-height:1.6;max-width:520px">목적지를 입력하면 최적화된 일정과 이동 동선을 자동으로 생성해드립니다.</div>
+
+  <!-- CTA 카드 -->
+  <div class="pd-fade" style="margin-top: 20px; width: 100%; position: relative; overflow: hidden; background: {{ c.ctaBg }}; border: 1px solid {{ c.border }}; border-radius: 20px; padding: 44px 32px; display: flex; flex-direction: column; align-items: center; gap: 14px; border-width: 2px">
+    <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:{{ c.ctaBlob }}"></div>
+    <div style="position:absolute;left:14px;bottom:14px;width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:rgba(123,203,147,.35);display:flex;align-items:center;justify-content:center;z-index:1">
+      <div style="width:8px;height:8px;border-radius:50%;background:#fff;transform:rotate(45deg)"></div>
+    </div>
+    <sc-for list="{{ trails }}" as="tr" hint-placeholder-count="41">
+      <div class="pd-trail" style="left:{{ tr.x }};top:{{ tr.y }};transform:translate(7px,16px) rotate({{ tr.rot }}deg);background:{{ c.trailColor }};--dur:{{ tr.dur }};--delay:{{ tr.delay }}" data-comment-anchor="ant-trail"></div>
+    </sc-for>
+    <sc-for list="{{ ants }}" as="ant" hint-placeholder-count="6">
+      <div class="pd-ant" style="--dur:{{ ant.dur }};--delay:{{ ant.delay }};--ox:{{ ant.ox }};--oy:{{ ant.oy }}">
+        <div class="pd-ant-crawl" style="--dur:{{ ant.dur }};--delay:{{ ant.delay }}"><div class="pd-ant-mark" style="background:{{ c.antColor }}"></div></div>
+      </div>
+    </sc-for>
+    <div style="position:relative;z-index:2;font-size:26px;font-weight:800;color:{{ c.ctaText }};white-space:nowrap">지금 바로 시작하세요</div>
+    <div style="position:relative;z-index:2;font-size:14px;color:{{ c.ctaSubText }};white-space:nowrap">무료로 나만의 여행 일정을 만들어보세요</div>
+    <a href="./My Routes.dc.html" class="pd-btn" style="position:relative;z-index:2;margin-top:8px;text-decoration:none;background:#7BCB93;color:#12321F;border-radius:999px;padding:14px 28px;font-size:15px;font-weight:800;white-space:nowrap">최적 동선 생성하기 →</a>
+  </div>
+
+  <!-- 통계 -->
+  <div class="pd-stats" style="margin-top:28px;display:flex;justify-content:center;gap:56px;flex-wrap:wrap;width:100%">
+    <sc-for list="{{ stats }}" as="s" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="font-size:26px;font-weight:800;color:#7BCB93">{{ s.value }}</div>
+        <div style="font-size:12.5px;color:{{ c.textSub }}">{{ s.label }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+<!-- 3단계 안내 -->
+<div style="max-width:1100px;margin:0 auto;padding:64px 24px 96px">
+  <div style="text-align:center;font-size:28px;font-weight:800;color:{{ c.text }};margin-bottom:44px">단 3단계로 완성되는 최적의 동선</div>
+  <div class="pd-steps-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+    <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
+      <div class="pd-fade pd-step-card" style="background: {{ c.cardBg }}; border: 1px solid {{ c.border }}; border-radius: 16px; padding: 32px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; border-color: #30AD554A; border-style: dotted">
+        <div style="font-size:11px;font-weight:800;color:#7BCB93;letter-spacing:.08em">{{ st.num }}</div>
+        <div style="width:48px;height:48px;border-radius:14px;background:{{ c.badgeBg }};display:flex;align-items:center;justify-content:center;color:#7BCB93">
+          <sc-if value="{{ st.isSearch }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg></sc-if>
+          <sc-if value="{{ st.isCalendar }}" hint-placeholder-val="{{ false }}"><div style="width:22px;height:22px;background:#7BCB93;-webkit-mask:url('./uploads/waypoints.png') center/contain no-repeat;mask:url('./uploads/waypoints.png') center/contain no-repeat"></div></sc-if>
+          <sc-if value="{{ st.isTicket }}" hint-placeholder-val="{{ false }}"><div style="width:22px;height:22px;background:#7BCB93;-webkit-mask:url('./uploads/notepad-text.png') center/contain no-repeat;mask:url('./uploads/notepad-text.png') center/contain no-repeat"></div></sc-if>
+        </div>
+        <div style="font-size:17px;font-weight:700;color:{{ c.text }}">{{ st.title }}</div>
+        <div style="font-size:13.5px;color:{{ c.textSub }};line-height:1.6">{{ st.desc }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+<!-- 푸터 -->
+<div class="pd-fade" style="border-top:1px solid {{ c.border }};padding:24px;text-align:center">
+  <div style="display:flex;align-items:center;justify-content:center;gap:3px;font-size:14px;font-weight:800;color:{{ c.text }};margin-bottom:6px">
+    <img src="./uploads/pinder_ant.png" alt="" style="width:16px;height:16px;object-fit:contain;filter:{{ c.antFilter }}"><span>p<span style="color:#26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</span>
+  </div>
+  <div style="font-size:11.5px;color:{{ c.textSub }}">© 2026 p<span style="color:#26AB4E">:</span>nder made by team_hello</div>
+</div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:1100},&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;section&quot;:&quot;기본값&quot;}}">
+const LIGHT = {
+  bg: '#FFFFFF', text: '#171719', textSub: 'rgba(23,23,25,.6)', border: '#E1E2E4',
+  headerBg: 'rgba(255,255,255,.82)', cardBg: '#F7F7F8', badgeBg: '#EAF9EF', badgeText: '#1F7A44',
+  ctaBg: '#FFFFFF', ctaText: '#171719', ctaSubText: 'rgba(23,23,25,.6)', ctaBlob: 'rgba(123,203,147,.25)',
+  antFilter: 'brightness(0) saturate(100%)',
+  antColor: '#3D3A36', trailColor: 'rgba(61,58,54,.55)',
+};
+const DARK = {
+  bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)', border: '#292A2D',
+  headerBg: 'rgba(15,15,16,.72)', cardBg: '#17181A', badgeBg: 'rgba(123,203,147,.14)', badgeText: '#7BCB93',
+  ctaBg: '#17181A', ctaText: '#FFFFFF', ctaSubText: 'rgba(255,255,255,.62)', ctaBlob: 'rgba(123,203,147,.16)',
+  antFilter: 'brightness(0) saturate(100%) invert(1)',
+  antColor: '#FFFFFF', trailColor: 'rgba(255,255,255,.6)',
+};
+
+class Component extends DCLogic {
+  state = { theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || this.props.defaultTheme || 'light', logoAnimKey: 0 };
+  replayLogoAnim = () => this.setState(s => ({ logoAnimKey: s.logoAnimKey + 1 }));
+  toggleTheme = () => this.setState(s => {
+    const next = s.theme === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('pd-theme', next); } catch (e) {}
+    return { theme: next };
+  });
+
+  renderVals() {
+    const c = this.state.theme === 'dark' ? DARK : LIGHT;
+    return {
+      c,
+      isDark: this.state.theme === 'dark',
+      isLight: this.state.theme !== 'dark',
+      toggleTheme: this.toggleTheme,
+      replayLogoAnim: this.replayLogoAnim,
+      logoAnimKey: this.state.logoAnimKey,
+      ants: [
+        { delay: '0s', dur: '32s', ox: '0px', oy: '0px' },
+      ],
+      trails: (() => {
+        // Mirrors the ant's own straight-ish path so each dash appears exactly where it crawled.
+        const keys = [
+          { t: 0.04, x: 8, y: 86 }, { t: 0.15, x: 15, y: 66 }, { t: 0.28, x: 26, y: 55 },
+          { t: 0.40, x: 38, y: 52 }, { t: 0.55, x: 55, y: 53 }, { t: 0.68, x: 70, y: 52 },
+          { t: 0.78, x: 80, y: 44 }, { t: 0.84, x: 84, y: 30 }, { t: 0.90, x: 86, y: 26 },
+          { t: 0.94, x: 86.5, y: 25.5 }, { t: 1.0, x: 87, y: 25 },
+        ];
+        const at = (t) => {
+          for (let i = 0; i < keys.length - 1; i++) {
+            const a = keys[i], b = keys[i + 1];
+            if (t >= a.t && t <= b.t) {
+              const span = b.t - a.t;
+              const u = span > 0 ? (t - a.t) / span : 0;
+              return { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u };
+            }
+          }
+          return t < keys[0].t ? keys[0] : keys[keys.length - 1];
+        };
+        // Same path fn as the ant, sampled at FIXED TIME intervals (equal tempo) rather
+        // than by distance — each dash sits exactly where the ant was, a fixed delay later.
+        const T_START = 0.06, T_END = 0.90, STEP_T = 0.06;
+        const pts = [];
+        for (let t = T_START; t <= T_END + 1e-6; t += STEP_T) {
+          const p = at(t);
+          pts.push({ x: `${p.x}%`, y: `${p.y}%`, rot: 0, dur: '32s', delay: `${t * 32 + 0.6}s` });
+        }
+        return pts;
+      })(),
+      stats: [
+        { value: '128,400+', label: '만족한 횟수' },
+        { value: '2,300+', label: '이용 누적 수' },
+        { value: '21,904+', label: '만족한 개발자' },
+      ],
+      steps: [
+        { num: '01', isSearch: true, title: '장소 입력', desc: '가고 싶은 장소를 입력해요' },
+        { num: '02', isCalendar: true, title: '최적 경로 생성', desc: 'AI가 최적의 경로를 생성해줘요' },
+        { num: '03', isTicket: true, title: '일정에 맞게 수정', desc: '세부적인 정보를 추가해 커스텀해요' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

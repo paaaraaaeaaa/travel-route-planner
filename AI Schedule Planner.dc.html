@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<style>
+body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+a{color:#1F7A44}
+a:hover{color:#146030}
+.pd-fade{transition:background-color .35s ease,color .35s ease,border-color .35s ease}
+.aip-chip{transition:background-color .15s,border-color .15s,transform .06s}
+.aip-chip:hover{transform:translateY(-1px)}
+.aip-btn:hover{filter:brightness(1.04)}
+.aip-btn:active{transform:scale(.98)}
+@keyframes aip-spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+
+<div class="pd-fade" style="min-height:100vh;background:{{ c.bg }};color:{{ c.text }}" data-screen-label="AI 일정 생성">
+
+  <div class="pd-fade" style="position:sticky;top:0;z-index:5;background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }};padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px">
+    <a href="./main(home).dc.html" style="font-size:20px;font-weight:700;letter-spacing:-0.01em;color:{{ c.text }};text-decoration:none">p<span style="color:#26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</a>
+    <a href="./My Routes.dc.html" style="font-size:13px;font-weight:600;color:{{ c.textSub }};text-decoration:none">나가기</a>
+  </div>
+
+  <div style="max-width:640px;margin:0 auto;padding:40px 20px 80px">
+
+    <sc-if value="{{ showStepper }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:28px">
+        <sc-for list="{{ progressDots }}" as="dot" hint-placeholder-count="5">
+          <div style="width:{{ dot.width }};height:6px;border-radius:3px;background:{{ dot.bg }};transition:background-color .2s"></div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- Step 0: 일정 선택 -->
+    <sc-if value="{{ isStepDate }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">여행 날짜를 알려주세요</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">AI가 일정 기간에 맞춰 동선을 구성해요</div>
+      </div>
+      <div style="background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:16px;padding:20px;max-width:340px;margin:0 auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div onClick="{{ onCalPrevMonth }}" style="cursor:pointer;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:{{ c.textSub }}">‹</div>
+          <div style="font-size:13.5px;font-weight:700">{{ calMonthLabel }}</div>
+          <div onClick="{{ onCalNextMonth }}" style="cursor:pointer;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:{{ c.textSub }}">›</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">
+          <sc-for list="{{ weekLabels }}" as="wl" hint-placeholder-count="7">
+            <div style="text-align:center;font-size:11px;color:{{ c.textSub }};padding:4px 0">{{ wl }}</div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+          <sc-for list="{{ calCells }}" as="cell" hint-placeholder-count="42">
+            <div onClick="{{ cell.onClick }}" style="cursor:pointer;height:34px;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:{{ cell.rangeRadius }};background:{{ cell.rangeBg }};color:{{ cell.textColor }}">{{ cell.day }}</div>
+          </sc-for>
+        </div>
+        <div style="text-align:center;font-size:12px;color:{{ c.textSub }};margin-top:12px">{{ dateRangeLabel }}</div>
+      </div>
+    </sc-if>
+
+    <!-- Step 0.5: 지역 선택 -->
+    <sc-if value="{{ isStepRegion }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">어느 지역으로 떠나시나요?</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">하나를 선택해주세요</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+        <sc-for list="{{ regionOptions }}" as="opt" hint-placeholder-count="10">
+          <div onClick="{{ opt.onSelect }}" class="aip-chip" style="cursor:pointer;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:700;background:{{ opt.bg }};color:{{ opt.color }};border:1px solid {{ opt.border }}">{{ opt.label }}</div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ isRegionCustom }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:300px;margin:14px auto 0">
+          <input value="{{ regionCustom }}" onInput="{{ onRegionCustomChange }}" placeholder="지역을 직접 입력해주세요" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1px solid {{ c.border }};background:{{ c.cardBg }};color:{{ c.text }};font-size:14px;font-family:inherit;outline:none">
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <!-- Step 1: 여행 스타일 -->
+    <sc-if value="{{ isStepStyle }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">어떤 스타일의 여행을 원하세요?</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">하나를 선택해주세요</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <sc-for list="{{ styleOptions }}" as="opt" hint-placeholder-count="4">
+          <div onClick="{{ opt.onSelect }}" class="aip-chip" style="cursor:pointer;padding:20px 12px;border-radius:14px;text-align:center;font-size:14.5px;font-weight:700;background:{{ opt.bg }};color:{{ opt.color }};border:1px solid {{ opt.border }}">{{ opt.label }}</div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- Step 2: 관심 장소 -->
+    <sc-if value="{{ isStepInterests }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">관심 있는 장소를 골라주세요</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">여러 개 선택할 수 있어요</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+        <sc-for list="{{ interestOptions }}" as="opt" hint-placeholder-count="7">
+          <div onClick="{{ opt.onToggle }}" class="aip-chip" style="cursor:pointer;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:700;background:{{ opt.bg }};color:{{ opt.color }};border:1px solid {{ opt.border }}">{{ opt.label }}</div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- Step 3: 동행 -->
+    <sc-if value="{{ isStepCompanion }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">누구와 함께 하나요?</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">하나를 선택해주세요</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <sc-for list="{{ companionOptions }}" as="opt" hint-placeholder-count="4">
+          <div onClick="{{ opt.onSelect }}" class="aip-chip" style="cursor:pointer;padding:20px 12px;border-radius:14px;text-align:center;font-size:14.5px;font-weight:700;background:{{ opt.bg }};color:{{ opt.color }};border:1px solid {{ opt.border }}">{{ opt.label }}</div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- Step 4: 이동 방식 -->
+    <sc-if value="{{ isStepTransport }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">이동 방식을 선택해주세요</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">하나를 선택해주세요</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <sc-for list="{{ transportOptions }}" as="opt" hint-placeholder-count="4">
+          <div onClick="{{ opt.onSelect }}" class="aip-chip" style="cursor:pointer;padding:20px 12px;border-radius:14px;text-align:center;font-size:14.5px;font-weight:700;background:{{ opt.bg }};color:{{ opt.color }};border:1px solid {{ opt.border }}">{{ opt.label }}</div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- Step 5: 생성 중 -->
+    <sc-if value="{{ isStepGenerating }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:80px 0">
+        <div style="width:36px;height:36px;border-radius:50%;border:3px solid {{ c.border }};border-top-color:#7BCB93;animation:aip-spin .8s linear infinite"></div>
+        <div style="font-size:15px;font-weight:700">AI가 최적의 일정을 만들고 있어요...</div>
+        <div style="font-size:12.5px;color:{{ c.textSub }}">선택하신 스타일과 관심사를 반영하는 중이에요</div>
+      </div>
+    </sc-if>
+
+    <!-- Step 6: 결과 -->
+    <sc-if value="{{ isStepResult }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">AI 추천 일정이 완성됐어요</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">{{ resultSummaryLine }}</div>
+      </div>
+      <div style="display:flex;gap:16px;margin-bottom:16px;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:14px;padding:14px 18px">
+        <div style="flex:1"><div style="font-size:11px;color:{{ c.textSub }}">방문 장소</div><div style="font-size:16px;font-weight:700">{{ resultStats.count }}곳</div></div>
+        <div style="flex:1"><div style="font-size:11px;color:{{ c.textSub }}">총 이동시간</div><div style="font-size:16px;font-weight:700">{{ resultStats.time }}</div></div>
+        <div style="flex:1"><div style="font-size:11px;color:{{ c.textSub }}">총 이동거리</div><div style="font-size:16px;font-weight:700">{{ resultStats.distance }}</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:14px;padding:16px 18px">
+        <sc-for list="{{ resultPlaces }}" as="rp" hint-placeholder-count="4">
+          <div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <div style="width:22px;height:22px;border-radius:50%;background:#171719;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ rp.order }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:700">{{ rp.name }}</div>
+                <div style="font-size:11.5px;color:{{ c.textSub }}">{{ rp.category }} · 체류 {{ rp.duration }}분</div>
+              </div>
+            </div>
+            <sc-if value="{{ rp.hasNext }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 0 8px 10px">
+                <div style="width:2px;height:16px;background:{{ c.border }}"></div>
+                <div style="font-size:11px;color:{{ c.textSub }}">{{ rp.nextModeLabel }} · {{ rp.nextDuration }}분</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <div onClick="{{ regenerate }}" class="aip-btn" style="flex:1;text-align:center;cursor:pointer;padding:13px;border-radius:10px;border:1px solid {{ c.border }};font-size:14px;font-weight:700;color:{{ c.text }}">다시 추천받기</div>
+        <div onClick="{{ startWithResult }}" class="aip-btn" style="flex:1;text-align:center;cursor:pointer;padding:13px;border-radius:10px;background:#7BCB93;color:#12321F;font-size:14px;font-weight:800">이 일정으로 시작하기</div>
+      </div>
+    </sc-if>
+
+    <!-- 하단 내비게이션 -->
+    <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:10px;margin-top:28px">
+        <sc-if value="{{ canGoBack }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ goBack }}" class="aip-btn" style="cursor:pointer;padding:13px 20px;border-radius:10px;border:1px solid {{ c.border }};font-size:14px;font-weight:700;color:{{ c.text }}">뒤로</div>
+        </sc-if>
+        <div onClick="{{ goNext }}" class="aip-btn" style="flex:1;text-align:center;cursor:pointer;padding:13px;border-radius:10px;background:{{ nextBtnBg }};color:{{ nextBtnColor }};font-size:14px;font-weight:800;opacity:{{ nextBtnOpacity }}">{{ nextBtnLabel }}</div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const LIGHT = { bg: '#FFFFFF', text: '#171719', textSub: 'rgba(23,23,25,.6)', border: '#E1E2E4', headerBg: 'rgba(255,255,255,.9)', cardBg: '#fff', chipBg: '#F4F4F5' };
+const DARK = { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)', border: '#292A2D', headerBg: 'rgba(15,15,16,.8)', cardBg: '#17181A', chipBg: 'rgba(255,255,255,.08)' };
+function pad2(n) { return String(n).padStart(2, '0'); }
+const HOLIDAYS = new Set(['2026-01-01','2026-02-16','2026-02-17','2026-02-18','2026-03-01','2026-03-02','2026-05-05','2026-05-24','2026-06-06','2026-08-15','2026-08-17','2026-09-24','2026-09-25','2026-09-26','2026-10-03','2026-10-05','2026-10-09','2026-12-25']);
+function buildCalCells(viewYear, viewMonth, startStr, endStr, onDayClick, isDark) {
+  const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+  const cells = [];
+  const toStr = (y, m, d) => `${y}-${pad2(m + 1)}-${pad2(d)}`;
+  for (let i = firstDow - 1; i >= 0; i--) {
+    const d = daysInPrevMonth - i;
+    let y = viewYear, m = viewMonth - 1; if (m < 0) { m = 11; y -= 1; }
+    cells.push({ day: d, dateStr: toStr(y, m, d), inMonth: false });
+  }
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d, dateStr: toStr(viewYear, viewMonth, d), inMonth: true });
+  while (cells.length % 7 !== 0 || cells.length < 42) {
+    const idx = cells.length - (firstDow + daysInMonth);
+    const d = idx + 1;
+    let y = viewYear, m = viewMonth + 1; if (m > 11) { m = 0; y += 1; }
+    cells.push({ day: d, dateStr: toStr(y, m, d), inMonth: false });
+  }
+  return cells.map((cell, i) => {
+    const dow = i % 7;
+    const isStart = cell.dateStr === startStr;
+    const isEnd = cell.dateStr === endStr;
+    const isRangeActive = !!(startStr && endStr);
+    const inRange = isRangeActive && cell.dateStr > startStr && cell.dateStr < endStr;
+    const isEdge = isStart || isEnd;
+    const isHoliday = HOLIDAYS.has(cell.dateStr);
+    const dayColor = !cell.inMonth ? '#C9CACD' : (dow === 0 || isHoliday) ? '#E5484D' : dow === 6 ? '#0066FF' : (isDark ? '#FFFFFF' : '#171719');
+    return {
+      day: cell.day,
+      onClick: cell.inMonth ? () => onDayClick(cell.dateStr) : () => {},
+      rangeBg: (isRangeActive && (isEdge || inRange)) || (!isRangeActive && isStart) ? '#95C898' : 'transparent',
+      rangeRadius: !isRangeActive ? '50%' : (isStart && isEnd) ? '50%' : isStart ? '50% 0 0 50%' : isEnd ? '0 50% 50% 0' : inRange ? '0' : '50%',
+      textColor: (isRangeActive && (isEdge || inRange)) || (!isRangeActive && isStart) ? '#12321F' : dayColor,
+    };
+  });
+}
+
+// MOCK: 실제 연동 시 AI/지도 API 응답으로 교체
+const PLACE_POOL = {
+  '맛집': [{ name: '행복 베이커리 강남점', address: '서울 강남구 테헤란로 152' }, { name: '을지로 노포식당', address: '서울 중구 을지로 25' }],
+  '카페': [{ name: '한강뷰 루프탑 카페', address: '서울 마포구 양화로 45' }, { name: '골목길 카페', address: '서울 종로구 자하문로 12' }],
+  '관광': [{ name: '경복궁', address: '서울 종로구 사직로 161' }, { name: 'N서울타워', address: '서울 용산구 남산공원길 105' }],
+  '쇼핑': [{ name: '더현대서울', address: '서울 영등포구 여의대로 108' }, { name: '광장시장', address: '서울 종로구 창경궁로 88' }],
+  '자연': [{ name: '서울숲', address: '서울 성동구 뚝섬로 273' }, { name: '한강공원 반포', address: '서울 서초구 신반포로 11' }],
+  '문화': [{ name: '국립현대미술관', address: '서울 종로구 삼청로 30' }, { name: '대학로 소극장', address: '서울 종로구 대학로 12' }],
+  '체험': [{ name: '한강 자전거 대여소', address: '서울 광진구 강변북로 2233' }, { name: '도자기 공방 체험', address: '서울 마포구 와우산로 94' }],
+};
+const TRANSPORT_LABEL = { walk: '도보', transit: '대중교통', car: '자동차', bike: '자전거' };
+
+class Component extends DCLogic {
+  state = {
+    theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || 'light',
+    step: 0,
+    tripStart: new Date().toISOString().slice(0, 10), tripEnd: '',
+    calViewYear: new Date().getFullYear(), calViewMonth: new Date().getMonth(),
+    region: null, regionCustom: '', style: null, interests: [], companion: null, transport: null,
+    result: null,
+  };
+
+  onCalPrevMonth = () => this.setState(s => { let m = s.calViewMonth - 1, y = s.calViewYear; if (m < 0) { m = 11; y -= 1; } return { calViewMonth: m, calViewYear: y }; });
+  onCalNextMonth = () => this.setState(s => { let m = s.calViewMonth + 1, y = s.calViewYear; if (m > 11) { m = 0; y += 1; } return { calViewMonth: m, calViewYear: y }; });
+  onDayClick = (dateStr) => this.setState(s => {
+    if (!s.tripStart || (s.tripStart && s.tripEnd)) return { tripStart: dateStr, tripEnd: '' };
+    if (dateStr < s.tripStart) return { tripStart: dateStr, tripEnd: s.tripStart };
+    return { tripEnd: dateStr };
+  });
+
+  selectRegion = (v) => this.setState({ region: v, regionCustom: v === '기타' ? this.state.regionCustom : '' });
+  onRegionCustomChange = (e) => this.setState({ regionCustom: e.target.value });
+  selectStyle = (v) => this.setState({ style: v });
+  toggleInterest = (v) => this.setState(s => ({ interests: s.interests.includes(v) ? s.interests.filter(x => x !== v) : [...s.interests, v] }));
+  selectCompanion = (v) => this.setState({ companion: v });
+  selectTransport = (v) => this.setState({ transport: v });
+
+  goBack = () => this.setState(s => ({ step: Math.max(0, s.step - 1) }));
+  isStepValid = (s) => [
+    !!(s.tripStart && s.tripEnd),
+    !!s.region && (s.region !== '기타' || !!s.regionCustom.trim()),
+    !!s.style, s.interests.length > 0, !!s.companion, !!s.transport,
+  ][s.step];
+  goNext = () => {
+    const s = this.state;
+    if (!this.isStepValid(s)) return;
+    if (s.step === 5) { this.generate(); return; }
+    this.setState({ step: s.step + 1 });
+  };
+
+  generate = () => {
+    this.setState({ step: 6 });
+    setTimeout(() => this.setState({ step: 7, result: this.buildResult() }), 1400);
+  };
+  regenerate = () => this.generate();
+
+  buildResult = () => {
+    const s = this.state;
+    const interests = s.interests.length ? s.interests : ['맛집', '카페'];
+    let pool = [];
+    interests.forEach(i => { pool = pool.concat((PLACE_POOL[i] || []).map(p => ({ ...p, category: i }))); });
+    if (pool.length === 0) pool = PLACE_POOL['맛집'].map(p => ({ ...p, category: '맛집' }));
+    const count = s.style === '알차게' ? Math.min(6, Math.max(4, pool.length)) : s.style === '조용하게' ? Math.min(3, pool.length) : Math.min(4, pool.length || 4);
+    const chosen = [];
+    for (let i = 0; i < count; i++) chosen.push(pool[i % pool.length]);
+    const durBase = s.style === '여유롭게' ? 40 : s.style === '조용하게' ? 35 : s.style === '알차게' ? 20 : 25;
+    const places = chosen.map((p, i) => ({ id: i + 1, name: p.name, address: p.address, category: p.category, duration: durBase + (i % 2) * 5, priority: 'normal', hours: 'unknown', hoursLabel: '영업시간 확인 필요', day: 0 }));
+    const segments = places.slice(0, -1).map(() => s.transport || 'walk');
+    const totalMin = segments.reduce((sum, _, i) => sum + 8 + i * 3, 0);
+    const totalDist = (segments.length * 1.4).toFixed(1);
+    return { places, segments, totalMin, totalDist };
+  };
+
+  startWithResult = () => {
+    const s = this.state;
+    const r = s.result || this.buildResult();
+    try {
+      localStorage.setItem('pd-ai-handoff', JSON.stringify({ places: r.places, segments: r.segments, tripStart: s.tripStart, tripEnd: s.tripEnd || s.tripStart }));
+    } catch (e) {}
+    window.location.href = './Route Planner App.dc.html?fromAI=1';
+  };
+
+  renderVals() {
+    const c = this.state.theme === 'dark' ? DARK : LIGHT;
+    const s = this.state;
+    const step = s.step;
+    const calCells = buildCalCells(s.calViewYear, s.calViewMonth, s.tripStart, s.tripEnd, this.onDayClick, this.state.theme === 'dark');
+
+    const stepValid = [
+      !!(s.tripStart && s.tripEnd),
+      !!s.region,
+      !!s.style,
+      s.interests.length > 0,
+      !!s.companion,
+      !!s.transport,
+    ];
+
+    const regionOptions = ['서울', '경기', '강원', '충남', '충북', '전남', '전북', '경남', '경북', '제주', '기타'].map(v => ({
+      label: v, onSelect: () => this.selectRegion(v),
+      bg: s.region === v ? '#7BCB93' : c.chipBg, color: s.region === v ? '#12321F' : c.text,
+      border: s.region === v ? '#7BCB93' : c.border,
+    }));
+    const isRegionCustom = s.region === '기타';
+
+    const styleOptions = ['여유롭게', '알차게', '인기 장소 위주', '조용하게'].map(v => ({
+      label: v, onSelect: () => this.selectStyle(v),
+      bg: s.style === v ? '#7BCB93' : c.chipBg, color: s.style === v ? '#12321F' : c.text,
+      border: s.style === v ? '#7BCB93' : c.border,
+    }));
+    const interestOptions = ['맛집', '카페', '관광', '쇼핑', '자연', '문화', '체험'].map(v => ({
+      label: v, onToggle: () => this.toggleInterest(v),
+      bg: s.interests.includes(v) ? '#7BCB93' : c.chipBg, color: s.interests.includes(v) ? '#12321F' : c.text,
+      border: s.interests.includes(v) ? '#7BCB93' : c.border,
+    }));
+    const companionOptions = ['혼자', '연인', '친구', '가족'].map(v => ({
+      label: v, onSelect: () => this.selectCompanion(v),
+      bg: s.companion === v ? '#7BCB93' : c.chipBg, color: s.companion === v ? '#12321F' : c.text,
+      border: s.companion === v ? '#7BCB93' : c.border,
+    }));
+    const transportOptions = [{ v: 'walk', l: '도보' }, { v: 'transit', l: '대중교통' }, { v: 'car', l: '자동차' }, { v: 'bike', l: '자전거' }].map(o => ({
+      label: o.l, onSelect: () => this.selectTransport(o.v),
+      bg: s.transport === o.v ? '#7BCB93' : c.chipBg, color: s.transport === o.v ? '#12321F' : c.text,
+      border: s.transport === o.v ? '#7BCB93' : c.border,
+    }));
+
+    const progressDots = [0, 1, 2, 3, 4, 5].map(i => ({
+      width: i === step ? '24px' : '6px',
+      bg: i <= step && step <= 5 ? '#7BCB93' : (i < step ? '#7BCB93' : c.border),
+    }));
+
+    const result = s.result || { places: [], segments: [], totalMin: 0, totalDist: 0 };
+    const resultPlaces = result.places.map((p, i) => ({
+      order: i + 1, name: p.name, category: p.category, duration: p.duration,
+      hasNext: i < result.places.length - 1,
+      nextModeLabel: TRANSPORT_LABEL[result.segments[i]] || '이동',
+      nextDuration: 8 + i * 3,
+    }));
+    const h = Math.floor(result.totalMin / 60), m = result.totalMin % 60;
+
+    return {
+      c, showStepper: step <= 5,
+      isStepDate: step === 0, isStepRegion: step === 1, isStepStyle: step === 2, isStepInterests: step === 3, isStepCompanion: step === 4, isStepTransport: step === 5,
+      isStepGenerating: step === 6, isStepResult: step === 7,
+      calCells, calMonthLabel: `${s.calViewYear}년 ${s.calViewMonth + 1}월`,
+      onCalPrevMonth: this.onCalPrevMonth, onCalNextMonth: this.onCalNextMonth,
+      weekLabels: ['일', '월', '화', '수', '목', '금', '토'],
+      dateRangeLabel: s.tripStart && s.tripEnd ? `${s.tripStart} ~ ${s.tripEnd}` : s.tripStart ? `${s.tripStart} ~ 종료일을 선택해주세요` : '날짜를 선택해주세요',
+      regionOptions, isRegionCustom, regionCustom: s.regionCustom, onRegionCustomChange: this.onRegionCustomChange,
+      styleOptions, interestOptions, companionOptions, transportOptions,
+      progressDots,
+      showNav: step <= 5,
+      canGoBack: step > 0,
+      goBack: this.goBack, goNext: this.goNext,
+      nextBtnLabel: step === 5 ? 'AI 일정 생성하기' : '다음',
+      nextBtnBg: stepValid[step] ? '#7BCB93' : c.chipBg,
+      nextBtnColor: stepValid[step] ? '#12321F' : c.textSub,
+      nextBtnOpacity: stepValid[step] ? 1 : 0.6,
+      resultSummaryLine: `${s.companion || ''} · ${s.style || ''} 여행`,
+      resultStats: { count: result.places.length, time: h > 0 ? `${h}시간 ${m}분` : `${m}분`, distance: `${result.totalDist}km` },
+      resultPlaces,
+      regenerate: this.regenerate, startWithResult: this.startWithResult,
+      toggleTheme: () => {},
+      isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark',
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<style>
+body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+a{color:#1F7A44}
+a:hover{color:#146030}
+.rp-shell{display:grid;grid-template-columns:392px 1fr;min-height:100vh;transition:grid-template-columns .32s cubic-bezier(.4,0,.2,1)}
+.rp-shell.rp-panel-collapsed{grid-template-columns:52px 1fr}
+.rp-shell.rp-map-collapsed{grid-template-columns:1fr 52px}
+.rp-map-col{position:relative;display:flex;flex-direction:column;overflow:hidden}
+.rp-panel{transition:padding .2s}
+@media (max-width:900px){
+  .rp-shell{grid-template-columns:1fr;transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1)}
+  .rp-map-col{order:1;min-height:320px}
+  .rp-panel{max-height:none;order:0}
+  .rp-shell.rp-panel-collapsed{grid-template-columns:1fr;grid-template-rows:1fr 52px}
+  .rp-shell.rp-map-collapsed{grid-template-columns:1fr;grid-template-rows:52px 1fr}
+}
+.rp-rail{display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px 0;height:100%;cursor:pointer}
+.rp-rail:hover{background:#F7F7F8;filter:brightness(1.03)}
+.rp-rail{transition:transform .06s ease,filter .1s ease}
+.rp-rail:active{transform:scale(0.95)}
+.rp-ai-fab{transition:transform .15s,box-shadow .15s}
+.rp-ai-fab:hover{transform:translateY(-2px);box-shadow:0px 6px 12px -3px rgba(23,23,25,.18)}
+.rp-ai-panel{position:fixed;right:20px;bottom:20px;top:auto;left:auto;width:340px;max-width:calc(100vw - 40px);height:min(560px,calc(100vh - 40px));background:#fff;border:1px solid #E1E2E4;border-radius:16px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.18);z-index:45;display:flex;flex-direction:column;transform:translateY(16px) scale(.97);opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.4,0,.2,1),opacity .18s}
+.rp-ai-panel-open{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
+@media (max-width:640px){
+  .rp-ai-panel{left:10px;right:10px;bottom:0;width:auto;max-width:none;height:70vh;border-radius:16px 16px 0 0;transform:translateY(100%);max-height:70vh}
+  .rp-ai-panel-open{transform:translateY(0)}
+}
+.rp-card{transition:box-shadow .15s,border-color .15s}
+.rp-card:hover{border-color:#AEB0B6;box-shadow:0px 2px 4px -2px rgba(23,23,25,.1),0px 4px 6px -1px rgba(23,23,25,.06)}
+.rp-btn-primary{transition:background-color .15s,transform .05s}
+.rp-btn-primary:hover{background-color:#63B37E}
+.rp-btn-primary:active{transform:scale(0.98)}
+.rp-btn-primary.rp-btn-pressed{transform:scale(0.98)}
+.rp-icon-btn:hover{background-color:#EAEBEC}
+.rp-seg-item:hover{background-color:#EAEBEC}
+[style*="cursor:pointer"],[style*="cursor: pointer"]{transition:transform .06s ease,filter .1s ease}
+[style*="cursor:pointer"]:hover,[style*="cursor: pointer"]:hover{filter:brightness(1.03)}
+[style*="cursor:pointer"]:active,[style*="cursor: pointer"]:active{transform:scale(0.95)}
+@keyframes rp-spin{to{transform:rotate(360deg)}}
+@keyframes rp-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</helmet>
+
+<div class="rp-shell {{ shellStateClass }}" data-screen-label="경로 플래너 메인" style="color:{{ c.text }};background:{{ c.bg }}">
+
+<!-- 좌측 패널: 장소 입력 + 조건 설정 -->
+<div class="rp-panel" style="display:flex;flex-direction:column;background:{{ c.panelBg }};border-right:1px solid {{ c.border }};overflow-y:auto;max-height:100vh">
+<sc-if value="{{ panelCollapsed }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ togglePanelCollapsed }}" class="rp-rail">
+    <div style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: {{ c.text }}; background-color: {{ c.panelBg }}">»</div>
+    <div style="writing-mode:vertical-rl;font-size:11px;font-weight:700;color:{{ c.textSub }};letter-spacing:.06em"><br></div>
+  </div>
+</sc-if>
+<sc-if value="{{ panelExpanded }}" hint-placeholder-val="{{ true }}">
+
+  <!-- 상단 바: 로고/스텝/알림/초대 -->
+  <div style="padding: 16px 20px; border-bottom: 1px solid {{ c.border }}; display: flex; flex-direction: column; gap: 12px; position: sticky; top: 0; z-index: 5; box-shadow: 0px 2px 4px -2px rgba(23,23,25,.08); background-color: {{ c.panelBg }}">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <a href="./main(home).dc.html" style="font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: {{ c.text }}; text-decoration: none; cursor: pointer">p<span style="color:#26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</a>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div onClick="{{ toggleTheme }}" title="테마 전환" style="cursor:pointer;width:32px;height:32px;border-radius:8px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:14px">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:14px;height:14px;object-fit:contain"></sc-if>
+        </div>
+        <!-- 공지 확장 지점 -->
+        <sc-if value="{{ canManageInvite }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ openPermissionsModal }}" style="height: 31px; padding: 0 12px; border-radius: 8px; background: {{ c.chipBg }}; display: flex; align-items: center; font-size: 12px; font-weight: 600; color: {{ c.text }}; cursor: pointer; white-space: nowrap">권한 관리</div>
+        </sc-if>
+        <sc-if value="{{ canManageInvite }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ toggleInvite }}" style="height: 31px; padding: 0 12px; border-radius: 8px; background: {{ c.chipBg }}; display: flex; align-items: center; font-size: 12px; font-weight: 600; color: {{ c.text }}; cursor: pointer; width: 55px; justify-content: center">+ 일행 초대</div>
+        </sc-if>
+        
+        <div onClick="{{ togglePanelCollapsed }}" class="rp-icon-btn" title="플래너 접기" style="width: 32px; height: 31px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; font-weight: 700; color: {{ collapseIconColor }}; text-transform: none; flex-grow: 0; background-color: {{ collapseIconBg }}; padding-top: 0px; padding-bottom: 0px; padding-left: 1px; padding-right: 1px">«</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;padding:4px 6px;border:1px dashed {{ c.border }};border-radius:8px">
+      <span style="font-size:9.5px;font-weight:700;color:{{ c.textSub }};text-transform:uppercase;letter-spacing:.04em">Role</span>
+      <sc-for list="{{ devRoleOptions }}" as="ro" hint-placeholder-count="4">
+        <div onClick="{{ ro.onSelect }}" style="cursor:pointer;font-size:10.5px;font-weight:700;padding:3px 7px;border-radius:6px;background:{{ ro.bg }};color:{{ ro.color }}">{{ ro.label }}</div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ newTripDateModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:30">
+      <div style="position:relative"><div onClick="{{ closeNewTripDateModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.panelBg }};border-radius:16px;padding:24px;width:320px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px">
+        <div style="font-size:16px;font-weight:700;color:{{ c.text }}">새 일정 만들기</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">여행 날짜를 입력해주세요</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:12px;font-weight:600;color:rgba(23,23,25,.6)">시작 날짜</div>
+            <input type="date" value="{{ tripStart }}" onChange="{{ onNewTripStartDateChange }}" autoFocus="{{ true }}" style="font-size:14px;padding:10px 12px;border-radius:8px;border:1px solid {{ c.border }};background:{{ c.panelBg }};color:{{ c.text }};font-family:inherit;color-scheme:{{ colorScheme }}">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:12px;font-weight:600;color:rgba(23,23,25,.6)">종료 날짜</div>
+            <input type="date" value="{{ tripEnd }}" min="{{ tripStart }}" onChange="{{ onNewTripEndDateChange }}" style="font-size:14px;padding:10px 12px;border-radius:8px;border:1px solid {{ c.border }};background:{{ c.panelBg }};color:{{ c.text }};font-family:inherit;color-scheme:{{ colorScheme }}">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:4px">
+          <div onClick="{{ confirmNewTripDate }}" style="cursor:pointer;font-size:13px;font-weight:700;color:#12321F;background:#7BCB93;border-radius:8px;padding:9px 16px;white-space:nowrap">시작하기</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ inviteOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F7F7F8;border:1px solid #E1E2E4;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;color:{{ c.textSub }}">링크가 있는 사람은 {{ permissionDescLabel }}</div>
+        <div style="display:flex;gap:6px">
+          <div style="flex:1;font-size:12.5px;color:{{ c.text }};background:{{ c.panelBg }};border:1px solid {{ c.border }};border-radius:8px;padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ inviteLink }}</div>
+          <div onClick="{{ copyInvite }}" style="font-size:12.5px;font-weight:700;color:{{ c.text }};background:{{ c.chipBg }};border-radius:8px;padding:7px 12px;cursor:pointer;white-space:nowrap">{{ copyLabel }}</div>
+        </div>
+        <div style="position:relative;align-self:flex-start">
+          <div onClick="{{ togglePermissionMenu }}" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;font-weight:600;color:{{ c.text }};padding:5px 9px;border-radius:7px;background:#fff;border:1px solid #E1E2E4">
+            {{ permissionLabel }}
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#70737C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+          </div>
+          <sc-if value="{{ permissionMenuOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:calc(100% + 4px);left:0;background:{{ c.panelBg }};border:1px solid {{ c.border }};border-radius:10px;box-shadow:0px 4px 6px -2px rgba(23,23,25,.1),0px 10px 15px -3px rgba(23,23,25,.1);padding:4px;z-index:10;min-width:110px">
+              <sc-for list="{{ permissionOptions }}" as="po" hint-placeholder-count="2">
+                <div onClick="{{ po.onSelect }}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:12.5px;font-weight:600;color:#171719" class="rp-seg-item">
+                  {{ po.label }}
+                  <sc-if value="{{ po.active }}" hint-placeholder-val="{{ false }}"><img src="./uploads/check.png" alt="" style="width:11px;height:11px;object-fit:contain"></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+    <!-- 권한 관리 모달 -->
+    <sc-if value="{{ permissionsModalOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
+        <div style="position:relative"><div onClick="{{ closePermissionsModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:380px;max-width:100%;display:flex;flex-direction:column;gap:16px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+          <div style="font-size:15px;font-weight:700;color:{{ c.text }}">권한 관리</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:12px;font-weight:700;color:{{ c.textSub }}">현재 편집 가능한 일행</div>
+            <sc-if value="{{ hasEditors }}" hint-placeholder-val="{{ true }}">
+              <sc-for list="{{ memberList }}" as="mb" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-radius:10px;background:{{ c.chipBg }}">
+                  <div style="font-size:13px;font-weight:700;color:{{ c.text }}">{{ mb.nickname }}님</div>
+                </div>
+              </sc-for>
+            </sc-if>
+            <sc-if value="{{ hasEditors }}" hint-placeholder-val="{{ true }}">
+            </sc-if>
+          </div>
+          <sc-if value="{{ hasEditRequests }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:12px;font-weight:700;color:{{ c.textSub }}">편집 권한 요청</div>
+              <sc-for list="{{ editRequests }}" as="req" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-radius:10px;border:1px solid {{ c.border }}">
+                  <div style="font-size:13px;font-weight:700;color:{{ c.text }}">{{ req.nickname }}님</div>
+                  <div style="display:flex;gap:6px">
+                    <div onClick="{{ req.onApprove }}" style="cursor:pointer;font-size:11.5px;font-weight:700;color:#12321F;background:#7BCB93;padding:5px 10px;border-radius:7px">승인</div>
+                    <div onClick="{{ req.onReject }}" style="cursor:pointer;font-size:11.5px;font-weight:700;color:{{ c.textSub }};background:{{ c.chipBg }};padding:5px 10px;border-radius:7px">거절</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        </div>
+      </div>
+    </sc-if>
+    <!-- 권한 승인/거절 확인 -->
+    <sc-if value="{{ requestConfirmOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:55;display:flex;align-items:center;justify-content:center;padding:20px">
+        <div style="position:relative"><div onClick="{{ closeRequestConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:320px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+          <div style="font-size:14.5px;font-weight:700;color:{{ c.text }}">{{ requestConfirmMessage }}</div>
+          <div style="display:flex;gap:8px">
+            <div onClick="{{ closeRequestConfirm }}" style="flex:1;text-align:center;border:1px solid {{ c.border }};border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:{{ c.text }};cursor:pointer">취소</div>
+            <div onClick="{{ requestConfirmAction }}" style="flex:1;text-align:center;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:pointer;background:{{ requestConfirmBtnBg }};color:{{ requestConfirmBtnColor }}">{{ requestConfirmBtnLabel }}</div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </sc-if>
+    <!-- 흐름 스텝 인디케이터 -->
+    
+  </div>
+
+  <!-- 조건 설정: 경로기준 / 구간 일괄 적용 -->
+  <div style="padding:18px 20px;border-bottom:1px solid {{ c.border }};display:flex;flex-direction:column;gap:14px">
+    <div>
+      <div style="font-size:12px;font-weight:700;color:{{ c.textSub }};margin-bottom:8px">경로 기준</div>
+      <div style="display:flex;background:{{ c.chipBg }};border-radius:10px;padding:2px">
+        <sc-for list="{{ criteriaOptions }}" as="opt" hint-placeholder-count="2">
+          <div onClick="{{ opt.onSelect }}" class="rp-seg-item" style="flex:1;text-align:center;padding:7px 4px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ opt.bg }};color:{{ opt.color }};box-shadow:{{ opt.shadow }}">{{ opt.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:700;color:{{ c.textSub }}">이동수단은 구간별로 설정돼요</div>
+      </div>
+      <div style="font-size:11px;color:{{ c.textSub }};margin-bottom:6px">전체 구간 일괄 적용</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <div onClick="{{ modeCar.onApplyAll }}" style="cursor:pointer;padding:6px 10px;border-radius:11px;font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:5px;color:{{ modeCar.chipColor }};background:{{ modeCar.chipBg }};border:1px solid {{ modeCar.chipBorder }};opacity:{{ modeCar.opacity }}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"></path><rect x="3" y="11" width="18" height="6" rx="1.5"></rect><circle cx="7.5" cy="17.5" r="1.5"></circle><circle cx="16.5" cy="17.5" r="1.5"></circle></svg>{{ modeCar.label }}
+        </div>
+        <div onClick="{{ modeWalk.onApplyAll }}" style="cursor:pointer;padding:6px 10px;border-radius:11px;font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:5px;color:{{ modeWalk.chipColor }};background:{{ modeWalk.chipBg }};border:1px solid {{ modeWalk.chipBorder }};opacity:{{ modeWalk.opacity }}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="1.6"></circle><path d="M10.5 21l1.3-6.5-2.3-2 .7-4.3 3.4 1.3 1.7 2.7 3 1"></path><path d="M11.6 14.5L8 19"></path></svg>{{ modeWalk.label }}
+        </div>
+        <div onClick="{{ modeTransit.onApplyAll }}" style="cursor:pointer;padding:6px 10px;border-radius:11px;font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:5px;color:{{ modeTransit.chipColor }};background:{{ modeTransit.chipBg }};border:1px solid {{ modeTransit.chipBorder }};opacity:{{ modeTransit.opacity }}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="3"></rect><path d="M4 11h16"></path><circle cx="8" cy="17.5" r="1.4"></circle><circle cx="16" cy="17.5" r="1.4"></circle><path d="M7 20l-1.5 1.5M17 20l1.5 1.5"></path></svg>{{ modeTransit.label }}
+        </div>
+        <div onClick="{{ modeBike.onApplyAll }}" style="cursor: pointer; padding: 6px 10px; border-radius: 11px; font-size: 11.5px; font-weight: 500; display: flex; align-items: center; gap: 5px; color: {{ modeBike.chipColor }}; background: {{ modeBike.chipBg }}; border: 1px solid {{ modeBike.chipBorder }}; opacity: {{ modeBike.opacity }}; border-color: #BFEFCF">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.2"></circle><circle cx="18.5" cy="17.5" r="3.2"></circle><path d="M5.5 17.5L10 8h4l4.5 9.5M10 8L8.5 5.5h-2"></path><path d="M10 8l3 5h4"></path></svg>{{ modeBike.label }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ urgentPushedBack }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:12px 20px 0;background:#FEECEC;border:1px solid #FFC9C9;border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:#B00C0C;font-weight:600">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E52222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 9v4M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+      <div>{{ urgentPushedLabel }}</div>
+    </div>
+  </sc-if>
+
+  <!-- 방문지 목록 헤더 -->
+  <div style="padding:16px 20px 10px;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0">
+      <div style="font-size:14.5px;font-weight:700;color:{{ c.text }};white-space:nowrap">방문지 목록 <span style="color:{{ c.textSub }};font-weight:600">{{ placeCountLabel }}</span></div>
+      <sc-if value="{{ hasDayTabs }}" hint-placeholder-val="{{ false }}">
+        <select value="{{ selectedDayValue }}" onChange="{{ onDaySelectChange }}" style="font-size:11.5px;font-weight:700;padding:4px 8px;border-radius:8px;border:1px solid {{ c.border }};background:{{ c.chipBg }};color:{{ c.text }};color-scheme:light">
+          <option value="all" style="color:#171719">전체보기</option>
+          <sc-for list="{{ dayTabs }}" as="dt" hint-placeholder-count="2">
+            <option value="{{ dt.value }}" style="color:#171719">{{ dt.label }}</option>
+          </sc-for>
+        </select>
+      </sc-if>
+      
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}"><div style="font-size:11.5px;color:{{ c.textSub }}">드래그로 순서 변경</div></sc-if>
+      <sc-if value="{{ canClearAll }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ clearAllPlaces }}" style="cursor:pointer;font-size:11.5px;font-weight:700;color:#B00C0C">전체 삭제</div>
+      </sc-if>
+    </div>
+  </div>
+
+  <!-- 빈 상태 -->
+  <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:8px 20px 16px;padding:36px 16px;border:1.5px dashed {{ c.border }};border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ quickAddPlace }}" class="rp-icon-btn" style="cursor:pointer;width:40px;height:40px;border-radius:50%;background:{{ c.chipBg }};display:flex;align-items:center;justify-content:center;font-size:18px;color:{{ c.textSub }}">＋</div>
+      </sc-if>
+      <div style="font-size:13.5px;font-weight:700;color:{{ c.text }}">아직 방문지가 없어요</div>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:12px;color:{{ c.textSub }};line-height:1.5">주소를 추가하면<br>최적 방문 순서를 자동으로 만들어드려요</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- 방문지 카드 + 구간(이동수단) 타임라인 -->
+  <sc-if value="{{ hasPlaces }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;padding:0 20px 10px">
+      <sc-for list="{{ timeline }}" as="item" hint-placeholder-count="7">
+        <sc-if value="{{ item.isDivider }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:8px;margin:10px 0 6px">
+            <div style="font-size:12px;font-weight:700;color:{{ c.text }}">{{ item.dayLabel }}</div>
+            <div style="flex:1;height:1px;background:{{ c.border }}"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ item.isPlace }}" hint-placeholder-val="{{ true }}">
+          <div draggable="{{ canEdit }}" onDragStart="{{ item.place.onDragStart }}" onDragOver="{{ item.place.onDragOver }}" onDrop="{{ item.place.onDrop }}" onDragEnd="{{ item.place.onDragEnd }}" class="rp-card" style="border:1px solid {{ item.place.borderColor }};border-radius:14px;padding:14px;background:{{ item.place.bg }};display:flex;gap:12px;cursor:{{ cardCursor }}">
+            <div style="display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0;align-self:stretch">
+              <div style="width: 24px; height: 24px; border-radius: 40%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background-color: #202020">
+                <span style="color: #fff; font-size: 11px; font-weight: 700; font-family: Montserrat">{{ item.place.order }}</span>
+              </div>
+              <div style="width:2px;flex:1;min-height:10px;background:{{ c.border }};margin-top:4px;opacity:{{ item.place.lineOpacity }}"></div>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;padding-top:2px">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <div style="font-size:14.5px;font-weight:700;color:{{ c.text }}">{{ item.place.name }}</div>
+                <sc-if value="{{ item.place.hasMemo }}" hint-placeholder-val="{{ false }}"><img src="./uploads/notepad-text.png" alt="" style="width:13px;height:13px;object-fit:contain;opacity:.45"></sc-if>
+              </div>
+              <div style="font-size:12px;color:{{ c.textSub }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.place.address }}</div>
+              <sc-if value="{{ item.place.expanded }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; width: 100%">
+                  <div style="font-size: 10.5px; font-weight: 600; padding: 4px 7px; border-radius: 6px; background: {{ item.place.hoursBg }}; color: {{ item.place.hoursColor }}; white-space: nowrap; line-height:1; box-sizing:border-box">{{ item.place.hoursLabel }}</div>
+                  <div onClick="{{ item.place.onOpenCategory }}" style="cursor:pointer;font-size:10.5px;font-weight:600;padding:4px 8px;border-radius:6px;background:{{ item.place.categoryBg }};color:{{ item.place.categoryColor }};line-height:1;box-sizing:border-box">{{ item.place.category }}</div>
+                  <div style="display:flex;align-items:center;gap:6px;width:100%">
+                    <input value="{{ item.place.packItems }}" onChange="{{ item.place.onPackItemsChange }}" placeholder="메모 (예: 우산, 신분증)" style="flex:1;min-width:0;font-size:11px;font-family:inherit;color:{{ c.text }};background:{{ c.chipBg }};border:1px solid {{ c.border }};border-radius:6px;padding:5px 8px;box-sizing:border-box">
+                    <div onClick="{{ item.place.onSaveMemo }}" style="flex-shrink:0;cursor:pointer;display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:{{ item.place.memoSaveColor }};background:{{ item.place.memoSaveBg }};border-radius:6px;padding:5px 9px;white-space:nowrap">
+                      <span>{{ item.place.memoSaveText }}</span>
+                      <sc-if value="{{ item.place.memoIsSaved }}" hint-placeholder-val="{{ false }}"><img src="./uploads/check.png" alt="" style="width:11px;height:11px;object-fit:contain"></sc-if>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:{{ c.textSub }};width:100%;justify-content:flex-end">
+                    <div onClick="{{ item.place.onDurationDown }}" style="width:18px;height:18px;border-radius:5px;background:{{ c.chipBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700">−</div>
+                    <div style="min-width:44px;text-align:center;color:{{ c.text }}">체류 {{ item.place.duration }}분</div>
+                    <div onClick="{{ item.place.onDurationUp }}" style="width:18px;height:18px;border-radius:5px;background:{{ c.chipBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700">+</div>
+                    <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                    <div onClick="{{ item.place.onOpenEdit }}" class="rp-icon-btn" style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:4px">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#878A93" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                    </div>
+                    <div onClick="{{ item.place.onDeleteClick }}" class="rp-icon-btn" style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:4px">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#878A93" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6M14 11v6"></path><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path></svg>
+                    </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+            <div onClick="{{ item.place.onToggleExpand }}" class="rp-icon-btn" style="align-self:flex-start;width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#AEB0B6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ item.place.expandChevronDeg }}deg);transition:transform .15s"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ item.isConnector }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:12px">
+            <div style="display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0">
+              <div style="width:2px;flex:1;min-height:16px;background:{{ c.border }}"></div>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding:6px 0 10px">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <div onClick="{{ item.segment.onCycle }}" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;background:{{ item.segment.bg }};color:{{ item.segment.color }};border:1px solid {{ item.segment.borderColor }};width:fit-content">
+                  <sc-if value="{{ item.segment.isCar }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"></path><rect x="3" y="11" width="18" height="6" rx="1.5"></rect><circle cx="7.5" cy="17.5" r="1.5"></circle><circle cx="16.5" cy="17.5" r="1.5"></circle></svg></sc-if>
+                  <sc-if value="{{ item.segment.isWalk }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="1.6"></circle><path d="M10.5 21l1.3-6.5-2.3-2 .7-4.3 3.4 1.3 1.7 2.7 3 1"></path><path d="M11.6 14.5L8 19"></path></svg></sc-if>
+                  <sc-if value="{{ item.segment.isTransit }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="3"></rect><path d="M4 11h16"></path><circle cx="8" cy="17.5" r="1.4"></circle><circle cx="16" cy="17.5" r="1.4"></circle><path d="M7 20l-1.5 1.5M17 20l1.5 1.5"></path></svg></sc-if>
+                  <sc-if value="{{ item.segment.isBike }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.2"></circle><circle cx="18.5" cy="17.5" r="3.2"></circle><path d="M5.5 17.5L10 8h4l4.5 9.5M10 8L8.5 5.5h-2"></path><path d="M10 8l3 5h4"></path></svg></sc-if>
+                  <span style="font-size:12px;font-weight:700">{{ item.segment.label }}</span>
+                  <span style="font-size:11px;font-weight:600;opacity:.8">· {{ item.segment.durationLabel }} · {{ item.segment.distanceLabel }}</span>
+                </div>
+                <sc-if value="{{ item.segment.isFirst }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:10.5px;color:{{ c.textSub }}">클릭해 변경</div>
+                </sc-if>
+                <sc-if value="{{ item.segment.hasDetail }}" hint-placeholder-val="{{ true }}">
+                  <div onClick="{{ item.segment.onToggle }}" class="rp-icon-btn" style="cursor:pointer;width:20px;height:20px;border-radius:6px;background:{{ item.segment.bg }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="{{ item.segment.color }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ item.segment.chevronDeg }}deg);transition:transform .15s"><path d="M6 9l6 6 6-6"></path></svg>
+                  </div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ item.segment.expanded }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 0; padding: 12px 14px; border-radius: 10px; margin-top:4px; background-color: {{ segmentDetailBg }}; border-width: 1px; border-style: solid; border-color: {{ c.border }}">
+                  <sc-for list="{{ item.segment.steps }}" as="st" hint-placeholder-count="3">
+                    <div style="display:flex;gap:8px">
+                      <div style="display:flex;flex-direction:column;align-items:center;width:14px;flex-shrink:0">
+                        <div style="width:7px;height:7px;border-radius:50%;background:{{ st.chipColor }};flex-shrink:0;margin-top:3px"></div>
+                        <div style="width:1.5px;flex:1;min-height:14px;background:{{ c.border }};margin-top:2px;opacity:{{ st.lineOpacity }}"></div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:4px;padding-bottom:10px;flex:1;min-width:0">
+                        <div style="font-size:11px;color:{{ c.textSub }}">
+                          <span style="font-weight:700;color:{{ st.chipColor }}">{{ st.arrowLabel }}</span> {{ st.durationLabel }} · {{ st.distanceLabel }}
+                        </div>
+                        <sc-if value="{{ st.hasNode }}" hint-placeholder-val="{{ false }}">
+                          <div style="padding: 3px 9px; border-radius: 20px; background: {{ st.nodeBg }}; color: {{ st.nodeColor }}; font-size: 11px; font-weight: 600; width: fit-content; border-width: 1px; border-style: solid; border-color: {{ st.nodeBorder }}">{{ st.nodeLabel }}</div>
+                        </sc-if>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- 주소 추가 입력 -->
+  <div style="padding: 14px 20px; margin-top: auto; position: sticky; bottom: 0; background: {{ c.panelBg }}; border-top: 1px solid {{ c.border }}; z-index: 4">
+    <div style="display:flex;gap:6px">
+      <sc-if value="{{ hasDayTabs }}" hint-placeholder-val="{{ false }}">
+        <select value="{{ newAddressDayValue }}" onChange="{{ onNewAddressDayChange }}" style="font-size:12px;font-weight:700;padding:0 6px;border-radius:10px;border:1px solid {{ c.border }};background:{{ c.chipBg }};color:{{ c.text }};flex-shrink:0;height:42px">
+          <sc-for list="{{ dayTabs }}" as="dt" hint-placeholder-count="2">
+            <option value="{{ dt.value }}" style="color:#171719">{{ dt.label }}</option>
+          </sc-for>
+        </select>
+      </sc-if>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+      <input value="{{ newAddress }}" onChange="{{ onAddressInput }}" onKeyDown="{{ onAddressKeyDown }}" placeholder="주소를 입력하거나 붙여넣기" style="flex:1;min-width:0;height:42px;box-sizing:border-box;border:1px solid {{ addressInputBorder }};border-radius:11px;padding:0 12px;font-size:13px;font-family:inherit;color:{{ c.text }};outline:none;background-color:{{ addressInputBg }}">
+      <div onClick="{{ addPlace }}" class="{{ addBtnClass }}" style="height: 42px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; color: {{ addBtnColor }}; border-radius: 10px; padding: 0 22px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; border: none; box-shadow: none; background-color: {{ addBtnBg }}; border-width: 1px; border-color: {{ addBtnBorder }}; border-style: solid">추가</div>
+      </sc-if>
+    </div>
+    <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:11px;color:rgba(23,23,25,.4);margin-top:6px">여러 줄 붙여넣기·엑셀 업로드도 지원할 예정</div>
+    </sc-if>
+  </div>
+</sc-if></div>
+
+<!-- 우측: 지도 + 요약 -->
+<div class="rp-map-col">
+<sc-if value="{{ mapCollapsed }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ toggleMapCollapsed }}" class="rp-rail">
+    <div style="width:28px;height:28px;border-radius:8px;background:{{ c.chipBg }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:{{ c.text }}">«</div>
+    <div style="writing-mode:vertical-rl;font-size:11px;font-weight:700;color:{{ c.textSub }};letter-spacing:.06em">지도 펼치기</div>
+  </div>
+</sc-if>
+<sc-if value="{{ mapExpanded }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;position:relative;background:#EAF2FE;overflow:hidden;min-height:280px">
+    <div style="position:absolute;inset:0;background-image:linear-gradient(#DCE7F5 1px,transparent 1px),linear-gradient(90deg,#DCE7F5 1px,transparent 1px);background-size:38px 38px;opacity:.7"></div>
+    <div style="position:absolute;top:14px;left:14px;background:rgba(23,23,25,.72);color:#fff;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.02em">MOCK MAP · 실제 지도 API 연동 전</div>
+    
+
+    <sc-if value="{{ hasRoute }}" hint-placeholder-val="{{ true }}">
+      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polyline points="{{ routePolylinePoints }}" fill="none" stroke="#2C8F4A" stroke-width="1.6" stroke-dasharray="3 2.4" stroke-linecap="butt" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
+      </svg><div class="{{ aiPanelClass }}">
+  <div style="padding:14px 16px;border-bottom:1px solid #EAEBEC;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#171719;display:flex;align-items:center;gap:5px"><span>✨</span>경로 AI</div>
+      <div style="font-size:11px;color:rgba(23,23,25,.5);margin-top:2px">경로 계획을 도와드릴게요</div>
+    </div>
+    <div onClick="{{ toggleAi }}" class="rp-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C;flex-shrink:0">✕</div>
+  </div>
+  <div style="padding:8px 16px;border-bottom:1px solid #EAEBEC;flex-shrink:0">
+    <div style="font-size:11px;color:rgba(23,23,25,.45);background:#F7F7F8;border-radius:7px;padding:6px 9px">현재 경로 · {{ aiContextLabel }}</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:0">
+    <sc-for list="{{ aiMessages }}" as="msg" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:{{ msg.align }}">
+        <div style="align-self:{{ msg.align }};max-width:82%;background:{{ msg.bg }};color:{{ msg.color }};border-radius:{{ msg.radius }};padding:9px 12px;font-size:13px;line-height:1.5">{{ msg.text }}</div>
+        <sc-if value="{{ msg.showSuggestions }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;max-width:100%">
+            <sc-for list="{{ msg.suggestions }}" as="sug" hint-placeholder-count="3">
+              <div onClick="{{ sug.onClick }}" style="border:1px solid #E1E2E4;border-radius:14px;padding:6px 12px;font-size:12px;font-weight:600;color:#171719;background:#fff;cursor:pointer;white-space:nowrap" class="rp-seg-item">{{ sug.text }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+  <div style="padding: 10px 12px; border-top: 1px solid #EAEBEC; display: flex; gap: 6px; flex-shrink: 0; border-width: 1px; border-color: #679D67">
+    <input value="{{ aiInput }}" onChange="{{ onAiInput }}" onKeyDown="{{ onAiInputKeyDown }}" placeholder="메시지를 입력하세요..." style="flex:1;min-width:0;border:1px solid #E1E2E4;border-radius:20px;padding:8px 13px;font-size:12.5px;font-family:inherit;color:#171719;outline:none">
+    <div onClick="{{ sendAiMessage }}" style="background:#7BCB93;color:#12321F;border-radius:20px;padding:8px 15px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:{{ aiSendOpacity }}">{{ aiSendLabel }}</div>
+  </div>
+</div>
+    </sc-if>
+    <sc-for list="{{ mapPins }}" as="pin" hint-placeholder-count="4">
+      <div style="position:absolute;left:{{ pin.left }};top:{{ pin.top }};transform:translate(-50%,-100%)">
+        <div style="width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0px 2px 10px 2px #FFFFFF4D; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; background-color: #000000; border-width: 1px; overflow: visible; opacity: 1">
+          <span style="transform: rotate(45deg); color: #FFFFFF; font-size: 12px; font-weight: 700; font-family: Montserrat">{{ pin.order }}</span>
+        </div>
+      </div>
+    </sc-for>
+
+    <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:rgba(247,247,248,.72);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px">
+        <div style="width:28px;height:28px;border-radius:50%;border:3px solid #E1E2E4;border-top-color:#7BCB93;animation:rp-spin .8s linear infinite"></div>
+        <div style="font-size:12.5px;font-weight:600;color:#46474C">동선 재계산 중...</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- 요약 바 -->
+  <div style="background:{{ c.panelBg }};border-top:1px solid {{ c.border }};padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="white-space:nowrap">
+        <div style="font-size:11px;color:{{ c.textSub }};margin-bottom:2px;white-space:nowrap">총 방문지</div>
+        <div style="font-size:18px;font-weight:700;color:{{ c.text }};white-space:nowrap">{{ summary.count }}곳</div>
+      </div>
+      <div style="white-space:nowrap">
+        <div style="font-size:11px;color:{{ c.textSub }};margin-bottom:2px;white-space:nowrap">총 이동거리</div>
+        <div style="font-size:18px;font-weight:700;color:{{ c.text }};white-space:nowrap">{{ summary.distanceLabel }}</div>
+      </div>
+      <div style="white-space:nowrap">
+        <div style="font-size:11px;color:{{ c.textSub }};margin-bottom:2px;white-space:nowrap">총 이동시간</div>
+        <div style="font-size:18px;font-weight:700;color:{{ c.text }};white-space:nowrap">{{ summary.timeLabel }}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto">
+      <sc-if value="{{ canDeleteOriginal }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ deleteOriginalRoute }}" style="height:40px;padding:0 14px;border-radius:10px;border:1px solid #F3C9C9;display:flex;align-items:center;font-size:13px;font-weight:600;color:#B00C0C;cursor:pointer;white-space:nowrap;background:#FDECEC">원본 삭제</div>
+      </sc-if>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ openSituationModal }}" style="height:40px;padding:0 14px;border-radius:10px;background:{{ situationBtnBg }};display:flex;align-items:center;font-size:13px;font-weight:600;color:{{ situationBtnColor }};cursor:pointer;white-space:nowrap;border:1px solid {{ situationBtnBorder }}">변수 추가</div>
+      </sc-if>
+      <div onClick="{{ toggleActivityLog }}" style="height:40px;padding:0 14px;border-radius:10px;display:flex;align-items:center;font-size:13px;font-weight:600;color:{{ c.text }};cursor:pointer;white-space:nowrap;border:1px solid {{ actionBtnBorder }};background:{{ actionBtnBg }}">활동 로그</div>
+      <div onClick="{{ saveOrRemoveAction }}" style="height:40px;padding:0 14px;border-radius:10px;border:1px solid {{ actionBtnBorder }};display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:{{ c.text }};cursor:pointer;white-space:nowrap;background:{{ actionBtnBg }}">
+        <span>{{ saveLabelText }}</span>
+        <sc-if value="{{ isSaved }}" hint-placeholder-val="{{ false }}"><img src="./uploads/check.png" alt="" style="width:13px;height:13px;object-fit:contain"></sc-if>
+      </div>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ recalc }}" class="rp-btn-primary" style="background:{{ recalcBtnBg }};color:{{ recalcBtnColor }};border-radius:10px;height:40px;padding:0 20px;display:flex;align-items:center;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:{{ recalcOpacity }}">경로 계산</div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+</div>
+</div>
+
+<sc-if value="{{ myRoutesOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ toggleMyRoutes }}" style="position:fixed;inset:0;background:rgba(23,23,25,.32);z-index:41"></div>
+</sc-if>
+
+<div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:60;background:#12321F;color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:10px;box-shadow:0px 6px 16px -4px rgba(23,23,25,.25);opacity:{{ toastOpacity }};transition:opacity .25s ease;pointer-events:none;white-space:nowrap;display:flex;align-items:center;gap:7px"><img src="./uploads/check.png" alt="" style="width:13px;height:13px;object-fit:contain;filter:brightness(0) invert(1)"><span>{{ toastMsg }}</span></div>
+<div style="position:fixed;top:0;right:0;height:100vh;width:340px;max-width:88vw;background:{{ c.panelBg }};border-left:1px solid {{ c.border }};box-shadow:-4px 0px 16px rgba(23,23,25,.08);z-index:42;display:flex;flex-direction:column;transform:{{ myRoutesDrawerTransform }};transition:transform .25s cubic-bezier(.4,0,.2,1)">
+  <div style="padding:16px 18px;border-bottom:1px solid {{ c.border }};display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:15px;font-weight:700;color:{{ c.text }}">내 일정</div>
+    <div onClick="{{ toggleMyRoutes }}" class="rp-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C">✕</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:12px 18px;display:flex;flex-direction:column;gap:8px">
+    <sc-if value="{{ hasSavedRoutes }}" hint-placeholder-val="{{ false }}">
+      <sc-for list="{{ savedRoutes }}" as="route" hint-placeholder-count="3">
+        <div class="rp-card" style="border:1px solid {{ c.border }};border-radius:12px;padding:12px;display:flex;align-items:flex-start;gap:8px;cursor:pointer" onClick="{{ route.onLoad }}">
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <div style="font-size: 13.5px; font-weight: 600; color: {{ c.text }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ route.name }}</div>
+            <div style="font-size:11.5px;color:{{ c.textSub }}">{{ route.savedAt }} · {{ route.countLabel }}</div>
+          </div>
+          <div onClick="{{ route.onDelete }}" class="rp-icon-btn" style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:12px;color:#AEB0B6">✕</div>
+        </div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{ noSavedRoutes }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center;padding:30px 0;font-size:12.5px;color:rgba(23,23,25,.4)">저장된 일정이 없어요<br>플래너에서 "저장"을 눌러보세요</div>
+    </sc-if>
+  </div>
+</div>
+
+<sc-if value="{{ activityLogOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ toggleActivityLog }}" style="position:fixed;inset:0;background:rgba(23,23,25,.32);z-index:39"></div>
+</sc-if>
+<div style="position:fixed;top:0;right:0;height:100vh;width:320px;max-width:88vw;background:{{ c.panelBg }};border-left:1px solid {{ c.border }};box-shadow:-4px 0px 16px rgba(23,23,25,.08);z-index:40;display:flex;flex-direction:column;transform:{{ logDrawerTransform }};transition:transform .25s cubic-bezier(.4,0,.2,1)">
+  <div style="padding:16px 18px;border-bottom:1px solid {{ c.border }};display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:15px;font-weight:700;color:{{ c.text }}">활동 로그</div>
+    <div onClick="{{ toggleActivityLog }}" class="rp-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C">✕</div>
+  </div>
+  <div style="padding:12px 18px;border-bottom:1px solid {{ c.border }};display:flex;align-items:center;gap:8px">
+    <div style="font-size:12px;color:{{ c.textSub }};white-space:nowrap">닉네임</div>
+    <input value="{{ nickname }}" onChange="{{ onNicknameChange }}" style="flex:1;min-width:0;border:1px solid {{ c.border }};border-radius:8px;padding:6px 10px;font-size:12.5px;font-family:inherit;color:{{ c.text }};outline:none;background:{{ c.panelBg }}">
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:12px 18px;display:flex;flex-direction:column;gap:10px">
+    <sc-if value="{{ hasActivityLog }}" hint-placeholder-val="{{ false }}">
+      <sc-for list="{{ activityLog }}" as="log" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:3px;padding-bottom:10px;border-bottom:1px solid {{ c.border }}">
+          <div style="font-size:12.5px;color:{{ c.text }};line-height:1.5">{{ log.text }}</div>
+          <div style="font-size:10.5px;color:{{ c.textSub }}">{{ log.time }}</div>
+        </div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{ noActivityLog }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center;padding:30px 0;font-size:12.5px;color:{{ c.textSub }}">아직 활동 내역이 없어요</div>
+    </sc-if>
+  </div>
+</div>
+
+<!-- 주소 수정 팝업 -->
+<sc-if value="{{ editModalOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="position:relative"><div onClick="{{ closeEditModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:360px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+      <div style="font-size:15px;font-weight:700;color:{{ c.text }}">방문지 수정</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;font-weight:600;color:{{ c.textSub }}">이름</div>
+        <input value="{{ editName }}" onChange="{{ onEditNameChange }}" style="border:1px solid {{ c.border }};border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:{{ c.text }};background:{{ c.panelBg }};outline:none">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;font-weight:600;color:{{ c.textSub }}">주소</div>
+        <input value="{{ editAddress }}" onChange="{{ onEditAddressChange }}" style="border:1px solid {{ c.border }};border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:{{ c.text }};background:{{ c.panelBg }};outline:none">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <div onClick="{{ closeEditModal }}" style="flex:1;text-align:center;border:1px solid {{ c.border }};border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:{{ c.text }};cursor:pointer">취소</div>
+        <div onClick="{{ saveEditModal }}" class="rp-btn-primary" style="flex:1;text-align:center;background:#7BCB93;color:#12321F;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:pointer">저장</div>
+      </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- 카테고리 선택 팝업 -->
+<sc-if value="{{ categoryModalOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="position:relative"><div onClick="{{ closeCategoryModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:#fff;border-radius:16px;padding:22px;width:320px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+      <div style="font-size:15px;font-weight:700;color:#171719">카테고리 선택</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ categoryOptions }}" as="co" hint-placeholder-count="6">
+          <div onClick="{{ co.onSelect }}" style="cursor:pointer;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;background:{{ co.bg }};color:{{ co.color }}">{{ co.label }}</div>
+        </sc-for>
+      </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- 방문지 추가 확인 팝업 -->
+<sc-if value="{{ addConfirmOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="position:relative"><div onClick="{{ closeAddConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:#fff;border-radius:16px;padding:22px;width:340px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+      <div style="font-size: 15.5px; font-weight: 700; color: #171719; padding-top: 5px; padding-bottom: 5px">방문지를 추가할까요?</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="font-size:12px;font-weight:600;color:rgba(23,23,25,.55)">이름</div>
+          <input value="{{ pendingName }}" onChange="{{ onPendingNameChange }}" placeholder="방문지 이름" style="font-size:13.5px;padding:9px 11px;border-radius:8px;border:1px solid #E1E2E4;font-family:inherit;color:#171719;outline:none">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="font-size:12px;font-weight:600;color:rgba(23,23,25,.55)">주소</div>
+          <input value="{{ pendingAddress }}" onChange="{{ onPendingAddressChange }}" placeholder="주소" style="font-size:13.5px;padding:9px 11px;border-radius:8px;border:1px solid #E1E2E4;font-family:inherit;color:#171719;outline:none">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div onClick="{{ closeAddConfirm }}" style="flex:1;text-align:center;border:1px solid #E1E2E4;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:#171719;cursor:pointer">취소</div>
+        <div onClick="{{ confirmAddPlace }}" class="rp-btn-primary" style="flex: 1; text-align: center; color: #12321F; border-radius: 10px; padding: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; background-color: #A3EAB8; border-width: 1px; border-style: solid; border-color: #8BBCA5">추가</div>
+      </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- 상황 변경 팝업 -->
+<sc-if value="{{ situationModalOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="position:relative"><div onClick="{{ closeSituationModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:{{ c.panelBg }};border-radius:16px;padding:22px;width:360px;max-width:100%;display:flex;flex-direction:column;gap:16px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+      <div style="font-size:15px;font-weight:700;color:{{ c.text }}">변수 추가</div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:{{ c.textSub }};margin-bottom:8px">어떤 상황이 생겼나요?</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <sc-for list="{{ situationVars }}" as="sv" hint-placeholder-count="5">
+            <div onClick="{{ sv.onSelect }}" style="cursor:pointer;padding:10px 12px;border-radius:10px;border:1px solid {{ sv.border }};background:{{ sv.bg }};color:{{ sv.color }};font-size:13px;font-weight:600">{{ sv.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ showWeatherSub }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:{{ c.textSub }};margin-bottom:8px">날씨 종류</div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ weatherOptions }}" as="wo" hint-placeholder-count="3">
+              <div onClick="{{ wo.onSelect }}" style="cursor:pointer;flex:1;text-align:center;padding:8px 4px;border-radius:9px;border:1px solid {{ wo.border }};background:{{ wo.bg }};color:{{ wo.color }};font-size:12.5px;font-weight:700">{{ wo.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ showSeverity }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:{{ c.textSub }};margin-bottom:8px">힘듦 정도</div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ severityOptions }}" as="sev" hint-placeholder-count="3">
+              <div onClick="{{ sev.onSelect }}" style="cursor: pointer; flex: 1; text-align: center; padding: 8px 4px; border-radius: 9px; border: 1px solid {{ sev.border }}; background: {{ sev.bg }}; color: {{ sev.color }}; font-size: 12.5px; font-weight: 600">{{ sev.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+        <div onClick="{{ closeSituationModal }}" style="flex:1;text-align:center;border:1px solid {{ c.border }};border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:{{ c.text }};cursor:pointer">취소</div>
+        <div onClick="{{ applySituation }}" class="rp-btn-primary" style="flex: 1; text-align: center; color: {{ applySituationColor }}; border-radius: 10px; padding: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; border: 1px solid {{ applySituationBorder }}; opacity: {{ applySituationOpacity }}; background-color: {{ applySituationBg }}">동선 재계산</div>
+      </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- 삭제 확인 팝업 -->
+<sc-if value="{{ deleteConfirmOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="position:relative"><div onClick="{{ closeDeleteConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div onClick="{{ stopPropagation }}" style="background:#fff;border-radius:16px;padding:22px;width:340px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+      <div style="font-size:15px;font-weight:700;color:#171719">{{ deleteConfirmMessage }}</div>
+      <div style="display:flex;gap:8px">
+        <div onClick="{{ closeDeleteConfirm }}" style="flex:1;text-align:center;border:1px solid #E1E2E4;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:#171719;cursor:pointer">취소</div>
+        <div onClick="{{ confirmDelete }}" style="flex:1;text-align:center;background:#E52222;color:#fff;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:pointer">삭제</div>
+      </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- AI 도우미: 평소엔 작은 진입 버튼, 클릭 시 패널로 확장 -->
+<sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
+<div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: 76px; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
+  <span>✨</span><span style="white-space:nowrap">AI 도우미</span>
+</div>
+
+
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;routeCriteria&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;time&quot;,&quot;tsType&quot;:&quot;'time'|'distance'&quot;,&quot;options&quot;:[&quot;time&quot;,&quot;distance&quot;],&quot;section&quot;:&quot;기본값&quot;}}">
+const PRIORITY_MAP = {
+  high: { label: '급한 방문', bg: '#FEECEC', color: '#E52222' },
+  normal: { label: '보통', bg: '#F4F4F5', color: '#5A5C63' },
+  low: { label: '낮음', bg: '#EAF2FE', color: '#0054D1' },
+};
+const PRIORITY_ORDER = ['high', 'normal', 'low'];
+const PIN_POS = ['20%,80%', '40%,54%', '64%,62%', '84%,28%'];
+
+const CATEGORY_OPTIONS = ['카페·베이커리', '식당', '쇼핑', '관광명소', '생활서비스', '기타'];
+const MODE_ORDER = ['car', 'walk', 'transit', 'bike'];
+const MODE_MAP = {
+  car: { label: '자동차', bg: '#F4F4F5', color: '#171719', border: '#E1E2E4', minPerKm: 2.0, wait: 0, icon: '🚗' },
+  walk: { label: '도보', bg: '#EAF2FE', color: '#0054D1', border: '#C9DEFE', minPerKm: 12, wait: 0, icon: '🚶' },
+  transit: { label: '대중교통', bg: '#FEF4E6', color: '#D47800', border: '#FEE6C6', minPerKm: 6, wait: 4, icon: '🚌' },
+  bike: { label: '자전거', bg: '#F2FFF6', color: '#1F7A44', border: '#ACFCC7', minPerKm: 4.5, wait: 0, icon: '🚲' },
+};
+const MODE_TOP_STYLE = {
+  car: { color: '#5B5B5E', border: '#E2E2E4', bg: '#F4F4F5' },
+  walk: { color: '#0054D1', border: '#C9DEFE', bg: '#EAF2FE' },
+  transit: { color: '#D47800', border: '#FEE6C6', bg: '#FEF4E6' },
+  bike: { color: '#1F7A44', border: '#ACFCC7', bg: '#F2FFF6' },
+};
+const MODE_DARK_TEXT = { car: '#D6D6D6', walk: '#9DB6FF', transit: '#FFC989', bike: '#8FE3A8' };
+const MODE_TOP_STYLE_DARK = {
+  car: { color: '#B8B8BA', border: '#4A4B4E', bg: '#2E2F31' },
+  walk: { color: '#8FA8D6', border: '#3A4560', bg: '#262B38' },
+  transit: { color: '#C9A06C', border: '#4A4030', bg: '#2E2A22' },
+  bike: { color: '#7FAF8C', border: '#3A4A3D', bg: '#242D26' },
+};
+const OUTDOOR_CATEGORIES = ['관광명소'];
+const SITUATION_VARS = [
+  { id: 'luggage', label: '짐 추가' },
+  { id: 'weather', label: '기상 변화' },
+  { id: 'delay', label: '일정 지연' },
+  { id: 'traffic', label: '교통 상황 악화' },
+];
+const WEATHER_SUBS = [
+  { id: 'rain', label: '비' },
+  { id: 'snow', label: '눈' },
+  { id: 'typhoon', label: '태풍' },
+];
+const SEVERITY_LEVELS = [
+  { id: 'mild', label: '조금 불편', weight: 1 },
+  { id: 'normal', label: '보통', weight: 2 },
+  { id: 'hard', label: '매우 불편', weight: 3 },
+];
+// MOCK 규칙 기반 "상황 변경" 재계산 엔진: 실제 서비스에서는 이 함수를 지도/날씨/교통 API 응답 기반 로직으로 교체.
+function applySituationAdjustment(situation, sub, severityWeight, places, segments) {
+  let newPlaces = [...places];
+  let newSegments = [...segments];
+  const toTransitIf = (modes) => newSegments.map(m => modes.includes(m) ? 'transit' : m);
+  if (situation === 'luggage') {
+    if (severityWeight >= 3) newSegments = newSegments.map(() => 'car');
+    else if (severityWeight === 2) newSegments = toTransitIf(['walk', 'bike']);
+    else newSegments = newSegments.map(m => m === 'walk' ? 'transit' : m);
+  } else if (situation === 'weather') {
+    if (sub === 'typhoon' && severityWeight >= 3) {
+      const indexed = newPlaces.map((p, i) => ({ p, i }));
+      indexed.sort((a, b) => {
+        const oa = OUTDOOR_CATEGORIES.includes(a.p.category) ? 1 : 0;
+        const ob = OUTDOOR_CATEGORIES.includes(b.p.category) ? 1 : 0;
+        if (oa !== ob) return oa - ob;
+        return a.i - b.i;
+      });
+      newPlaces = indexed.map(x => x.p);
+      newSegments = new Array(Math.max(0, newPlaces.length - 1)).fill('transit');
+    } else if (severityWeight >= 2) {
+      newSegments = toTransitIf(['walk', 'bike']);
+    } else {
+      newSegments = toTransitIf(['bike']);
+    }
+  } else if (situation === 'delay') {
+    const weight = (p) => (p.priority === 'high' ? 0 : p.priority === 'low' ? 2 : 1);
+    const indexed = newPlaces.map((p, i) => ({ p, i }));
+    indexed.sort((a, b) => {
+      const wa = weight(a.p), wb = weight(b.p);
+      if (wa !== wb) return wa - wb;
+      return a.i - b.i;
+    });
+    newPlaces = indexed.map(x => x.p);
+    if (severityWeight >= 2) newPlaces = newPlaces.map(p => ({ ...p, duration: Math.max(5, Math.round(p.duration * (severityWeight === 3 ? 0.6 : 0.8))) }));
+    newSegments = new Array(Math.max(0, newPlaces.length - 1)).fill(segments[0] || 'car');
+  } else if (situation === 'traffic') {
+    if (severityWeight >= 3) newSegments = toTransitIf(['car']).map(m => m === 'transit' ? 'transit' : m);
+    else if (severityWeight === 2) newSegments = toTransitIf(['car']);
+  }
+  return { places: newPlaces, segments: newSegments };
+}
+// MOCK 규칙 기반 자동 재조정 엔진: 실제 서비스에서는 이 함수만 지도/날씨/교통 API 기반 로직으로 교체하면 됨.
+function computeAutoAdjustment(places, segments) {
+  if (places.length < 2) return { places, segments };
+  const weight = (p) => (p.priority === 'high' ? 0 : p.priority === 'low' ? 2 : 1);
+  const badWeather = (p) => p.weather === 'rain' || p.weather === 'snow';
+  const outdoorPenalty = (p) => (badWeather(p) && OUTDOOR_CATEGORIES.includes(p.category) ? 1 : 0);
+  const indexed = places.map((p, i) => ({ p, i }));
+  indexed.sort((a, b) => {
+    const wa = weight(a.p), wb = weight(b.p);
+    if (wa !== wb) return wa - wb;
+    const oa = outdoorPenalty(a.p), ob = outdoorPenalty(b.p);
+    if (oa !== ob) return oa - ob;
+    return a.i - b.i;
+  });
+  const newPlaces = indexed.map(x => x.p);
+  const oldToNew = new Map(indexed.map((x, newI) => [x.i, newI]));
+  const newSegments = new Array(Math.max(0, newPlaces.length - 1)).fill('car');
+  for (let i = 0; i < segments.length; i++) {
+    const newFrom = oldToNew.get(i), newTo = oldToNew.get(i + 1);
+    if (newFrom != null && newTo != null && Math.abs(newFrom - newTo) === 1) {
+      newSegments[Math.min(newFrom, newTo)] = segments[i];
+    }
+  }
+  for (let i = 0; i < newSegments.length; i++) {
+    const from = newPlaces[i], to = newPlaces[i + 1];
+    const hasPack = !!(from.packItems || to.packItems);
+    const hasBadWeather = badWeather(from) || badWeather(to);
+    if (hasPack && newSegments[i] === 'walk') newSegments[i] = 'car';
+    else if (hasBadWeather && (newSegments[i] === 'walk' || newSegments[i] === 'bike')) newSegments[i] = 'transit';
+  }
+  return { places: newPlaces, segments: newSegments };
+}
+const SEGMENT_DISTANCES = [3.2, 5.6, 4.1, 2.8, 6.0, 3.9, 4.7];
+const STOP_NAMES = ['을지대입구 정류장', '시청역 3번 출구', '종합운동장 정류장', '상록수역 2번 출구', '시민공원 정류장'];
+const LINE_NAMES = ['452번 버스', '2호선 지하철', '730번 버스', '수인분당선'];
+
+// MOCK: 실제 대중교통/경로 API 연동 시 이 함수만 교체하면 됨 (동일한 steps 구조로 반환)
+function computeMockSteps(mode, distanceKm, idx) {
+  const info = MODE_MAP[mode];
+  if (mode !== 'transit') {
+    return [{ mode, arrowLabel: info.label, minutes: Math.round(distanceKm * info.minPerKm), distanceKm, nodeLabel: null }];
+  }
+  const rideDist = Math.max(0.3, distanceKm - 0.45);
+  const line = LINE_NAMES[idx % LINE_NAMES.length];
+  return [
+    { mode: 'walk', arrowLabel: '도보', minutes: 3, distanceKm: 0.2, nodeLabel: STOP_NAMES[idx % STOP_NAMES.length] },
+    { mode: 'transit', arrowLabel: line.includes('버스') ? '버스' : '지하철', minutes: Math.round(rideDist * info.minPerKm), distanceKm: rideDist, nodeLabel: line },
+    { mode: 'walk', arrowLabel: '도보', minutes: 4, distanceKm: 0.25, nodeLabel: null },
+  ];
+}
+
+// MOCK: 실제 지도/지오코딩 API 연동 시 좌표 계산 로직만 교체하면 됨 (마커/경로선은 그대로 사용)
+// MOCK: 실제 지도/지오코딩 API 연동 시, 장소별 좌표는 이 해시가 아니라 실제 지오코딩 결과로 교체
+const MOCK_COORD_PATTERN = [
+  { left: 18, top: 70 }, { left: 34, top: 42 }, { left: 52, top: 58 }, { left: 68, top: 30 },
+  { left: 26, top: 22 }, { left: 78, top: 62 }, { left: 44, top: 78 }, { left: 60, top: 16 },
+  { left: 14, top: 46 }, { left: 82, top: 38 }, { left: 38, top: 12 }, { left: 70, top: 82 },
+];
+function getMockCoordForId(id) {
+  const idx = Math.abs(Number(id) || 0) % MOCK_COORD_PATTERN.length;
+  return MOCK_COORD_PATTERN[idx];
+}
+function computePinLayout(count) {
+  const pts = [];
+  for (let i = 0; i < count; i++) {
+    const t = count > 1 ? i / (count - 1) : 0.5;
+    pts.push({ left: 12 + t * 74, top: 76 - t * 48 + (i % 2 === 1 ? 14 : 0) });
+  }
+  return pts;
+}
+
+const IS_NEW_ROUTE = (() => { try { return new URLSearchParams(window.location.search).get('new') === '1'; } catch (e) { return false; } })();
+const HAS_TRIP_DATE_PARAM = (() => { try { return !!new URLSearchParams(window.location.search).get('tripStart'); } catch (e) { return false; } })();
+function tripDayCount(start, end) {
+  if (!start || !end) return 1;
+  const a = new Date(start), b = new Date(end);
+  const diff = Math.round((b - a) / 86400000);
+  return diff > 0 ? diff + 1 : 1;
+}
+function chunkEven(arr, n) {
+  const chunks = Array.from({ length: n }, () => []);
+  arr.forEach((item, i) => chunks[Math.floor(i * n / arr.length)].push(item));
+  return chunks;
+}
+
+class Component extends DCLogic {
+  state = {
+    devRole: 'creator',
+    theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || 'light',
+    transport: this.props.transport ?? 'car',
+    criteria: this.props.routeCriteria ?? 'time',
+    loading: false,
+    permissionsModalOpen: false,
+    members: [
+      { id: 'm1', nickname: '유수', role: 'editor' },
+      { id: 'm2', nickname: '옐', role: 'viewer' },
+    ],
+    editRequests: [
+      { id: 'r1', nickname: '양다연', time: '10분 전' },
+    ],
+    inviteOpen: false,
+    permission: 'edit',
+    permissionMenuOpen: false,
+    copyLabel: '복사',
+    newAddress: '',
+    newAddressDay: 0,
+    dragIndex: null,
+    expandedPlaces: {},
+    editModalOpen: false,
+    editingId: null,
+    editName: '',
+    editAddress: '',
+    deleteConfirmOpen: false,
+    deleteTargetId: null,
+    deleteTargetLabel: '',
+    categoryModalOpen: false,
+    categoryTargetId: null,
+    selectedDay: null,
+    situationModalOpen: false,
+    situationVar: null,
+    situationSub: null,
+    situationSeverity: null,
+    tripStart: IS_NEW_ROUTE ? new Date().toISOString().slice(0, 10) : '',
+    mapOrderIds: null,
+    tripEnd: IS_NEW_ROUTE ? new Date().toISOString().slice(0, 10) : '',
+    newTripDateModalOpen: false,
+    places: IS_NEW_ROUTE ? [] : [
+      { id: 1, visitTime: '', packItems: '', weather: 'sunny', name: '행복 베이커리 강남점', category: '카페·베이커리', address: '서울 강남구 테헤란로 152', priority: 'normal', duration: 20, hours: 'open', hoursLabel: '영업중 · 21:00 마감' },
+      { id: 2, visitTime: '', packItems: '', weather: 'sunny', name: '미소 세탁소', category: '생활서비스', address: '서울 송파구 올림픽로 300', priority: 'normal', duration: 10, hours: 'closed', hoursLabel: '영업종료 · 09:00 오픈' },
+      { id: 3, visitTime: '', packItems: '', weather: 'sunny', name: '그린마트 광진점', category: '마트·편의점', address: '서울 광진구 자양로 45', priority: 'normal', duration: 15, hours: 'open', hoursLabel: '영업중 · 23:00 마감' },
+      { id: 4, visitTime: '', packItems: '', weather: 'sunny', name: '한빛 인쇄소', category: '사무·인쇄', address: '서울 성동구 아차산로 12', priority: 'low', duration: 25, hours: 'open', hoursLabel: '영업중 · 18:00 마감' },
+    ],
+    nextId: IS_NEW_ROUTE ? 1 : 5,
+    segments: IS_NEW_ROUTE ? [] : ['car', 'walk', 'transit'],
+    expandedSegments: { 2: true },
+    panelCollapsed: false,
+    mapCollapsed: false,
+    nickname: '다연',
+    activityLogOpen: false,
+    memoSavedId: null,
+    savedMemoIds: {},
+    toastMsg: '',
+    toastVisible: false,
+    myRoutesOpen: false,
+    savedRoutes: [],
+    saveLabel: '저장',
+    aiOpen: false,
+    aiInput: '',
+    aiLoading: false,
+    aiMessages: [
+      { role: 'ai', text: '안녕하세요! 경로를 계획하시면서 궁금한 점이 있으면 편하게 물어보세요.', suggestions: ['현재 경로 괜찮아?', '더 빠른 순서 있어?', '주변 추천해줘'] },
+    ],
+    // MOCK: 실제 서버 연동 시 activityLog를 API 응답으로 교체하고 logActivity를 POST 호출로 바꾸면 됨
+    activityLog: [],
+  };
+
+  logActivity = (text) => this.setState(s => ({
+    activityLog: [{
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      text: `${s.nickname}님이 ${text}`,
+      time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+    }, ...s.activityLog],
+  }));
+  toggleActivityLog = () => this.setState(s => ({ activityLogOpen: !s.activityLogOpen }));
+  onNicknameChange = (e) => this.setState({ nickname: e.target.value });
+
+  toggleAi = () => this.setState(s => ({ aiOpen: !s.aiOpen }));
+  onAiInput = (e) => this.setState({ aiInput: e.target.value });
+  onAiInputKeyDown = (e) => { if (e.key === 'Enter') this.sendAiMessage(); };
+  // MOCK: 실제 연동 시 이 함수를 현재 경로 상태를 컨텍스트로 넘기는 API 호출로 교체
+  sendAiMessage = (overrideText) => {
+    const text = (overrideText ?? this.state.aiInput).trim();
+    if (!text) return;
+    this.setState(s => ({ aiMessages: [...s.aiMessages, { role: 'user', text }], aiInput: '' }));
+    setTimeout(() => {
+      // MOCK: 다음 예상 질문 제안도 실제로는 API 응답에 함께 포함되는 형태로 교체
+      this.setState(s => ({ aiMessages: [...s.aiMessages, { role: 'ai', text: '현재 설정된 경로를 기준으로 확인해볼게요. (mock 응답)', suggestions: ['거리 얼마나 줄어?', '이동수단 바꿔볼까?', '경유지 추천해줘'] }] }));
+    }, 500);
+  };
+  onSuggestionClick = (text) => this.sendAiMessage(text);
+
+  togglePanelCollapsed = () => this.setState(s => {
+    const next = !s.panelCollapsed;
+    return { panelCollapsed: next, mapCollapsed: next ? false : s.mapCollapsed };
+  });
+  toggleMapCollapsed = () => this.setState(s => {
+    const next = !s.mapCollapsed;
+    return { mapCollapsed: next, panelCollapsed: next ? false : s.panelCollapsed };
+  });
+
+  resizeSegments(places, segments) {
+    const need = Math.max(0, places.length - 1);
+    const next = segments.slice(0, need);
+    while (next.length < need) next.push('car');
+    return next;
+  }
+
+  // MOCK: 실제 연동 시 localStorage 대신 서버 API로 내 일정 목록을 저장/조회
+  componentDidMount() {
+    try {
+      const raw = localStorage.getItem('rp-saved-routes');
+      if (raw) this.setState({ savedRoutes: JSON.parse(raw) });
+    } catch (e) {}
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('openMyRoutes') === '1') this.setState({ myRoutesOpen: true });
+      const loadId = params.get('loadRoute');
+      if (loadId) setTimeout(() => this.loadSavedRoute(loadId), 0);
+      const tripStart = params.get('tripStart');
+      const tripEnd = params.get('tripEnd');
+      if (tripStart || tripEnd) this.setState({ tripStart: tripStart || '', tripEnd: tripEnd || tripStart || '' });
+    } catch (e) {}
+    if (IS_NEW_ROUTE && !HAS_TRIP_DATE_PARAM) this.setState({ newTripDateModalOpen: true });
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('fromAI') === '1') {
+        const raw = localStorage.getItem('pd-ai-handoff');
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && Array.isArray(data.places) && data.places.length) {
+            this.setState({
+              places: data.places,
+              segments: data.segments || this.resizeSegments(data.places, []),
+              nextId: data.places.length + 1,
+              tripStart: data.tripStart || this.state.tripStart,
+              tripEnd: data.tripEnd || this.state.tripEnd,
+              newTripDateModalOpen: false,
+            });
+            this.logActivity('AI가 생성한 일정을 불러왔습니다');
+          }
+          localStorage.removeItem('pd-ai-handoff');
+        }
+      }
+    } catch (e) {}
+  }
+  onNewTripStartDateChange = (e) => this.setState(s => ({ tripStart: e.target.value, tripEnd: s.tripEnd < e.target.value ? e.target.value : s.tripEnd }));
+  onNewTripEndDateChange = (e) => this.setState({ tripEnd: e.target.value });
+  confirmNewTripDate = () => this.setState({ newTripDateModalOpen: false });
+  closeNewTripDateModal = () => this.setState({ newTripDateModalOpen: false });
+  toggleTheme = () => this.setState(s => {
+    const next = s.theme === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('pd-theme', next); } catch (e) {}
+    return { theme: next };
+  });
+  onDaySelectChange = (e) => this.setState({ selectedDay: e.target.value === 'all' ? null : Number(e.target.value) });
+  persistSavedRoutes(routes) {
+    try { localStorage.setItem('rp-saved-routes', JSON.stringify(routes)); } catch (e) {}
+  }
+  toggleMyRoutes = () => this.setState(s => ({ myRoutesOpen: !s.myRoutesOpen }));
+  saveCurrentRoute = () => {
+    const s = this.state;
+    if (s.places.length === 0) return;
+    const entry = {
+      id: `${Date.now()}`,
+      name: `${s.places[0].name} 외 ${Math.max(0, s.places.length - 1)}곳`,
+      customName: false,
+      members: [s.nickname, '유수'],
+      savedAt: new Date().toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      tripStart: s.tripStart || '',
+      tripEnd: s.tripEnd || '',
+      places: s.places,
+      segments: s.segments,
+      criteria: s.criteria,
+    };
+    this.setState(prev => {
+      const savedRoutes = [entry, ...prev.savedRoutes];
+      this.persistSavedRoutes(savedRoutes);
+      return { savedRoutes, saveLabel: '저장됨' };
+    });
+    this.logActivity(`현재 일정을 "${entry.name}"으로 저장했습니다`);
+    setTimeout(() => this.setState({ saveLabel: '저장' }), 1500);
+  };
+  loadSavedRoute = (id) => {
+    const route = this.state.savedRoutes.find(r => r.id === id);
+    if (!route) return;
+    this.setState({ places: route.places, segments: route.segments, criteria: route.criteria || 'time', tripStart: route.tripStart || '', tripEnd: route.tripEnd || '', myRoutesOpen: false });
+    this.logActivity(`"${route.name}" 일정을 불러왔습니다`);
+  };
+  deleteSavedRoute = (id) => this.setState(s => {
+    const savedRoutes = s.savedRoutes.filter(r => r.id !== id);
+    this.persistSavedRoutes(savedRoutes);
+    return { savedRoutes };
+  });
+
+  toggleInvite = () => this.setState(s => ({ inviteOpen: !s.inviteOpen }));
+  openPermissionsModal = () => this.setState({ permissionsModalOpen: true });
+  closePermissionsModal = () => this.setState({ permissionsModalOpen: false });
+  revokeMember = (id) => this.setState(s => ({ members: s.members.map(m => m.id === id ? { ...m, role: 'viewer' } : m) }));
+  askApproveRequest = (id) => this.setState({ requestConfirmOpen: true, requestConfirmId: id, requestConfirmKind: 'approve' });
+  askRejectRequest = (id) => this.setState({ requestConfirmOpen: true, requestConfirmId: id, requestConfirmKind: 'reject' });
+  closeRequestConfirm = () => this.setState({ requestConfirmOpen: false, requestConfirmId: null, requestConfirmKind: null });
+  confirmRequestAction = () => this.setState(s => {
+    const id = s.requestConfirmId;
+    const target = s.editRequests.find(r => r.id === id);
+    let members = s.members;
+    if (s.requestConfirmKind === 'approve' && target) {
+      members = [...s.members, { id: target.id, nickname: target.nickname, role: 'editor' }];
+    }
+    return {
+      members,
+      editRequests: s.editRequests.filter(r => r.id !== id),
+      requestConfirmOpen: false, requestConfirmId: null, requestConfirmKind: null,
+    };
+  });
+  setDevRole = (role) => this.setState({ devRole: role });
+  saveOrRemoveAction = () => {
+    if (this.state.devRole === 'savedViewer') {
+      this.showToast('내 일정에서 제거했어요');
+      return;
+    }
+    this.saveCurrentRoute();
+  };
+  deleteOriginalRoute = () => {
+    this.setState({ deleteConfirmOpen: true, deleteTargetId: 'ORIGINAL_ROUTE', deleteTargetLabel: '이 원본 일정' });
+  };
+  copyInvite = () => {
+    this.setState({ copyLabel: '복사됨' });
+    setTimeout(() => this.setState({ copyLabel: '복사' }), 1200);
+  };
+  togglePermissionMenu = () => this.setState(s => ({ permissionMenuOpen: !s.permissionMenuOpen }));
+  setPermission = (p) => this.setState({ permission: p, permissionMenuOpen: false });
+  onAddressInput = (e) => this.setState({ newAddress: e.target.value });
+  onNewAddressDayChange = (e) => this.setState({ newAddressDay: Number(e.target.value) });
+  onAddressKeyDown = (e) => {
+    if (e.key !== 'Enter') return;
+    this.setState({ addBtnPressed: true });
+    setTimeout(() => this.setState({ addBtnPressed: false }), 120);
+    this.addPlace();
+  };
+  showToast = (msg) => {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastMsg: msg, toastVisible: true });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2200);
+  };
+  addPlace = () => {
+    const addr = this.state.newAddress.trim();
+    if (!addr) return;
+    this.setState({ addConfirmOpen: true, pendingName: addr, pendingAddress: addr, pendingDay: this.state.newAddressDay || 0 });
+  };
+  onPendingNameChange = (e) => this.setState({ pendingName: e.target.value });
+  onPendingAddressChange = (e) => this.setState({ pendingAddress: e.target.value });
+  closeAddConfirm = () => this.setState({ addConfirmOpen: false, pendingAddress: '', pendingName: '' });
+  confirmAddPlace = () => {
+    const addr = this.state.pendingAddress.trim();
+    const name = this.state.pendingName.trim() || addr;
+    if (!addr) return;
+    this.setState(s => {
+      const places = [...s.places, { id: s.nextId, name, category: '미분류', address: addr, priority: 'normal', duration: 15, hours: 'unknown', hoursLabel: '영업시간 확인 필요', day: s.pendingDay || 0 }];
+      return { places, nextId: s.nextId + 1, newAddress: '', segments: this.resizeSegments(places, s.segments), addConfirmOpen: false, pendingAddress: '', pendingName: '' };
+    });
+    this.logActivity(`${name}을 추가했습니다`);
+    this.showToast('방문지가 일정에 추가됐어요');
+  };
+  quickAddPlace = () => {
+    this.setState(s => {
+      const name = `새 방문지 ${s.places.length + 1}`;
+      const places = [...s.places, { id: s.nextId, name, category: '미분류', address: '주소를 입력해주세요', priority: 'normal', duration: 15, hours: 'unknown', hoursLabel: '영업시간 확인 필요' }];
+      return { places, nextId: s.nextId + 1, segments: this.resizeSegments(places, s.segments) };
+    });
+    this.logActivity('새 방문지를 추가했습니다');
+  };
+  deletePlace = (id) => {
+    const place = this.state.places.find(p => p.id === id);
+    this.setState(s => {
+      const places = s.places.filter(p => p.id !== id);
+      return { places, segments: this.resizeSegments(places, s.segments) };
+    });
+    if (place) this.logActivity(`${place.name}을(를) 삭제했습니다`);
+  };
+  onDeleteClick = (e, id) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    const place = this.state.places.find(p => p.id === id);
+    if (!place) return;
+    this.setState({ deleteConfirmOpen: true, deleteTargetId: id, deleteTargetLabel: place.name });
+  };
+  closeDeleteConfirm = () => this.setState({ deleteConfirmOpen: false, deleteTargetId: null });
+  confirmDelete = () => {
+    const { deleteTargetId } = this.state;
+    if (deleteTargetId === 'ALL') {
+      const count = this.state.places.length;
+      this.setState({ places: [], segments: [] });
+      this.logActivity(`방문지 ${count}곳을 모두 삭제했습니다 (초기화)`);
+    } else if (deleteTargetId != null) {
+      this.deletePlace(deleteTargetId);
+    }
+    this.setState({ deleteConfirmOpen: false, deleteTargetId: null });
+  };
+  clearAllPlaces = () => {
+    if (this.state.places.length === 0) return;
+    this.setState({ deleteConfirmOpen: true, deleteTargetId: 'ALL', deleteTargetLabel: '방문지 전체' });
+  };
+  stopPropagation = (e) => { if (e && e.stopPropagation) e.stopPropagation(); };
+  openEditModal = (id) => {
+    const place = this.state.places.find(p => p.id === id);
+    if (!place) return;
+    this.setState({ editModalOpen: true, editingId: id, editName: place.name, editAddress: place.address });
+  };
+  closeEditModal = () => this.setState({ editModalOpen: false, editingId: null });
+  onEditNameChange = (e) => this.setState({ editName: e.target.value });
+  onEditAddressChange = (e) => this.setState({ editAddress: e.target.value });
+  saveEditModal = () => {
+    const { editingId, editName, editAddress } = this.state;
+    const name = editName.trim(), address = editAddress.trim();
+    if (!name || !address) return;
+    this.setState(s => ({
+      places: s.places.map(p => p.id === editingId ? { ...p, name, address } : p),
+      editModalOpen: false, editingId: null,
+    }));
+    this.logActivity(`방문지 정보를 "${name}"(으)로 수정했습니다`);
+  };
+  openCategoryModal = (id) => this.setState({ categoryModalOpen: true, categoryTargetId: id });
+  closeCategoryModal = () => this.setState({ categoryModalOpen: false, categoryTargetId: null });
+  selectCategory = (category) => {
+    const { categoryTargetId } = this.state;
+    const place = this.state.places.find(p => p.id === categoryTargetId);
+    this.setState(s => ({
+      places: s.places.map(p => p.id === categoryTargetId ? { ...p, category } : p),
+      categoryModalOpen: false, categoryTargetId: null,
+    }));
+    if (place) this.logActivity(`${place.name}의 카테고리를 ${category}(으)로 설정했습니다`);
+  };
+  cycleSegmentMode = (idx) => {
+    const curMode = this.state.segments[idx];
+    const nextMode = MODE_ORDER[(MODE_ORDER.indexOf(curMode) + 1) % MODE_ORDER.length];
+    this.setState(s => ({ segments: s.segments.map((m, i) => i === idx ? nextMode : m) }));
+    this.logActivity(`${idx + 1}-${idx + 2} 구간의 이동수단을 ${MODE_MAP[nextMode].label}(으)로 변경했습니다`);
+  };
+  applyModeToAll = (mode) => {
+    if (this.state.lastAppliedMode === mode) {
+      this.setState({ lastAppliedMode: null });
+      return;
+    }
+    this.setState(s => ({ segments: s.segments.map(() => mode), lastAppliedMode: mode }));
+    this.logActivity(`전체 구간 이동수단을 ${MODE_MAP[mode].label}(으)로 일괄 변경했습니다`);
+  };
+  toggleExpand = (idx) => this.setState(s => ({ expandedSegments: { ...s.expandedSegments, [idx]: !s.expandedSegments[idx] } }));
+  togglePlaceExpand = (id) => this.setState(s => ({ expandedPlaces: { ...s.expandedPlaces, [id]: !s.expandedPlaces[id] } }));
+  updatePlaceField = (id, field, value) => this.setState(s => ({
+    places: s.places.map(p => p.id === id ? { ...p, [field]: value } : p),
+    savedMemoIds: field === 'packItems' ? { ...s.savedMemoIds, [id]: false } : s.savedMemoIds,
+  }));
+  saveMemo = (id) => {
+    const place = this.state.places.find(p => p.id === id);
+    this.setState(s => ({ savedMemoIds: { ...s.savedMemoIds, [id]: true } }));
+    if (place) this.logActivity(`${place.name}의 메모를 저장했습니다`);
+  };
+  cyclePriority = (id) => {
+    const place = this.state.places.find(p => p.id === id);
+    const nextPriority = place ? PRIORITY_ORDER[(PRIORITY_ORDER.indexOf(place.priority) + 1) % 3] : null;
+    this.setState(s => ({ places: s.places.map(p => p.id === id ? { ...p, priority: PRIORITY_ORDER[(PRIORITY_ORDER.indexOf(p.priority) + 1) % 3] } : p) }));
+    if (place && nextPriority) this.logActivity(`${place.name}의 우선순위를 ${PRIORITY_MAP[nextPriority].label}(으)로 변경했습니다`);
+  };
+  changeDuration = (id, delta) => {
+    const place = this.state.places.find(p => p.id === id);
+    this.setState(s => ({ places: s.places.map(p => p.id === id ? { ...p, duration: Math.max(5, p.duration + delta) } : p) }));
+    if (place) this.logActivity(`${place.name}의 체류시간을 ${Math.max(5, place.duration + delta)}분으로 변경했습니다`);
+  };
+  onDragStart = (idx) => this.setState({ dragIndex: idx });
+  onDragOver = (e) => e.preventDefault();
+  onDrop = (idx) => {
+    const wasDragging = this.state.dragIndex !== null && this.state.dragIndex !== idx;
+    this.setState(s => {
+      if (s.dragIndex === null || s.dragIndex === idx) return null;
+      const arr = [...s.places];
+      const [moved] = arr.splice(s.dragIndex, 1);
+      arr.splice(idx, 0, moved);
+      return { places: arr, dragIndex: null, segments: this.resizeSegments(arr, s.segments) };
+    });
+    if (wasDragging) this.logActivity('방문 순서를 변경했습니다');
+  };
+  onDragEnd = () => this.setState({ dragIndex: null });
+  setCriteria = (c) => this.setState({ criteria: c });
+  openSituationModal = () => this.setState({ situationModalOpen: true, situationVar: null, situationSub: null, situationSeverity: null });
+  closeSituationModal = () => this.setState({ situationModalOpen: false });
+  selectSituationVar = (id) => this.setState({ situationVar: id, situationSub: null, situationSeverity: null });
+  selectSituationSub = (id) => this.setState({ situationSub: id });
+  selectSituationSeverity = (id) => this.setState({ situationSeverity: id });
+  applySituation = () => {
+    const { situationVar, situationSub, situationSeverity } = this.state;
+    if (!situationVar || !situationSeverity) return;
+    if (situationVar === 'weather' && !situationSub) return;
+    const sevWeight = (SEVERITY_LEVELS.find(s => s.id === situationSeverity) || {}).weight || 1;
+    this.setState({ situationModalOpen: false, loading: true });
+    setTimeout(() => {
+      this.setState(s => {
+        const { places, segments } = applySituationAdjustment(situationVar, situationSub, sevWeight, s.places, s.segments);
+        return { places, segments, loading: false };
+      });
+      const varLabel = (SITUATION_VARS.find(v => v.id === situationVar) || {}).label || situationVar;
+      const sevLabel = (SEVERITY_LEVELS.find(s => s.id === situationSeverity) || {}).label || '';
+      this.logActivity(`상황 변경(${varLabel}${situationSub ? ' · ' + WEATHER_SUBS.find(w => w.id === situationSub).label : ''} · ${sevLabel})에 맞춰 동선을 재계산했습니다`);
+      this.showToast('변경된 상황을 동선에 반영했어요');
+    }, 800);
+  };
+  recalc = () => {
+    if (this.state.loading) return;
+    this.setState({ loading: true });
+    setTimeout(() => this.setState(s => ({ loading: false, mapOrderIds: s.places.map(p => p.id) })), 900);
+  };
+
+  segStyle(active) {
+    return active
+      ? { bg: '#171719', color: '#fff', shadow: '0px 1px 2px -1px rgba(23,23,25,.2)' }
+      : { bg: 'transparent', color: this.state.theme === 'dark' ? 'rgba(247,247,248,.75)' : 'rgba(23,23,25,.55)', shadow: 'none' };
+  }
+
+  renderVals() {
+    const cEarly = this.state.theme === 'dark'
+      ? { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.55)', border: '#3A3B3E', panelBg: '#17181A', chipBg: 'rgba(255,255,255,.08)', cardBg: '#37383A', cardBgAlt: '#232426' }
+      : { bg: '#F7F7F8', text: '#171719', textSub: 'rgba(23,23,25,.5)', border: '#E1E2E4', panelBg: '#fff', chipBg: '#F4F4F5', cardBg: '#fff', cardBgAlt: '#F7F7F8' };
+    const { criteria, places, loading, noticeOpen, inviteOpen, permission, permissionMenuOpen, copyLabel, newAddress, dragIndex, segments, expandedSegments, expandedPlaces, panelCollapsed, mapCollapsed, nickname, activityLogOpen, activityLog } = this.state;
+    const panelExpanded = !panelCollapsed;
+    const mapExpanded = !mapCollapsed;
+    const devRole = this.state.devRole || 'creator';
+    const canEdit = devRole === 'creator' || devRole === 'editor';
+    const canManageInvite = devRole === 'creator';
+    const canDeleteOriginal = devRole === 'creator';
+    const isViewerRole = devRole === 'viewer' || devRole === 'savedViewer';
+    const shellStateClass = panelCollapsed ? 'rp-panel-collapsed' : (mapCollapsed ? 'rp-map-collapsed' : '');
+    const hasActivityLog = activityLog.length > 0;
+    const noActivityLog = activityLog.length === 0;
+    const logDrawerTransform = activityLogOpen ? 'translateX(0)' : 'translateX(100%)';
+    const { aiOpen, aiInput, aiMessages, myRoutesOpen, savedRoutes, saveLabel } = this.state;
+    const hasSavedRoutes = savedRoutes.length > 0;
+    const noSavedRoutes = savedRoutes.length === 0;
+    const myRoutesDrawerTransform = myRoutesOpen ? 'translateX(0)' : 'translateX(100%)';
+    const enrichedSavedRoutes = savedRoutes.map(r => ({
+      ...r,
+      countLabel: `${r.places.length}곳`,
+      onLoad: () => this.loadSavedRoute(r.id),
+      onDelete: (e) => { this.deleteSavedRoute(r.id); },
+    }));
+
+    const firstNonHighIdx = places.findIndex(p => p.priority !== 'high');
+    const urgentPushedNames = firstNonHighIdx === -1 ? [] : places.filter((p, i) => p.priority === 'high' && i > firstNonHighIdx).map(p => p.name);
+    const urgentPushedBack = urgentPushedNames.length > 0;
+
+    const enrichedPlaces = places.map((p, idx) => {
+      const pr = PRIORITY_MAP[p.priority];
+      const isDragging = dragIndex === idx;
+      const expanded = !!expandedPlaces[p.id];
+      return {
+        ...p,
+        packItems: p.packItems || '',
+        onPackItemsChange: (e) => this.updatePlaceField(p.id, 'packItems', e.target.value),
+        onSaveMemo: () => this.saveMemo(p.id),
+        hasMemo: !!p.packItems,
+        categoryBg: this.state.theme === 'dark' ? '#3A342A' : '#F7F1E7',
+        categoryColor: this.state.theme === 'dark' ? '#D9C6A8' : '#927A55',
+        memoSaveText: this.state.savedMemoIds[p.id] ? '저장됨' : '저장',
+        memoIsSaved: !!this.state.savedMemoIds[p.id],
+        memoSaveBg: cEarly.chipBg,
+        memoSaveColor: cEarly.textSub,
+        order: idx + 1,
+        isLast: idx === places.length - 1,
+        lineOpacity: idx === places.length - 1 ? 0 : 1,
+        priorityLabel: pr.label,
+        priorityBg: pr.bg,
+        priorityColor: pr.color,
+        hoursBg: this.state.theme === 'dark'
+          ? (p.hours === 'open' ? '#1E2E22' : p.hours === 'unknown' ? '#332B1E' : '#332020')
+          : (p.hours === 'open' ? '#EAF6EE' : p.hours === 'unknown' ? '#FFF5E5' : '#FDECEC'),
+        hoursColor: this.state.theme === 'dark'
+          ? (p.hours === 'open' ? '#6FCB93' : p.hours === 'unknown' ? '#E0B372' : '#E58888')
+          : (p.hours === 'open' ? '#3F8F5B' : p.hours === 'unknown' ? '#C9822B' : '#D9534F'),
+        bg: isDragging ? cEarly.cardBgAlt : cEarly.cardBg,
+        borderColor: isDragging ? '#7BCB93' : (this.state.theme === 'dark' ? '#8A8B8F' : cEarly.border),
+        expanded, expandChevronDeg: expanded ? 180 : 0,
+        onToggleExpand: () => this.togglePlaceExpand(p.id),
+        onDelete: () => this.deletePlace(p.id),
+        onDeleteClick: (e) => this.onDeleteClick(e, p.id),
+        onOpenEdit: () => this.openEditModal(p.id),
+        onOpenCategory: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openCategoryModal(p.id); },
+        onCyclePriority: () => this.cyclePriority(p.id),
+        onDurationUp: () => this.changeDuration(p.id, 5),
+        onDurationDown: () => this.changeDuration(p.id, -5),
+        onDragStart: () => this.onDragStart(idx),
+        onDragOver: this.onDragOver,
+        onDrop: () => this.onDrop(idx),
+        onDragEnd: this.onDragEnd,
+      };
+    });
+
+    const criteriaOptions = [
+      { key: 'time', label: '최단시간', onSelect: () => this.setCriteria('time'), ...this.segStyle(criteria === 'time') },
+      { key: 'distance', label: '최단거리', onSelect: () => this.setCriteria('distance'), ...this.segStyle(criteria === 'distance') },
+    ];
+    const modeOptions = MODE_ORDER.map(key => {
+      const info = MODE_MAP[key];
+      const top = this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK[key] : MODE_TOP_STYLE[key];
+      const isApplied = this.state.lastAppliedMode === key;
+      const dimmed = this.state.lastAppliedMode && !isApplied;
+      return {
+        key, label: info.label, onApplyAll: () => this.applyModeToAll(key), opacity: dimmed ? 0.45 : 1,
+        chipBg: isApplied ? top.color : top.bg,
+        chipColor: isApplied ? '#fff' : top.color,
+        chipBorder: isApplied ? top.color : top.border,
+      };
+    });
+
+    const enrichedSegments = segments.map((mode, idx) => {
+      const isFirst = idx === 0;
+      const info = MODE_MAP[mode];
+      const fromP = places[idx], toP = places[idx + 1];
+      const pairKey = fromP && toP ? (Number(fromP.id) * 131 + Number(toP.id) * 17) : idx;
+      const dist = SEGMENT_DISTANCES[Math.abs(pairKey) % SEGMENT_DISTANCES.length];
+      const rawSteps = computeMockSteps(mode, dist, idx);
+      const steps = rawSteps.map((st, si) => ({
+        ...st,
+        durationLabel: `${st.minutes}분`,
+        lineOpacity: si === rawSteps.length - 1 ? 0 : 1,
+        distanceLabel: `${st.distanceKm.toFixed(1)}km`,
+        hasNode: !!st.nodeLabel,
+        chipBg: MODE_TOP_STYLE[st.mode].bg,
+        chipColor: this.state.theme === 'dark' ? MODE_DARK_TEXT[st.mode] : MODE_TOP_STYLE[st.mode].color,
+        nodeBg: this.state.theme === 'dark' ? cEarly.chipBg : MODE_TOP_STYLE[st.mode].bg,
+        nodeColor: this.state.theme === 'dark' ? cEarly.text : MODE_TOP_STYLE[st.mode].color,
+        nodeBorder: this.state.theme === 'dark' ? cEarly.border : MODE_TOP_STYLE[st.mode].border,
+      }));
+      const totalMinutes = steps.reduce((s, st) => s + st.minutes, 0);
+      const totalDist = steps.reduce((s, st) => s + st.distanceKm, 0);
+      const expanded = !!expandedSegments[idx];
+      return {
+        mode, label: info.label, icon: info.icon, isFirst,
+        isCar: mode === 'car', isWalk: mode === 'walk', isTransit: mode === 'transit', isBike: mode === 'bike',
+        bg: (this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK : MODE_TOP_STYLE)[mode].bg,
+        color: (this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK : MODE_TOP_STYLE)[mode].color,
+        borderColor: (this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK : MODE_TOP_STYLE)[mode].border,
+        distanceKm: totalDist, minutes: totalMinutes,
+        durationLabel: `${totalMinutes}분`, distanceLabel: `${totalDist.toFixed(1)}km`,
+        onCycle: () => this.cycleSegmentMode(idx),
+        hasDetail: steps.length > 1,
+        expanded, onToggle: () => this.toggleExpand(idx),
+        chevronDeg: expanded ? 180 : 0,
+        steps,
+      };
+    });
+
+    const dayCount = tripDayCount(this.state.tripStart, this.state.tripEnd);
+    const dayOfIdx = (i) => Math.min(enrichedPlaces[i].day || 0, dayCount - 1);
+    const { selectedDay } = this.state;
+    const hasDayTabs = dayCount > 1;
+    const dayTabs = hasDayTabs ? Array.from({ length: dayCount }, (_, di) => ({ value: String(di), label: `${di + 1}일차` })) : [];
+    const selectedDayValue = selectedDay === null ? 'all' : String(selectedDay);
+    const timeline = [];
+    let lastDay = -1;
+    enrichedPlaces.forEach((p, i) => {
+      const day = dayOfIdx(i);
+      if (hasDayTabs && selectedDay !== null && day !== selectedDay) return;
+      if (dayCount > 1 && day !== lastDay) {
+        timeline.push({ isPlace: false, isConnector: false, isDivider: true, dayLabel: `${day + 1}일차` });
+        lastDay = day;
+      }
+      timeline.push({ isPlace: true, isConnector: false, place: p });
+      if (i < enrichedSegments.length && (selectedDay === null || day === selectedDay)) timeline.push({ isPlace: false, isConnector: true, segment: enrichedSegments[i] });
+    });
+
+    let distance = enrichedSegments.reduce((sum, s) => sum + s.distanceKm, 0);
+    let time = enrichedSegments.reduce((sum, s) => sum + s.minutes, 0);
+    if (criteria === 'distance') { distance = distance * 0.92; } else { time = time * 0.9; }
+    const h = Math.floor(time / 60), m = Math.round(time % 60);
+    const aiContextLabel = places.length
+      ? `경유지 ${places.length}곳 · ${distance.toFixed(1)}km · ${h > 0 ? h + '시간 ' : ''}${m}분`
+      : '방문지를 추가하면 AI가 경로를 참고해요';
+    const lastAiIdx = aiMessages.reduce((acc, m, i) => m.role === 'ai' ? i : acc, -1);
+    const enrichedAiMessages = aiMessages.map((msg, i) => {
+      const suggestions = (msg.suggestions || []).map(text => ({ text, onClick: () => this.onSuggestionClick(text) }));
+      return {
+        ...msg,
+        isAi: msg.role === 'ai',
+        align: msg.role === 'ai' ? 'flex-start' : 'flex-end',
+        bg: msg.role === 'ai' ? '#F4F4F5' : '#7BCB93',
+        color: msg.role === 'ai' ? '#171719' : '#fff',
+        radius: msg.role === 'ai' ? '4px 14px 14px 14px' : '14px 4px 14px 14px',
+        showSuggestions: msg.role === 'ai' && i === lastAiIdx && suggestions.length > 0,
+        suggestions,
+      };
+    });
+
+    // 지도 표시는 "경로 계산"을 눌렀을 때 확정된 순서(mapOrderIds)를 기준으로 하며, 드래그 중에는 즉시 반영되지 않음.
+    // 각 장소의 지도 위치는 장소 id 기반 고정 좌표(MOCK) — 순서가 바뀌어도 위치 자체는 유지, 번호/경로선만 갱신됨.
+    const mapOrderIds = (this.state.mapOrderIds && this.state.mapOrderIds.length === places.length)
+      ? this.state.mapOrderIds
+      : places.map(p => p.id);
+    const mapOrderedPlaces = mapOrderIds.map(id => places.find(p => p.id === id)).filter(Boolean);
+    const pinLayout = mapOrderedPlaces.map(p => getMockCoordForId(p.id));
+    const mapPins = mapOrderedPlaces.map((p, i) => ({ order: i + 1, left: `${pinLayout[i].left}%`, top: `${pinLayout[i].top}%` }));
+    const routePolylinePoints = pinLayout.map(pt => `${pt.left.toFixed(1)},${pt.top.toFixed(1)}`).join(' ');
+    const mapSegmentLabels = enrichedSegments.map((seg, i) => {
+      const a = pinLayout[i], b = pinLayout[i + 1];
+      if (!a || !b) return null;
+      return { key: i, left: `${((a.left + b.left) / 2).toFixed(1)}%`, top: `${((a.top + b.top) / 2).toFixed(1)}%`, bg: seg.bg, color: seg.color, label: seg.label, durationLabel: seg.durationLabel };
+    }).filter(Boolean);
+
+    const c = cEarly;
+    const devRoleOptions = [
+      { key: 'creator', label: 'Creator' },
+      { key: 'editor', label: 'Editor' },
+      { key: 'viewer', label: 'Viewer' },
+      { key: 'savedViewer', label: 'Saved Viewer' },
+    ].map(r => ({
+      label: r.label, onSelect: () => this.setDevRole(r.key),
+      bg: devRole === r.key ? '#7BCB93' : 'transparent',
+      color: devRole === r.key ? '#12321F' : c.textSub,
+    }));
+    return {
+      c, isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
+      addressInputBg: this.state.theme === 'dark' ? '#37383A' : '#FFFFFF',
+      addressInputBorder: this.state.theme === 'dark' ? '#8A8B8F' : '#E5E5E5',
+      situationBtnBg: this.state.theme === 'dark' ? '#26332B' : '#F2F6ED',
+      situationBtnColor: this.state.theme === 'dark' ? '#8FC79E' : '#2F6B45',
+      situationBtnBorder: this.state.theme === 'dark' ? '#3A4C40' : '#CFE8D6',
+      actionBtnBg: this.state.theme === 'dark' ? '#2A2B2D' : '#fff',
+      actionBtnBorder: this.state.theme === 'dark' ? '#4A4B4E' : '#E5E5E5',
+      recalcBtnBg: this.state.theme === 'dark' ? '#5FA173' : '#7BCB93',
+      recalcBtnColor: this.state.theme === 'dark' ? '#0E1F14' : '#12321F',
+      addBtnBg: this.state.theme === 'dark' ? '#26332B' : '#F2F6ED',
+      addBtnColor: this.state.theme === 'dark' ? '#8FC79E' : '#163B25',
+      addBtnBorder: this.state.theme === 'dark' ? '#3A4C40' : '#CFE8D6',
+      segmentDetailBg: this.state.theme === 'dark' ? '#37383A' : '#FBFBFE',
+      newTripDateModalOpen: this.state.newTripDateModalOpen, tripStart: this.state.tripStart, tripEnd: this.state.tripEnd,
+      closeNewTripDateModal: this.closeNewTripDateModal,
+      colorScheme: this.state.theme === 'dark' ? 'dark' : 'light',
+      hasDayTabs, dayTabs, selectedDayValue, onDaySelectChange: this.onDaySelectChange,
+      newAddressDayValue: String(Math.min(this.state.newAddressDay || 0, dayCount - 1)), onNewAddressDayChange: this.onNewAddressDayChange,
+      onNewTripStartDateChange: this.onNewTripStartDateChange, onNewTripEndDateChange: this.onNewTripEndDateChange, confirmNewTripDate: this.confirmNewTripDate,
+      panelCollapsed, panelExpanded, mapCollapsed, mapExpanded, shellStateClass,
+      togglePanelCollapsed: this.togglePanelCollapsed,
+      collapseIconBg: this.state.theme === 'dark' ? '#2E332D' : '#E7EDE3',
+      collapseIconColor: this.state.theme === 'dark' ? '#C7CBC4' : '#000000',
+      noticeBg: this.state.theme === 'dark' ? '#1E2A22' : '#EDFFF3',
+      noticeBorder: this.state.theme === 'dark' ? '#37453B' : '#A8DEBA',
+      noticeText: this.state.theme === 'dark' ? '#8FBF9E' : '#1F7A44',
+      toggleMapCollapsed: this.toggleMapCollapsed,
+      nickname, onNicknameChange: this.onNicknameChange,
+      activityLogOpen, toggleActivityLog: this.toggleActivityLog,
+      activityLog, hasActivityLog, noActivityLog, logDrawerTransform,
+      myRoutesOpen, toggleMyRoutes: this.toggleMyRoutes, myRoutesDrawerTransform,
+      savedRoutes: enrichedSavedRoutes, hasSavedRoutes, noSavedRoutes,
+      saveLabel, saveLabelText: isViewerRole ? (devRole === 'savedViewer' ? '내 일정에서 제거' : '내 일정에 저장') : saveLabel, isSaved: !isViewerRole && saveLabel !== '저장', saveCurrentRoute: this.saveCurrentRoute,
+      urgentPushedBack,
+      urgentPushedLabel: urgentPushedNames.length ? `급한 방문지 ${urgentPushedNames.join(', ')}이(가) 뒤 순서로 밀렸어요` : '',
+      aiOpen, toggleAi: this.toggleAi,
+      situationModalOpen: this.state.situationModalOpen,
+      openSituationModal: this.openSituationModal, closeSituationModal: this.closeSituationModal,
+      applySituation: this.applySituation,
+      applySituationOpacity: 1,
+      applySituationBg: (this.state.situationVar && this.state.situationSeverity && (this.state.situationVar !== 'weather' || this.state.situationSub)) ? '#7BCB93' : c.chipBg,
+      applySituationColor: (this.state.situationVar && this.state.situationSeverity && (this.state.situationVar !== 'weather' || this.state.situationSub)) ? '#12321F' : c.text,
+      applySituationBorder: (this.state.situationVar && this.state.situationSeverity && (this.state.situationVar !== 'weather' || this.state.situationSub)) ? '#7BCB93' : c.border,
+      showWeatherSub: this.state.situationVar === 'weather',
+      showSeverity: !!this.state.situationVar,
+      situationVars: SITUATION_VARS.map(v => ({
+        ...v,
+        onSelect: () => this.selectSituationVar(v.id),
+        bg: this.state.situationVar === v.id ? '#EAF9EF' : c.chipBg,
+        color: this.state.situationVar === v.id ? '#1F7A44' : c.text,
+        border: this.state.situationVar === v.id ? '#7BCB93' : c.border,
+      })),
+      weatherOptions: WEATHER_SUBS.map(w => ({
+        ...w,
+        onSelect: () => this.selectSituationSub(w.id),
+        bg: this.state.situationSub === w.id ? '#EAF9EF' : c.chipBg,
+        color: this.state.situationSub === w.id ? '#1F7A44' : c.text,
+        border: this.state.situationSub === w.id ? '#7BCB93' : c.border,
+      })),
+      severityOptions: SEVERITY_LEVELS.map(sv => ({
+        ...sv,
+        onSelect: () => this.selectSituationSeverity(sv.id),
+        bg: this.state.situationSeverity === sv.id ? '#EAF9EF' : c.chipBg,
+        color: this.state.situationSeverity === sv.id ? '#1F7A44' : c.text,
+        border: this.state.situationSeverity === sv.id ? '#7BCB93' : c.border,
+      })),
+      aiInput, onAiInput: this.onAiInput, onAiInputKeyDown: this.onAiInputKeyDown, sendAiMessage: () => this.sendAiMessage(),
+      aiMessages: enrichedAiMessages, aiContextLabel, aiLoading: this.state.aiLoading,
+      aiSendOpacity: this.state.aiLoading ? 0.5 : 1,
+      aiSendLabel: this.state.aiLoading ? '...' : '전송',
+      aiPanelClass: aiOpen ? 'rp-ai-panel rp-ai-panel-open' : 'rp-ai-panel',
+      aiFabDisplay: aiOpen ? 'none' : 'flex',
+      toastMsg: this.state.toastMsg, toastOpacity: this.state.toastVisible ? 1 : 0,
+      places: enrichedPlaces,
+      timeline,
+      hasPlaces: places.length > 0,
+      isEmpty: places.length === 0,
+      canEdit, canManageInvite, canDeleteOriginal, isViewerRole, devRole, devRoleOptions,
+      canClearAll: places.length > 0 && canEdit,
+      cardCursor: canEdit ? 'grab' : 'default',
+      saveOrRemoveAction: this.saveOrRemoveAction,
+      deleteOriginalRoute: this.deleteOriginalRoute,
+      quickAddPlace: this.quickAddPlace,
+      clearAllPlaces: this.clearAllPlaces,
+      stopPropagation: this.stopPropagation,
+      editModalOpen: this.state.editModalOpen,
+      editName: this.state.editName,
+      editAddress: this.state.editAddress,
+      onEditNameChange: this.onEditNameChange,
+      onEditAddressChange: this.onEditAddressChange,
+      closeEditModal: this.closeEditModal,
+      saveEditModal: this.saveEditModal,
+      categoryModalOpen: this.state.categoryModalOpen,
+      closeCategoryModal: this.closeCategoryModal,
+      categoryOptions: CATEGORY_OPTIONS.map(cat => ({
+        label: cat, onSelect: () => this.selectCategory(cat),
+        bg: '#F7F1E7',
+        color: '#927A55',
+      })),
+      deleteConfirmOpen: this.state.deleteConfirmOpen,
+      deleteConfirmMessage: `${this.state.deleteTargetLabel}을 삭제하시겠습니까?`,
+      closeDeleteConfirm: this.closeDeleteConfirm,
+      confirmDelete: this.confirmDelete,
+      addConfirmOpen: this.state.addConfirmOpen,
+      pendingName: this.state.pendingName,
+      onPendingNameChange: this.onPendingNameChange,
+      pendingAddress: this.state.pendingAddress,
+      onPendingAddressChange: this.onPendingAddressChange,
+      closeAddConfirm: this.closeAddConfirm,
+      confirmAddPlace: this.confirmAddPlace,
+      placeCountLabel: places.length > 0 ? `(${places.length})` : '',
+      mapPins,
+      mapSegmentLabels,
+      hasRoute: pinLayout.length > 1,
+      routePolylinePoints,
+      modeOptions,
+      modeCar: modeOptions[0], modeWalk: modeOptions[1], modeTransit: modeOptions[2], modeBike: modeOptions[3],
+      criteriaOptions,
+      newAddress,
+      onAddressInput: this.onAddressInput,
+      onAddressKeyDown: this.onAddressKeyDown,
+      addPlace: this.addPlace,
+      addBtnClass: this.state.addBtnPressed ? 'rp-btn-primary rp-btn-pressed' : 'rp-btn-primary',
+      permissionsModalOpen: this.state.permissionsModalOpen,
+      openPermissionsModal: this.openPermissionsModal,
+      closePermissionsModal: this.closePermissionsModal,
+      memberList: this.state.members.filter(m => m.role === 'editor').map(m => ({
+        nickname: m.nickname,
+        onRevoke: () => this.revokeMember(m.id),
+      })),
+      hasEditors: this.state.members.some(m => m.role === 'editor'),
+      editRequests: this.state.editRequests.map(r => ({
+        nickname: r.nickname, time: r.time,
+        onApprove: () => this.askApproveRequest(r.id),
+        onReject: () => this.askRejectRequest(r.id),
+      })),
+      hasEditRequests: this.state.editRequests.length > 0,
+      requestConfirmOpen: this.state.requestConfirmOpen,
+      closeRequestConfirm: this.closeRequestConfirm,
+      requestConfirmAction: this.confirmRequestAction,
+      requestConfirmMessage: (() => {
+        const target = this.state.editRequests.find(r => r.id === this.state.requestConfirmId);
+        const name = target ? target.nickname : '';
+        return this.state.requestConfirmKind === 'approve' ? `${name}님의 편집 권한을 수락하시겠습니까?` : `${name}님의 편집 권한을 거절하시겠습니까?`;
+      })(),
+      requestConfirmBtnLabel: this.state.requestConfirmKind === 'approve' ? '수락' : '거절',
+      requestConfirmBtnBg: this.state.requestConfirmKind === 'approve' ? '#7BCB93' : '#E52222',
+      requestConfirmBtnColor: this.state.requestConfirmKind === 'approve' ? '#12321F' : '#fff',
+      inviteOpen,
+      toggleInvite: this.toggleInvite,
+      inviteLink: permission === 'edit' ? 'montage.app/invite/8f2xk1?role=editor' : 'montage.app/invite/8f2xk1?role=viewer',
+      permissionLabel: permission === 'edit' ? '편집 가능' : '보기 전용',
+      permissionDescLabel: permission === 'edit' ? '함께 수정할 수 있어요' : '보기만 할 수 있어요',
+      permissionMenuOpen,
+      togglePermissionMenu: this.togglePermissionMenu,
+      permissionOptions: [
+        { key: 'edit', label: '편집 가능', active: permission === 'edit', onSelect: () => this.setPermission('edit') },
+        { key: 'view', label: '보기 전용', active: permission === 'view', onSelect: () => this.setPermission('view') },
+      ],
+      copyLabel,
+      copyInvite: this.copyInvite,
+      loading,
+      recalc: this.recalc,
+      recalcLabel: loading ? '계산 중...' : '경로 다시 계산',
+      recalcOpacity: loading ? 0.7 : 1,
+      summary: {
+        count: places.length,
+        distanceLabel: places.length ? `${distance.toFixed(1)}km` : '-',
+        timeLabel: places.length ? (h > 0 ? `${h}시간 ${m}분` : `${m}분`) : '-',
+      },
+    };
+  }
+}
+
+</script>
+</body>
+</html>

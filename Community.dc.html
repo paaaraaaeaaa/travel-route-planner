@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+a{color:#1F7A44}
+a:hover{color:#146030}
+.cm-icon-btn{transition:background-color .15s}
+.cm-icon-btn:hover{background-color:#EAEBEC}
+.cm-like:hover{opacity:.8}
+.cm-btn{background:#7BCB93;color:#12321F;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer;border:none;font-family:inherit}
+.cm-region-col{width:180px;flex-shrink:0;background:#fff;border:1px solid #E1E2E4;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px;max-height:520px;overflow-y:auto}
+.cm-region-item{cursor:pointer;border-radius:8px;padding:8px 11px;font-size:13px;font-weight:700;color:#171719;background:transparent;transition:background-color .15s,color .15s}
+.cm-region-item:hover{background:#EAEBEC}
+.cm-region-active{background:#7BCB93 !important;color:#12321F !important}
+.cm-dark .cm-region-col{background:#17181A;border-color:#292A2D;border-width:1px}
+.cm-dark .cm-region-item{color:#fff}
+.cm-dark .cm-region-item:hover{background:rgba(255,255,255,.1)}
+.cm-dark .cm-region-active{background:#357849 !important;color:#fff !important}
+.cm-dark .cm-nav-link-active{color:#7BCB93 !important;border-color:#7BCB93 !important}
+.cm-row{display:flex;gap:20px;align-items:flex-start}
+.cm-tag{padding:6px 11px;background:#F4F4F5;color:rgba(23,23,25,.6);border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;transition:background-color .15s,color .15s}
+.cm-dark .cm-tag{background:rgba(255,255,255,.08);color:rgba(247,247,248,.62)}
+.cm-tag:hover{background:#EAF9EF;color:#1F7A44}
+.cm-side-col{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:16px}
+.cm-side-card{background:#fff;border:1px solid #E1E2E4;border-radius:14px;padding:16px 18px}
+.cm-dark .cm-side-card{background:#17181A;border-color:#292A2D}
+@media (max-width:1024px){ .cm-side-col{display:none} }
+@media (max-width:640px){
+  .cm-row{flex-direction:column}
+  .cm-region-col{width:100%;max-height:none;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+}
+.cm-comment-input::placeholder{color:rgba(23,23,25,.4)}
+.cm-dark .cm-comment-input::placeholder{color:rgba(247,247,248,.4)}
+.cm-nav-link{transition:color .15s ease}
+.cm-nav-link:hover{color:#95C898 !important}
+[style*="cursor:pointer"],[style*="cursor: pointer"]{transition:transform .06s ease,filter .1s ease}
+[style*="cursor:pointer"]:hover,[style*="cursor: pointer"]:hover{filter:brightness(1.03)}
+[style*="cursor:pointer"]:active,[style*="cursor: pointer"]:active{transform:scale(0.95)}
+</style>
+</helmet>
+
+<div class="{{ darkClass }}" style="min-height:100vh;color:{{ c.text }};background:{{ c.bg }};transition:background-color .2s,color .2s" data-screen-label="커뮤니티">
+
+  <div style="position:sticky;top:0;z-index:5;background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }};box-shadow:0 1px 8px rgba(23,23,25,.04);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
+    <a href="./main(home).dc.html" style="font-size:20px;font-weight:800;letter-spacing:-0.01em;color:{{ c.text }};text-decoration:none;display:flex;align-items:center;gap:2px">p<span style="color: #26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</a>
+    <div style="display:flex;align-items:center;gap:32px">
+      <a href="./Explore Destinations.dc.html" class="cm-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">여행지 탐색</a>
+      <a href="./My Routes.dc.html" class="cm-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">내 일정</a>
+      <a href="./Community.dc.html" class="cm-nav-link-active" style="font-size:14px;font-weight:700;color:#95C898;text-decoration:none;border-bottom:2px solid #95C898;padding-bottom:20px;margin-bottom:-21px">커뮤니티</a>
+      <div onClick="{{ toggleTheme }}" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:15px;height:15px;object-fit:contain"></sc-if>
+      </div>
+    </div>
+  </div><div style="max-width:1080px;margin:0 auto;padding:28px 24px 80px">
+
+    
+
+    
+
+    <sc-if value="{{ myProfileEditOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeMyProfileEdit }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px">
+        <div onClick="{{ stopPropagation }}" style="background:{{ c.cardBg }};border-radius:16px;padding:22px;width:320px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+          <div style="font-size:15px;font-weight:700;color:{{ c.text }}">커뮤니티 프로필 설정</div>
+          <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;background:#EAF9EF;border:1px solid {{ c.border }};align-self:center;pointer-events:none">
+            <image-slot id="my-profile-avatar" shape="circle" placeholder="프로필"></image-slot>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:12px;font-weight:600;color:{{ c.textSub }}">닉네임</div>
+            <input value="{{ myNicknameDraft }}" onChange="{{ onMyNicknameChange }}" style="border:1px solid {{ c.border }};border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:{{ c.text }};outline:none">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <div onClick="{{ closeMyProfileEdit }}" style="flex:1;text-align:center;border:1px solid {{ c.border }};border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:{{ c.text }};cursor:pointer">취소</div>
+            <div onClick="{{ saveMyProfile }}" style="flex:1;text-align:center;background:#7BCB93;color:#12321F;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:pointer">저장</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:26px;font-weight:800;color:{{ c.text }};letter-spacing:-0.01em;margin-bottom:4px">커뮤니티</div>
+        <div style="font-size:13.5px;color:{{ c.textSub }}">다녀온 여행지의 감상평을 공유하고 다양한 여행 꿀팁을 나누어보세요</div>
+      </div>
+      <div style="position:relative;width:320px;flex-shrink:0">
+        <input value="{{ searchQuery }}" onChange="{{ onSearchChange }}" placeholder="게시글 키워드로 검색 (여행지, 내용 등)" style="width:100%;box-sizing:border-box;border:1px solid {{ c.border }};border-radius:10px;padding:10px 36px 10px 42px;font-size:13px;font-family:inherit;color:{{ c.text }};outline:none;background:{{ c.cardBg }};height:40px">
+        <img src="./uploads/pinder_ant.png" alt="" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 25px; height: 25px; object-fit: contain; opacity: .65; pointer-events: none; filter: {{ c.iconFilter }}">
+        <img src="./search-icon.png" alt="검색" onClick="{{ onSearchSubmit }}" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; object-fit: contain; opacity: .55; cursor: pointer; filter: {{ c.iconFilter }}">
+      </div>
+    </div>
+
+    <div class="cm-row">
+      <div class="cm-region-col" style="background-color: {{ legendColBg }}">
+        <sc-for list="{{ regions }}" as="rg" hint-placeholder-count="18">
+          <div onClick="{{ rg.onSelect }}" class="cm-region-item {{ rg.activeClass }}">{{ rg.label }}</div>
+        </sc-for>
+      </div>
+
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:flex-end;gap:2px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid {{ c.border }}">
+          <sc-for list="{{ sortOptions }}" as="so" hint-placeholder-count="3">
+            <div onClick="{{ so.onSelect }}" style="cursor: pointer; padding: 6px 12px; border-radius: 8px; font-size: 12.2px; font-weight: 600; background: {{ so.bg }}; color: {{ so.color }}; padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px">{{ so.label }}</div>
+          </sc-for>
+          <div style="display: flex; align-items: flex-end; gap: 14px; margin-left: auto; padding-top: 5px; padding-bottom: 5px">
+            <div onClick="{{ setViewList }}" style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:12.2px;font-weight:600;color:{{ listViewColor }}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"></circle><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"></circle><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"></circle></svg>
+              목록
+            </div>
+            <div style="width:1px;height:12px;background:{{ c.border }}"></div>
+            <div onClick="{{ setViewGrid }}" style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:12.2px;font-weight:600;color:{{ gridViewColor }}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="8.5" cy="9.5" r="1.8" fill="currentColor" stroke="none"></circle><path d="M21 15l-5-5-9 9"></path></svg>
+              사진
+            </div>
+          </div>
+        </div>
+
+        <sc-if value="{{ viewingProfile }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:14px;padding:14px;margin-bottom:16px">
+            <div onClick="{{ closeProfile }}" style="cursor:pointer;font-size:14px;color:{{ c.textSub }};padding:4px">←</div>
+            <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:#EAF9EF;flex-shrink:0"><img src="./community-avatar-default.png" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:{{ c.text }}">{{ profileDisplayName }}</div>
+              <div style="font-size:11.5px;color:{{ c.textSub }}">게시물 {{ profilePostCount }}개</div>
+            </div>
+            <sc-if value="{{ profileIsMine }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ toggleBookmarksOnly }}" class="cm-icon-btn" style="cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:{{ bookmarksOnlyColor }};border-radius:8px;padding:8px 12px;border:1px solid {{ bookmarksOnlyBorder }};background:{{ bookmarksOnlyBg }};white-space:nowrap;margin-left:auto">
+                <div style="width:13px;height:13px;-webkit-mask:url('./uploads/bookmark-icon.png') center/contain no-repeat;mask:url('./uploads/bookmark-icon.png') center/contain no-repeat;background-color:{{ bookmarksOnlyColor }}"></div>저장
+              </div>
+              <div onClick="{{ openMyProfileEdit }}" class="cm-icon-btn" style="cursor:pointer;font-size:12px;font-weight:700;color:{{ c.text }};border-radius:8px;padding:8px 12px;border:1px solid {{ c.border }};white-space:nowrap">프로필 설정</div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ noPosts }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:48px 0;font-size:13px;color:{{ c.textSub }}">{{ noPostsMessage }}</div>
+        </sc-if>
+
+        <sc-if value="{{ isGridView }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:20px">
+            <sc-for list="{{ posts }}" as="post" hint-placeholder-count="9">
+              <div onClick="{{ post.onOpenProfile }}" style="cursor:pointer;width:100%;aspect-ratio:4/3;min-width:0;background:#F4F4F5;border-radius:6px;overflow:hidden">
+                <image-slot id="{{ post.imgId }}" shape="rect" placeholder="{{ post.place }} 사진"></image-slot>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isListView }}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{ posts }}" as="post" hint-placeholder-count="3">
+      <div style="background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:16px;margin-bottom:20px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px">
+          <div onClick="{{ post.onOpenProfile }}" style="cursor:pointer;width:34px;height:34px;border-radius:50%;overflow:hidden;background:#EAF9EF;flex-shrink:0"><img src="./community-avatar-default.png" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+          <div onClick="{{ post.onOpenProfile }}" style="flex:1;min-width:0;cursor:pointer">
+            <div style="font-size:13.5px;font-weight:700;color:{{ c.text }}">{{ post.displayAuthor }}</div>
+            <div style="font-size:11.5px;color:{{ c.textSub }}">{{ post.place }} · {{ post.time }}</div>
+          </div>
+          <sc-if value="{{ post.isMine }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:4px">
+              <div onClick="{{ post.onEdit }}" class="cm-icon-btn" style="cursor:pointer;font-size:12px;font-weight:700;color:{{ c.textSub }};border-radius:7px;padding:6px 9px">수정</div>
+              <div onClick="{{ post.onDelete }}" class="cm-icon-btn" style="cursor:pointer;font-size:12px;font-weight:700;color:#B00C0C;border-radius:7px;padding:6px 9px">삭제</div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="width:100%;aspect-ratio:4/3;background:#F4F4F5">
+          <image-slot id="{{ post.imgId }}" shape="rect" placeholder="{{ post.place }} 사진"></image-slot>
+        </div>
+        <div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div onClick="{{ post.onLike }}" class="cm-like" style="cursor:pointer;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:{{ post.likeColor }}">
+              <sc-if value="{{ post.liked }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="{{ post.likeColor }}"><path d="M12 21s-6.7-4.35-9.3-8.1C1.1 10.6 1.6 7.4 4.2 5.7c2.2-1.4 5-.8 6.6 1.1l1.2 1.4 1.2-1.4c1.6-1.9 4.4-2.5 6.6-1.1 2.6 1.7 3.1 4.9 1.5 7.2C18.7 16.65 12 21 12 21Z"></path></svg></sc-if>
+              <sc-if value="{{ post.notLiked }}" hint-placeholder-val="{{ true }}"><div style="width:15px;height:15px;-webkit-mask:url('./uploads/heart.png') center/contain no-repeat;mask:url('./uploads/heart.png') center/contain no-repeat;background-color:{{ post.likeColor }}"></div></sc-if>
+              <span>{{ post.likeCount }}</span>
+            </div>
+            <div onClick="{{ post.onOpenCommentModal }}" style="cursor:pointer;display:flex;align-items:center;gap:5px;font-size:13px;color:{{ c.textSub }}">
+              <div style="width:15px;height:15px;-webkit-mask:url('./uploads/message-circle.png') center/contain no-repeat;mask:url('./uploads/message-circle.png') center/contain no-repeat;background-color:{{ c.textSub }}"></div><span>{{ post.commentCountLabel }}</span>
+            </div>
+            <div onClick="{{ post.onToggleBookmark }}" class="cm-like" style="cursor:pointer;margin-left:auto;display:flex;align-items:center">
+              <sc-if value="{{ post.bookmarked }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="{{ post.bookmarkColor }}"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1Z"></path></svg></sc-if>
+              <sc-if value="{{ post.notBookmarked }}" hint-placeholder-val="{{ true }}"><div style="width:15px;height:15px;-webkit-mask:url('./uploads/bookmark-icon.png') center/contain no-repeat;mask:url('./uploads/bookmark-icon.png') center/contain no-repeat;background-color:{{ post.bookmarkColor }}"></div></sc-if>
+            </div>
+          </div>
+          <div style="font-size:13.5px;line-height:1.6;color:{{ c.text }}"><b>{{ post.displayAuthor }}</b> {{ post.caption }}</div>
+          <sc-if value="{{ post.hasTags }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px">
+              <sc-for list="{{ post.tags }}" as="tag" hint-placeholder-count="3">
+                <span style="font-size:12px;font-weight:600;color:#1F7A44;cursor:pointer">#{{ tag }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px">
+            <sc-for list="{{ post.visibleComments }}" as="cmt" hint-placeholder-count="1">
+              <div style="font-size:12.5px;line-height:1.5;color:{{ c.text }}"><b>{{ cmt.author }}</b> {{ cmt.text }}</div>
+            </sc-for>
+            <sc-if value="{{ post.hasMoreComments }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ post.onToggleComments }}" style="cursor:pointer;font-size:12px;font-weight:700;color:{{ c.textSub }}">댓글 {{ post.hiddenCommentCount }}개 더보기</div>
+            </sc-if>
+            <sc-if value="{{ post.canCollapseComments }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ post.onToggleComments }}" style="cursor:pointer;font-size:12px;font-weight:700;color:{{ c.textSub }}">댓글 접기</div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <input value="{{ post.commentDraft }}" onChange="{{ post.onCommentInput }}" onKeyDown="{{ post.onCommentKeyDown }}" placeholder="댓글 달기..." class="cm-comment-input" style="flex:1;min-width:0;border:1px solid {{ c.border }};border-radius:18px;padding:7px 12px;font-size:12.5px;font-family:inherit;color:{{ c.text }};outline:none;background:{{ c.cardBg }}">
+            <div onClick="{{ post.onCommentSubmit }}" style="font-size:12.5px;font-weight:700;color:#1F7A44;cursor:pointer;padding:7px 4px;white-space:nowrap">게시</div>
+          </div>
+        </div>
+      </div>
+        </sc-for>
+        </sc-if>
+
+        <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ showMorePosts }}" style="text-align:center;cursor:pointer;padding:12px;border:1px solid {{ c.border }};border-radius:12px;font-size:13px;font-weight:700;color:{{ c.text }};background:{{ c.cardBg }};margin-bottom:20px">더보기</div>
+        </sc-if>
+      </div>
+
+      <div class="cm-side-col">
+        <div class="cm-side-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div style="font-size: 14px; font-weight: 700; color: {{ c.text }}; display: flex; align-items: center; gap: 6px; padding-top: 4px; padding-bottom: 4px"><img src="./flame.png" alt="" style="width: 17px; height: 17px; object-fit: contain; filter: {{ c.iconFilter }}"> 이번 주 인기 여행지</div>
+            <span style="font-size: 10.5px; color: {{ c.textSub }}">실시간</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ trending }}" as="tr" hint-placeholder-count="3">
+              <div onClick="{{ tr.onClick }}" style="display:flex;align-items:center;gap:12px;cursor:pointer">
+                <span style="font-size: 13px; font-weight: 700; color: {{ tr.rankColor }}; width: 14px; text-align: center; flex-shrink: 0">{{ tr.rank }}</span>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <div style="font-size: 12px; font-weight: 600; color: {{ c.text }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ tr.name }}</div>
+                  <div style="font-size: 10px; color: {{ c.textSub }}">게시글 {{ tr.count }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div class="cm-side-card">
+          <div style="font-size: 14px; font-weight: 700; color: {{ c.text }}; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; padding-top: 3px; padding-bottom: 3px"><img src="./tag.png" alt="" style="width:14px;height:14px;object-fit:contain;filter:{{ c.iconFilter }}"> 추천 태그</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ popularTags }}" as="pt" hint-placeholder-count="5">
+              <div onClick="{{ pt.onClick }}" class="cm-tag">#{{ pt.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div onClick="{{ openComposer }}" class="cm-btn" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; height: 41px; border-width: 1px; border-style: solid; border-color: #65B686">여행 후기 쓰기 <img src="./uploads/pencil-line.png" alt="" style="width:13px;height:13px;object-fit:contain"></div>
+      </div>
+    </div>
+  </div>
+
+  
+</div>
+
+<!-- 글쓰기/수정 팝업 -->
+<sc-if value="{{ composerOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeComposer }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ stopPropagation }}" style="background:{{ c.cardBg }};border-radius:16px;padding:22px;width:400px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:15px;font-weight:700;color:{{ c.text }}">{{ composerTitle }}</div>
+        <div onClick="{{ closeComposer }}" class="cm-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C">✕</div>
+      </div>
+      <div style="width:100%;aspect-ratio:4/3;border-radius:10px;overflow:hidden">
+        <image-slot id="composer-photo" shape="rect" placeholder="사진을 추가해주세요"></image-slot>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;font-weight:600;color:{{ c.textSub }}">여행지</div>
+        <input value="{{ draftPlace }}" onChange="{{ onDraftPlaceChange }}" style="border:1px solid {{ c.border }};border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:#171719;outline:none">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;font-weight:600;color:{{ c.textSub }}">지역</div>
+        <select value="{{ draftRegion }}" onChange="{{ onDraftRegionChange }}" style="border:1px solid {{ c.border }};border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:{{ c.text }};outline:none;background:{{ c.cardBg }}">
+          <sc-for list="{{ regionChoices }}" as="rc" hint-placeholder-count="17">
+            <option value="{{ rc }}">{{ rc }}</option>
+          </sc-for>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;font-weight:600;color:{{ c.textSub }}">감상평</div>
+        <textarea value="{{ draftCaption }}" onChange="{{ onDraftCaptionChange }}" rows="3" style="border:1px solid {{ c.border }};border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:#171719;outline:none;resize:vertical"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <div onClick="{{ closeComposer }}" style="flex:1;text-align:center;border:1px solid {{ c.border }};border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:{{ c.text }};cursor:pointer">취소</div>
+        <div onClick="{{ saveComposer }}" style="flex:1;text-align:center;background:#7BCB93;color:#12321F;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:pointer">게시</div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- 댓글 상세 팝업 -->
+<sc-if value="{{ commentModalPost }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeCommentModal }}" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;display:flex;align-items:center;justify-content:center;padding:24px">
+    <div onClick="{{ stopPropagation }}" style="background:{{ c.cardBg }};border-radius:12px;overflow:hidden;display:flex;width:min(1000px,92vw);height:min(680px,88vh);box-shadow:0px 20px 48px rgba(0,0,0,.35)">
+      <div style="flex:1.2;min-width:0;background:#000">
+        <image-slot id="{{ commentModalPost.imgId }}" shape="rect" placeholder="{{ commentModalPost.place }} 사진"></image-slot>
+      </div>
+      <div style="flex:1;min-width:280px;max-width:380px;display:flex;flex-direction:column;background:{{ c.cardBg }}">
+        <div style="display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid {{ c.border }}">
+          <div style="width:32px;height:32px;border-radius:50%;overflow:hidden;background:#EAF9EF;flex-shrink:0"><img src="./community-avatar-default.png" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13.5px;font-weight:700;color:{{ c.text }}">{{ commentModalPost.displayAuthor }}</div>
+            <div style="font-size:11px;color:{{ c.textSub }}">{{ commentModalPost.place }} · {{ commentModalPost.time }}</div>
+          </div>
+          <div onClick="{{ closeCommentModal }}" class="cm-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C;flex-shrink:0">✕</div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:13px;line-height:1.6;color:{{ c.text }}"><b>{{ commentModalPost.displayAuthor }}</b> {{ commentModalPost.caption }}</div>
+          <sc-for list="{{ commentModalPost.comments }}" as="cmt" hint-placeholder-count="2">
+            <div style="font-size:13px;line-height:1.5;color:{{ c.text }}"><b>{{ cmt.author }}</b> {{ cmt.text }}</div>
+          </sc-for>
+          <sc-if value="{{ commentModalPost.commentsEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px;color:{{ c.textSub }}">아직 댓글이 없어요</div>
+          </sc-if>
+        </div>
+        <div style="border-top:1px solid {{ c.border }};padding:10px 14px;display:flex;align-items:center;gap:14px">
+          <div onClick="{{ commentModalPost.onLike }}" class="cm-like" style="cursor:pointer;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:{{ commentModalPost.likeColor }}">
+            <sc-if value="{{ commentModalPost.liked }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="{{ commentModalPost.likeColor }}"><path d="M12 21s-6.7-4.35-9.3-8.1C1.1 10.6 1.6 7.4 4.2 5.7c2.2-1.4 5-.8 6.6 1.1l1.2 1.4 1.2-1.4c1.6-1.9 4.4-2.5 6.6-1.1 2.6 1.7 3.1 4.9 1.5 7.2C18.7 16.65 12 21 12 21Z"></path></svg></sc-if>
+            <sc-if value="{{ commentModalPost.notLiked }}" hint-placeholder-val="{{ true }}"><div style="width:15px;height:15px;-webkit-mask:url('./uploads/heart.png') center/contain no-repeat;mask:url('./uploads/heart.png') center/contain no-repeat;background-color:{{ commentModalPost.likeColor }}"></div></sc-if>
+            <span>{{ commentModalPost.likeCount }}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;padding:10px 14px 14px">
+          <input value="{{ commentModalPost.commentDraft }}" onChange="{{ commentModalPost.onCommentInput }}" onKeyDown="{{ commentModalPost.onCommentKeyDown }}" placeholder="댓글 달기..." class="cm-comment-input" style="flex:1;min-width:0;border:1px solid {{ c.border }};border-radius:18px;padding:8px 12px;font-size:12.5px;font-family:inherit;color:{{ c.text }};outline:none;background:{{ c.cardBg }}">
+          <div onClick="{{ commentModalPost.onCommentSubmit }}" style="font-size:12.5px;font-weight:700;color:#1F7A44;cursor:pointer;padding:8px 4px;white-space:nowrap">게시</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- 삭제 확인 팝업 -->
+<sc-if value="{{ deleteConfirmOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ cancelDelete }}" style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ stopPropagation }}" style="background:{{ c.cardBg }};border-radius:16px;padding:22px;width:320px;max-width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
+      <div style="font-size:15px;font-weight:700;color:{{ c.text }}">삭제하시겠습니까?</div>
+      <div style="font-size:12.5px;color:{{ c.textSub }}">삭제한 게시물은 되돌릴 수 없어요</div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <div onClick="{{ cancelDelete }}" style="flex:1;text-align:center;border:1px solid {{ c.border }};border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:{{ c.text }};cursor:pointer">취소</div>
+        <div onClick="{{ confirmDelete }}" style="flex:1;text-align:center;background:#B00C0C;color:#fff;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:pointer">삭제</div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+// MOCK: 실제 연동 시 posts를 서버 API 응답으로 교체하고, 저장/좋아요/댓글 액션을 API 호출로 교체
+const REGIONS = ['전체', '서울', '강원', '경기', '경남', '경북', '광주', '대구', '대전', '부산', '세종', '울산', '인천', '전남', '전북', '제주', '충남', '충북'];
+
+const SEED_POSTS = [
+  { id: 'p1', author: '민준', avatarInitial: '민', place: '제주도', region: '제주', time: '2일 전', timestamp: Date.now() - 2 * 86400000, caption: '성산일출봉 근처 카페에서 본 바다뷰가 최고였어요 🌊', liked: false, likeCount: 24, bookmarked: false, tags: ['제주여행', '성산일출봉'], isMine: false, comments: [{ author: '서연', text: '저도 가보고 싶어요!' }] },
+  { id: 'p2', author: '나', avatarInitial: '나', place: '부산', region: '부산', time: '5일 전', timestamp: Date.now() - 5 * 86400000, caption: '광안리 야경 산책 다녀왔습니다', liked: true, likeCount: 41, bookmarked: false, tags: ['부산야경', '광안리'], isMine: true, comments: [] },
+  { id: 'p3', author: '서연', avatarInitial: '서', place: '강릉', region: '강원', time: '1일 전', timestamp: Date.now() - 1 * 86400000, caption: '안목해변 커피거리 완전 추천이에요 ☕', liked: false, likeCount: 12, bookmarked: false, tags: ['강릉카페'], isMine: false, comments: [] },
+];
+
+// MOCK: 실제 연동 시 서버의 인기 여행지/태그 랭킹 API로 교체
+const TRENDING_DESTINATIONS = [
+  { name: '부산 해운대 & 광안리', count: '1,420개' },
+  { name: '제주 애월 한담해안길', count: '980개' },
+  { name: '강릉 안목해변 카페거리', count: '750개' },
+];
+const POPULAR_TAGS = ['부산야경', '제주카페투어', '국내서핑', '감성숙소', '주말드라이브'];
+const LIGHT = { bg: '#F7F7F8', text: '#171719', textSub: 'rgba(23,23,25,.6)', border: '#E1E2E4', headerBg: 'rgba(255,255,255,.92)', cardBg: '#fff', chipBg: '#F4F4F5', regionBg: '#fff', activeBg: '#7BCB93', iconFilter: 'none', sortActiveBg: '#EAF9EF', sortActiveColor: '#1F7A44' };
+const DARK = { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)', border: '#292A2D', headerBg: 'rgba(15,15,16,.82)', cardBg: '#17181A', chipBg: 'rgba(255,255,255,.08)', regionBg: '#ACD9C5', activeBg: '#7BCB93', iconFilter: 'brightness(0) invert(1)', sortActiveBg: 'rgba(123,203,147,.22)', sortActiveColor: '#7BCB93' };
+
+class Component extends DCLogic {
+  state = {
+    posts: SEED_POSTS.map(p => ({ ...p, commentDraft: '' })),
+    composerOpen: false,
+    editingId: null,
+    draftPlace: '',
+    draftCaption: '',
+    draftRegion: REGIONS[1],
+    selectedRegion: '전체',
+    sortMode: 'popular',
+    deleteConfirmOpen: false,
+    pendingDeleteId: null,
+    profileAuthor: null,
+    showBookmarksOnly: false,
+    visibleCount: 5,
+    viewMode: 'list',
+    myNickname: '나',
+    myNicknameDraft: '나',
+    myProfileEditOpen: false,
+    searchQuery: '',
+    expandedComments: {},
+    commentModalId: null,
+    theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || 'light',
+  };
+  toggleTheme = () => this.setState(s => {
+    const next = s.theme === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('pd-theme', next); } catch (e) {}
+    return { theme: next };
+  });
+
+  openCommentModal = (id) => this.setState({ commentModalId: id });
+  closeCommentModal = () => this.setState({ commentModalId: null });
+  toggleComments = (id) => this.setState(s => ({ expandedComments: { ...s.expandedComments, [id]: !s.expandedComments[id] } }));
+
+  onSearchChange = (e) => this.setState({ searchQuery: e.target.value, visibleCount: 5 });
+  onSearchSubmit = () => this.setState(s => ({ searchQuery: s.searchQuery, visibleCount: 5 }));
+  openMyProfileEdit = () => this.setState(s => ({ myProfileEditOpen: true, myNicknameDraft: s.myNickname }));
+  closeMyProfileEdit = () => this.setState({ myProfileEditOpen: false });
+  onMyNicknameChange = (e) => this.setState({ myNicknameDraft: e.target.value });
+  saveMyProfile = () => this.setState(s => ({ myNickname: s.myNicknameDraft.trim() || s.myNickname, myProfileEditOpen: false }));
+  setViewList = () => this.setState({ viewMode: 'list' });
+  setViewGrid = () => this.setState({ viewMode: 'grid' });
+  showMorePosts = () => this.setState(s => ({ visibleCount: s.visibleCount + 5 }));
+  selectRegion = (region) => this.setState({ selectedRegion: region, profileAuthor: null, visibleCount: 5 });
+  selectSort = (mode) => this.setState({ sortMode: mode });
+  openProfile = (author) => this.setState({ profileAuthor: author, showBookmarksOnly: false });
+  closeProfile = () => this.setState({ profileAuthor: null, showBookmarksOnly: false });
+  toggleBookmarksOnly = () => this.setState(s => ({ showBookmarksOnly: !s.showBookmarksOnly }));
+  requestDelete = (id) => this.setState({ deleteConfirmOpen: true, pendingDeleteId: id });
+  cancelDelete = () => this.setState({ deleteConfirmOpen: false, pendingDeleteId: null });
+  confirmDelete = () => this.setState(s => ({
+    posts: s.posts.filter(p => p.id !== s.pendingDeleteId),
+    deleteConfirmOpen: false, pendingDeleteId: null,
+  }));
+
+  stopPropagation = (e) => { if (e && e.stopPropagation) e.stopPropagation(); };
+  toggleLike = (id) => this.setState(s => ({
+    posts: s.posts.map(p => p.id === id ? { ...p, liked: !p.liked, likeCount: p.liked ? p.likeCount - 1 : p.likeCount + 1 } : p),
+  }));
+  toggleBookmark = (id) => this.setState(s => ({
+    posts: s.posts.map(p => p.id === id ? { ...p, bookmarked: !p.bookmarked } : p),
+  }));
+  filterByTagOrPlace = (keyword) => this.setState({ searchQuery: keyword, visibleCount: 5 });
+  onCommentInput = (id, e) => this.setState(s => ({ posts: s.posts.map(p => p.id === id ? { ...p, commentDraft: e.target.value } : p) }));
+  submitComment = (id) => this.setState(s => ({
+    posts: s.posts.map(p => p.id === id && p.commentDraft.trim()
+      ? { ...p, comments: [...p.comments, { author: '나', text: p.commentDraft.trim() }], commentDraft: '' }
+      : p),
+  }));
+  onCommentKeyDown = (id, e) => { if (e.key === 'Enter') this.submitComment(id); };
+
+  openComposer = () => this.setState({ composerOpen: true, editingId: null, draftPlace: '', draftCaption: '', draftRegion: REGIONS[1] });
+  openEditComposer = (id) => {
+    const post = this.state.posts.find(p => p.id === id);
+    if (!post) return;
+    this.setState({ composerOpen: true, editingId: id, draftPlace: post.place, draftCaption: post.caption, draftRegion: post.region });
+  };
+  closeComposer = () => this.setState({ composerOpen: false, editingId: null });
+  onDraftPlaceChange = (e) => this.setState({ draftPlace: e.target.value });
+  onDraftCaptionChange = (e) => this.setState({ draftCaption: e.target.value });
+  onDraftRegionChange = (e) => this.setState({ draftRegion: e.target.value });
+  saveComposer = () => {
+    const { editingId, draftPlace, draftCaption, draftRegion } = this.state;
+    const place = draftPlace.trim(), caption = draftCaption.trim();
+    if (!place || !caption) return;
+    if (editingId) {
+      this.setState(s => ({ posts: s.posts.map(p => p.id === editingId ? { ...p, place, caption, region: draftRegion } : p), composerOpen: false, editingId: null }));
+    } else {
+      const newPost = { id: `p${Date.now()}`, author: '나', avatarInitial: '나', place, region: draftRegion, time: '방금', timestamp: Date.now(), caption, liked: false, likeCount: 0, isMine: true, comments: [], commentDraft: '' };
+      this.setState(s => ({ posts: [newPost, ...s.posts], composerOpen: false }));
+    }
+  };
+
+  renderVals() {
+    const { posts, composerOpen, editingId, draftPlace, draftCaption, draftRegion, selectedRegion, sortMode, deleteConfirmOpen, profileAuthor, visibleCount, viewMode, myNickname, myNicknameDraft, myProfileEditOpen, searchQuery, expandedComments, commentModalId, showBookmarksOnly } = this.state;
+    const myPostCount = posts.filter(p => p.isMine).length;
+    const byRegion = selectedRegion === '전체' ? posts : posts.filter(p => p.region === selectedRegion);
+    const q = searchQuery.trim().toLowerCase();
+    const bySearch = q ? byRegion.filter(p => p.place.toLowerCase().includes(q) || p.caption.toLowerCase().includes(q)) : byRegion;
+    const filtered = showBookmarksOnly
+      ? bySearch.filter(p => p.bookmarked)
+      : profileAuthor
+        ? bySearch.filter(p => p.author === profileAuthor)
+        : bySearch;
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortMode === 'popular') return b.likeCount - a.likeCount;
+      if (sortMode === 'oldest') return a.timestamp - b.timestamp;
+      return b.timestamp - a.timestamp;
+    });
+    const regions = REGIONS.map(r => ({
+      label: r,
+      onSelect: () => this.selectRegion(r),
+      activeClass: selectedRegion === r ? 'cm-region-active' : '',
+    }));
+    const cTheme = this.state.theme === 'dark' ? DARK : LIGHT;
+    const sortOptions = [
+      { key: 'popular', label: '인기순' },
+      { key: 'latest', label: '최신순' },
+      { key: 'oldest', label: '오래된순' },
+    ].map(o => ({
+      label: o.label, onSelect: () => this.selectSort(o.key),
+      weight: sortMode === o.key ? 700 : 500,
+      color: sortMode === o.key ? '#1F7A44' : cTheme.textSub,
+    }));
+    const enriched = sorted.map(p => {
+      const expanded = !!expandedComments[p.id];
+      const visibleComments = expanded ? p.comments : p.comments.slice(0, 1);
+      return {
+        ...p,
+        imgId: `post-${p.id}`,
+        displayAuthor: p.isMine ? myNickname : p.author,
+        displayAvatarInitial: p.isMine ? (myNickname.trim()[0] || '나') : p.avatarInitial,
+        likeColor: p.liked ? '#E5342E' : cTheme.textSub,
+        notLiked: !p.liked,
+        commentCountLabel: `${p.comments.length}`,
+        visibleComments,
+        hasMoreComments: !expanded && p.comments.length > 1,
+        hiddenCommentCount: p.comments.length - 1,
+        canCollapseComments: expanded && p.comments.length > 1,
+        onToggleComments: () => this.toggleComments(p.id),
+        onLike: () => this.toggleLike(p.id),
+        onEdit: () => this.openEditComposer(p.id),
+        onDelete: () => this.requestDelete(p.id),
+        onOpenProfile: () => this.openProfile(p.author),
+        onOpenCommentModal: () => this.openCommentModal(p.id),
+        onToggleBookmark: () => this.toggleBookmark(p.id),
+        bookmarked: p.bookmarked, notBookmarked: !p.bookmarked,
+        bookmarkColor: p.bookmarked ? '#7BCB93' : cTheme.textSub,
+        hasTags: (p.tags || []).length > 0,
+        tags: p.tags || [],
+        commentsEmpty: p.comments.length === 0,
+        onCommentInput: (e) => this.onCommentInput(p.id, e),
+        onCommentKeyDown: (e) => this.onCommentKeyDown(p.id, e),
+        onCommentSubmit: () => this.submitComment(p.id),
+      };
+    });
+    const profilePost = profileAuthor ? posts.find(p => p.author === profileAuthor) : null;
+    const visiblePosts = enriched.slice(0, visibleCount);
+    const commentModalPost = commentModalId ? enriched.find(p => p.id === commentModalId) : null;
+    const trending = TRENDING_DESTINATIONS.map((t, i) => ({
+      rank: i + 1, name: t.name, count: t.count,
+      rankColor: i === 0 ? '#1F7A44' : cTheme.textSub,
+      onClick: () => this.filterByTagOrPlace(t.name.split(' ')[0]),
+    }));
+    const popularTags = POPULAR_TAGS.map(t => ({ label: t, onClick: () => this.filterByTagOrPlace(t) }));
+    const c = this.state.theme === 'dark' ? DARK : LIGHT;
+    return {
+      c, isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
+      darkClass: this.state.theme === 'dark' ? 'cm-dark' : '',
+      legendColBg: this.state.theme === 'dark' ? '#17181A' : '#fff',
+      trending, popularTags,
+      commentModalPost, closeCommentModal: this.closeCommentModal,
+      posts: visiblePosts,
+      hasMore: enriched.length > visibleCount,
+      showMorePosts: this.showMorePosts,
+      noPosts: enriched.length === 0,
+      noPostsMessage: q ? '검색 결과가 없어요' : '아직 게시물이 없어요',
+      searchQuery, onSearchChange: this.onSearchChange, onSearchSubmit: this.onSearchSubmit,
+      regions, regionChoices: REGIONS.slice(1),
+      sortOptions,
+      composerOpen, stopPropagation: this.stopPropagation,
+      composerTitle: editingId ? '후기 수정' : '여행 후기 쓰기',
+      openComposer: this.openComposer, closeComposer: this.closeComposer, saveComposer: this.saveComposer,
+      draftPlace, draftCaption, draftRegion, onDraftPlaceChange: this.onDraftPlaceChange, onDraftCaptionChange: this.onDraftCaptionChange, onDraftRegionChange: this.onDraftRegionChange,
+      viewingProfile: !!profileAuthor, profileAuthor, closeProfile: this.closeProfile,
+      profileInitial: profilePost ? (profilePost.isMine ? (myNickname.trim()[0] || '나') : profilePost.avatarInitial) : '',
+      profileDisplayName: profilePost && profilePost.isMine ? myNickname : profileAuthor,
+      profileIsMine: !!(profilePost && profilePost.isMine),
+      profilePostCount: filtered.length,
+      toggleBookmarksOnly: this.toggleBookmarksOnly,
+      bookmarksOnlyColor: showBookmarksOnly ? '#2F6B45' : c.text,
+      bookmarksOnlyBorder: showBookmarksOnly ? '#7BCB93' : c.border,
+      bookmarksOnlyBg: showBookmarksOnly ? '#F2F6ED' : 'transparent',
+      deleteConfirmOpen, cancelDelete: this.cancelDelete, confirmDelete: this.confirmDelete,
+      setViewList: this.setViewList, setViewGrid: this.setViewGrid,
+      isListView: viewMode === 'list', isGridView: viewMode === 'grid',
+      listViewColor: viewMode === 'list' ? '#1F7A44' : cTheme.textSub, listViewWeight: viewMode === 'list' ? 700 : 500,
+      gridViewColor: viewMode === 'grid' ? '#1F7A44' : cTheme.textSub, gridViewWeight: viewMode === 'grid' ? 700 : 500,
+      myNickname, myNicknameDraft, myPostCount,
+      myProfileEditOpen, openMyProfileEdit: this.openMyProfileEdit, closeMyProfileEdit: this.closeMyProfileEdit,
+      onMyNicknameChange: this.onMyNicknameChange, saveMyProfile: this.saveMyProfile,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

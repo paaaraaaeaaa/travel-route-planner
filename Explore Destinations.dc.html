@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+a{color:#1F7A44}
+a:hover{color:#146030}
+.ed-card{transition:box-shadow .15s,border-color .15s,transform .15s,background-color .2s,border-color .2s}
+.ed-card:hover{border-color:#AEB0B6;box-shadow:0px 4px 8px -2px rgba(23,23,25,.12);transform:translateY(-2px)}
+.ed-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.ed-btn{background:#7BCB93;color:#12321F;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;transition:background-color .15s}
+.ed-btn:hover{background:#63B37E;color:#12321F}
+.ed-map-wrap{position:relative;width:100%;max-width:520px;aspect-ratio:524/631;margin:0 auto}
+.ed-map-svg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.ed-pin{position:absolute;transform:translate(-50%,-100%) scale(1);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .18s;z-index:1}
+.ed-pin:hover{transform:translate(-50%,-100%) scale(1.25);z-index:2}
+.ed-pin-dot{width:18px;height:18px;border-radius:50% 50% 0 50%;transform:rotate(45deg);background:#9AA0A6;box-shadow:0 2px 4px rgba(23,23,25,.25);transition:background-color .18s;display:flex;align-items:center;justify-content:center}
+.ed-pin-emoji{transform:rotate(-45deg);font-size:9px;line-height:1}
+.ed-pin:hover .ed-pin-dot{background:#7BCB93}
+.ed-pin-label{font-size:9px;font-weight:700;color:#171719;background:#fff;border-radius:5px;padding:1px 4px;white-space:nowrap;box-shadow:0 1px 2px rgba(23,23,25,.15);transition:color .18s}
+.ed-pin:hover .ed-pin-label{color:#1F7A44}
+.ed-pin-active .ed-pin-dot{background:#95C898}
+.ed-pin-active:hover .ed-pin-dot{background:#95C898}
+.ed-legend{display:flex;flex-direction:column;gap:4px}
+.ed-legend-item{cursor:pointer;border-radius:8px;padding:9px 12px;text-align:left;font-size:13px;font-weight:700;background:transparent;color:#171719 !important;border:1px solid transparent;transition:background-color .15s,color .15s;display:flex;align-items:center;gap:8px}
+.ed-dark .ed-legend-col{background:#D6E0D9 !important;border-color:#D6E0D9 !important}
+.ed-dark .ed-legend-item{color:#12321F !important}
+.ed-dark .ed-legend-item:hover{background:rgba(0,0,0,.08)}
+.ed-dark .ed-legend-active{background:#fff !important;color:#12321F !important}
+.ed-dark .ed-legend-all-active{background:#fff !important;color:#12321F !important}
+.ed-dark .ed-pin-active .ed-pin-dot{background:#fff}
+.ed-dark .ed-nav-link-active{color:#7BCB93 !important;border-color:#7BCB93 !important}
+
+.ed-legend-item:hover{background:#EAEBEC}
+.ed-legend-active{background:#7BCB93 !important;color:#12321F !important}
+.ed-legend-all-active{background:#7BCB93 !important;color:#12321F !important}
+.ed-map-row{display:flex;gap:20px;align-items:flex-start}
+.ed-legend-col{width:180px;flex-shrink:0;background:#fff;border:1px solid #E1E2E4;border-radius:14px;padding:10px;max-height:520px;overflow-y:auto}
+@media (max-width:700px){ .ed-map-row{flex-direction:column}
+  .ed-legend-col{width:100%;max-height:none;display:grid;grid-template-columns:repeat(3,1fr);gap:6px} }
+.ed-region:hover{transform:scale(1.04)}
+.ed-region-active{background:#95C898;border-color:#95C898;color:#12321F}
+@media (max-width:760px){ .ed-grid{grid-template-columns:1fr} }
+.ed-nav-link{transition:color .15s ease}
+.ed-nav-link:hover{color:#95C898 !important}
+[style*="cursor:pointer"],[style*="cursor: pointer"]{transition:transform .06s ease,filter .1s ease}
+[style*="cursor:pointer"]:hover,[style*="cursor: pointer"]:hover{filter:brightness(1.03)}
+[style*="cursor:pointer"]:active,[style*="cursor: pointer"]:active{transform:scale(0.95)}
+</style>
+</helmet>
+
+<div class="{{ darkClass }}" style="min-height:100vh;color:{{ c.text }};background:{{ c.bg }};transition:background-color .2s,color .2s" data-screen-label="여행지 탐색">
+
+  <div style="position:sticky;top:0;z-index:5;background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }};box-shadow:0 1px 8px rgba(23,23,25,.04);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
+    <a href="./main(home).dc.html" style="font-size:20px;font-weight:800;letter-spacing:-0.01em;color:{{ c.text }};text-decoration:none;display:flex;align-items:center;gap:2px">p<span style="color:#26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</a>
+    <div style="display:flex;align-items:center;gap:32px;margin-left:auto">
+      <a href="./Explore Destinations.dc.html" class="ed-nav-link ed-nav-link-active" style="font-size:14px;font-weight:700;color:#95C898;text-decoration:none;border-bottom:2px solid #95C898;padding-bottom:20px;margin-bottom:-21px">여행지 탐색</a>
+      <a href="./My Routes.dc.html" class="ed-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">내 일정</a>
+      <a href="./Community.dc.html" class="ed-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">커뮤니티</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div onClick="{{ toggleTheme }}" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:15px;height:15px;object-fit:contain"></sc-if>
+      </div>
+      
+    </div>
+  </div>
+
+  <sc-if value="{{ newTripModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:20">
+      <div style="position:relative"><div onClick="{{ closeNewTripModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></div><div style="background:{{ c.cardBg }};border-radius:16px;padding:24px;width:320px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px" onClick="{{ stopClick }}">
+        <div style="font-size:16px;font-weight:700;color:{{ c.text }}">새 일정 만들기</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">여행 날짜를 입력해주세요</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:12px;font-weight:600;color:{{ c.textSub }}">시작 날짜</div>
+            <input type="date" value="{{ newTripStartDate }}" onChange="{{ onNewTripStartDateChange }}" autoFocus="{{ true }}" style="font-size:14px;padding:10px 12px;border-radius:8px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.text }};font-family:inherit;color-scheme:{{ colorScheme }}">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:12px;font-weight:600;color:{{ c.textSub }}">종료 날짜</div>
+            <input type="date" value="{{ newTripEndDate }}" min="{{ newTripStartDate }}" onChange="{{ onNewTripEndDateChange }}" style="font-size:14px;padding:10px 12px;border-radius:8px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.text }};font-family:inherit;color-scheme:{{ colorScheme }}">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+          <div onClick="{{ closeNewTripModal }}" style="cursor:pointer;font-size:13px;font-weight:600;color:{{ c.textSub }};background:{{ c.chipBg }};border-radius:8px;padding:9px 16px">취소</div>
+          <a href="{{ newTripHref }}" style="font-size:13px;font-weight:700;color:#12321F;background:#7BCB93;border-radius:8px;padding:9px 16px;text-decoration:none">시작하기</a>
+        </div>
+      </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="max-width:1080px;margin:0 auto;padding:32px 24px 80px">
+    <div style="font-size:22px;font-weight:700;color:{{ c.text }};margin-bottom:4px">여행지 탐색</div>
+    <div style="font-size:13px;color:{{ c.textSub }};margin-bottom:20px">지도의 핀이나 아래 목록에서 지역을 눌러 여행지를 추천받아보세요</div>
+
+    <div class="ed-map-row" style="margin-bottom:32px">
+      <div class="ed-legend-col" style="border-color: {{ c.border }}; background-color: {{ legendColBg }}">
+        <div onClick="{{ selectAll }}" class="ed-legend-item {{ allActiveClass }}" style="{{ allActiveStyleObj }}">전체</div>
+        <sc-for list="{{ mapRegions }}" as="mr" hint-placeholder-count="17">
+          <div onClick="{{ mr.onSelect }}" class="ed-legend-item {{ mr.legendActiveClass }}" style="color:{{ c.text }}">{{ mr.label }}</div>
+        </sc-for>
+      </div>
+      <div class="ed-map-wrap" style="flex: 1; background: {{ c.mapGlow }}; border-radius: 16px; height: 626px; width: 520px; overflow: visible">
+        <img class="ed-map-svg" src="./korea-map.svg" alt="대한민국 지도" style="padding-top: 7px; padding-bottom: 7px; border-radius: 50px">
+        <sc-for list="{{ mapRegions }}" as="mr" hint-placeholder-count="17">
+          <div onClick="{{ mr.onSelect }}" class="ed-pin {{ mr.pinActiveClass }}" style="left:{{ mr.left }};top:{{ mr.top }}">
+            <div class="ed-pin-label">{{ mr.label }}</div>
+            <div class="ed-pin-dot"></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:60px 0;font-size:13px;color:{{ c.textSub }}">이 지역의 추천 여행지가 아직 없어요</div>
+    </sc-if>
+
+    <sc-for list="{{ sections }}" as="section" hint-placeholder-count="2">
+      <sc-if value="{{ section.hasItems }}" hint-placeholder-val="{{ true }}">
+      <div style="margin-bottom:36px">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-bottom:14px">
+          <div style="font-size:17px;font-weight:700;color:{{ c.text }};white-space:nowrap">{{ section.title }}</div>
+          <div style="font-size:12.5px;color:{{ c.textSub }}">{{ section.subtitle }}</div>
+        </div>
+        <div class="ed-grid">
+          <sc-for list="{{ section.items }}" as="dest" hint-placeholder-count="3">
+            <div class="ed-card" style="background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="position:relative;width:100%;aspect-ratio:4/3">
+                <image-slot id="{{ dest.imgId }}" shape="rect" placeholder="{{ dest.name }} 사진"></image-slot>
+                <div style="position:absolute;top:10px;left:10px;background:rgba(23,23,25,.7);color:#fff;font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;pointer-events:none">{{ dest.badge }}</div>
+              </div>
+              <div style="padding:14px;display:flex;flex-direction:column;gap:6px;flex:1">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:6px">
+                  <div style="font-size:15px;font-weight:700;color:{{ c.text }}">{{ dest.name }}</div>
+                  <div style="font-size:12px;color:{{ c.textSub }};white-space:nowrap">{{ dest.region }}</div>
+                </div>
+                <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.5">{{ dest.desc }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+                  <sc-for list="{{ dest.tags }}" as="tag" hint-placeholder-count="2">
+                    <div style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ c.chipBg }};color:{{ c.textSub }}">{{ tag }}</div>
+                  </sc-for>
+                </div>
+                <a href="{{ dest.planHref }}" style="margin-top:8px;font-size:12.5px;font-weight:700;color:#1F7A44;text-decoration:none">이 여행지로 일정 짜기 →</a>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+    </sc-for>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+// MOCK: 실제 연동 시 이 정적 데이터를 추천/인기 여행지 API 응답으로 교체
+const REGION_COORDS = {
+  서울: { left: 29, top: 18 }, 인천: { left: 15, top: 25 }, 경기: { left: 26, top: 33 },
+  강원: { left: 62, top: 16 },
+  세종: { left: 35, top: 42 }, 대전: { left: 40, top: 47 }, 충북: { left: 47, top: 42 }, 충남: { left: 21, top: 46 },
+  경북: { left: 68, top: 36 },
+  대구: { left: 55, top: 56 }, 전북: { left: 28, top: 56 },
+  경남: { left: 52, top: 66 }, 울산: { left: 72, top: 60 }, 부산: { left: 67, top: 71 },
+  광주: { left: 22, top: 66 }, 전남: { left: 24, top: 79 },
+  제주: { left: 27, top: 97 },
+};
+const REGION_ORDER = ['서울', '강원', '경기', '경남', '경북', '광주', '대구', '대전', '부산', '세종', '울산', '인천', '전남', '전북', '제주', '충남', '충북'];
+const MAP_REGIONS = REGION_ORDER.map(key => ({ key, ...REGION_COORDS[key] }));
+
+const SECTIONS = [
+  {
+    title: '당장 차키 챙기자', subtitle: '드라이브하기 좋은 곳',
+    items: [
+      { name: '제주도', region: '제주', badge: '드라이브', desc: '오름과 해안도로를 잇는 자유여행의 정석', tags: ['자연', '드라이브'] },
+      { name: '부산', region: '부산', badge: '드라이브', desc: '바다와 도심을 함께 즐기는 대표 휴양 도시', tags: ['해변', '도시여행'] },
+      { name: '경주', region: '경북', badge: '드라이브', desc: '유적과 벚꽃길이 어우러진 역사 여행지', tags: ['역사', '문화'] },
+      { name: '군산', region: '전북', badge: '드라이브', desc: '오래된 빵집과 베이커리 투어로 유명한 항구도시', tags: ['베이커리', '카페'] },
+      { name: '동대문', region: '서울', badge: '드라이브', desc: '밤새 열리는 쇼핑 상권과 야시장', tags: ['쇼핑', '야경'] },
+      { name: '전주', region: '전북', badge: '드라이브', desc: '한정식과 길거리 음식이 풍부한 미식 도시', tags: ['미식', '한옥'] },
+    ],
+  },
+  {
+    title: '가을 타나봐', subtitle: 'ㅇㅇㅇㅇ',
+    items: [
+      { name: '속초', region: '강원', badge: '급상승', desc: '서울에서 가까운 바다+산 당일여행 코스', tags: ['근교', '자연'] },
+      { name: '통영', region: '경남', badge: '급상승', desc: '한적한 항구와 섬 여행이 주목받는 곳', tags: ['해변', '섬여행'] },
+      { name: '연남동', region: '서울', badge: '급상승', desc: '개성 있는 베이커리와 카페가 몰려있는 동네', tags: ['베이커리', '카페'] },
+      { name: '을지로', region: '서울', badge: '급상승', desc: '뉴트로 감성의 소품샵과 쇼핑거리', tags: ['쇼핑', '감성'] },
+      { name: '포항', region: '경북', badge: '급상승', desc: '신선한 해산물과 물회가 유명한 미식 여행지', tags: ['미식', '해산물'] },
+    ],
+  },
+];
+
+const LIGHT = { bg: '#F7F7F8', text: '#171719', textSub: 'rgba(23,23,25,.6)', border: '#E1E2E4', headerBg: 'rgba(255,255,255,.92)', cardBg: '#fff', chipBg: '#F4F4F5', regionBg: '#fff', activeBg: '#7BCB93', mapGlow: 'none' };
+const DARK = { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)', border: '#292A2D', headerBg: 'rgba(15,15,16,.82)', cardBg: '#17181A', chipBg: 'rgba(255,255,255,.08)', regionBg: '#D6E0D9', activeBg: '#7BCB93', mapGlow: 'radial-gradient(circle 220px at 50% 45%, #1E4230 0%, #0F0F10 100%)' };
+
+class Component extends DCLogic {
+  state = {
+    activeRegion: null, newTripModalOpen: false,
+    newTripStartDate: new Date().toISOString().slice(0, 10), newTripEndDate: new Date().toISOString().slice(0, 10),
+    theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || 'light',
+  };
+  selectRegion = (key) => this.setState({ activeRegion: key });
+  selectAll = () => this.setState({ activeRegion: null });
+  openNewTripModal = () => this.setState({ newTripModalOpen: true });
+  closeNewTripModal = () => this.setState({ newTripModalOpen: false });
+  onNewTripStartDateChange = (e) => this.setState(s => ({ newTripStartDate: e.target.value, newTripEndDate: s.newTripEndDate < e.target.value ? e.target.value : s.newTripEndDate }));
+  onNewTripEndDateChange = (e) => this.setState({ newTripEndDate: e.target.value });
+  stopClick = (e) => e.stopPropagation();
+  toggleTheme = () => this.setState(s => {
+    const next = s.theme === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('pd-theme', next); } catch (e) {}
+    return { theme: next };
+  });
+
+  renderVals() {
+    const { activeRegion } = this.state;
+    const c = this.state.theme === 'dark' ? DARK : LIGHT;
+    const mapRegions = MAP_REGIONS.map((r, i) => ({
+      label: r.key, num: i + 1,
+      left: `${r.left}%`, top: `${r.top}%`,
+      onSelect: () => this.selectRegion(r.key),
+      pinActiveClass: activeRegion === r.key ? 'ed-pin-active' : '',
+      legendActiveClass: activeRegion === r.key ? 'ed-legend-active' : '',
+    }));
+    const sections = SECTIONS.map((sec, si) => {
+      const items = sec.items
+        .filter(d => !activeRegion || d.region === activeRegion)
+        .map((d, di) => ({
+          ...d,
+          imgId: `dest-${si}-${di}`,
+          planHref: `./Route Planner App.dc.html?destination=${encodeURIComponent(d.name)}`,
+        }));
+      return { ...sec, items, hasItems: items.length > 0 };
+    });
+    const noResults = sections.every(s => !s.hasItems);
+    return {
+      c, isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
+      darkClass: this.state.theme === 'dark' ? 'ed-dark' : '',
+      legendColBg: this.state.theme === 'dark' ? '#D6E0D9' : '#fff',
+      colorScheme: this.state.theme === 'dark' ? 'dark' : 'light',
+      sections, mapRegions, noResults, selectAll: this.selectAll,
+      allActiveClass: '',
+      allActiveStyleObj: activeRegion ? { color: this.state.theme === 'dark' ? '#12321F' : '#171719' } : { background: this.state.theme === 'dark' ? '#fff' : '#7BCB93', color: '#12321F' },
+      newTripModalOpen: this.state.newTripModalOpen, openNewTripModal: this.openNewTripModal, closeNewTripModal: this.closeNewTripModal,
+      newTripStartDate: this.state.newTripStartDate, onNewTripStartDateChange: this.onNewTripStartDateChange,
+      newTripEndDate: this.state.newTripEndDate, onNewTripEndDateChange: this.onNewTripEndDateChange, stopClick: this.stopClick,
+      newTripHref: `./Route Planner App.dc.html?new=1&tripStart=${encodeURIComponent(this.state.newTripStartDate)}&tripEnd=${encodeURIComponent(this.state.newTripEndDate)}`,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
