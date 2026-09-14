@@ -53,9 +53,9 @@ a:hover{color:#146030}
     </div>
 
     <sc-if value="{{ hasRoutes }}" hint-placeholder-val="{{ false }}">
-      <div style="display:flex;align-items:flex-end;gap:2px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid {{ c.border }}">
+      <div style="display:flex;align-items:flex-end;gap:24px;margin-bottom:19px;padding-bottom:0;padding-left:10px;border-bottom:1px solid {{ c.border }}">
         <sc-for list="{{ statusTabs }}" as="tab" hint-placeholder-count="2">
-          <div onClick="{{ tab.onSelect }}" style="cursor:pointer;padding:6px 12px;border-radius:8px;font-size:12.2px;font-weight:600;background:{{ tab.bg }};color:{{ tab.color }}">{{ tab.label }}</div>
+          <div onClick="{{ tab.onSelect }}" style="cursor:pointer;padding:0 2px 11px 2px;font-size:12.2px;font-weight:600;background:transparent;color:{{ tab.color }};border-bottom:2px solid {{ tab.underline }};margin-bottom:-1px;white-space:nowrap">{{ tab.label }}</div>
         </sc-for>
       </div>
       <div style="display:flex;flex-direction:column;gap:14px">
@@ -467,8 +467,8 @@ class Component extends DCLogic {
     const statusTabs = ['upcoming', 'done'].map(k => ({
       label: `${k === 'upcoming' ? '예정된 일정' : '완료된 일정'} (${enriched.filter(r => k === 'done' ? r.isDone : !r.isDone).length})`,
       onSelect: this.onSetStatusTab(k),
-      bg: statusTab === k ? '#EAF9EF' : 'transparent',
-      color: statusTab === k ? '#1F7A44' : c.textSub,
+      color: statusTab === k ? '#4FAE6B' : c.textSub,
+      underline: statusTab === k ? '#4FAE6B' : 'transparent',
     }));
     const sortedRoutes = filteredRoutes;
     const PAGE_SIZE = 5;
