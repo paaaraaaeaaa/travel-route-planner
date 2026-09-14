@@ -986,39 +986,90 @@ class Component extends DCLogic {
     if (this.polylineRef.current) this.polylineRef.current.setAttribute('points', this._routePolylinePoints || '0,0');
   };
 
-  componentDidMount() {
-    this.loadKakaoSdk();
-    this.syncPolyline();
-  }
-
   componentDidUpdate() {
     this.syncPolyline();
   }
 
   loadKakaoSdk = async () => {
     try {
+      console.log('[map] fetching /api/kakao-config');
       const r = await fetch('/api/kakao-config');
+      console.log('[map] kakao-config response status:', r.status);
       const data = await r.json();
-      if (!r.ok || !data.javascriptKey) throw new Error(data?.error || 'no javascriptKey');
-      if (window.kakao && window.kakao.maps) { this.initKakaoMap(); return; }
+      console.log('[map] javascriptKey received:', data && data.javascriptKey ? 'yes' : 'no');
+      if (!r.ok || !data.javascriptKey) {
+        console.error('[map] /api/kakao-config failed:', data?.error || `HTTP ${r.status}`);
+        this.setState({ kakaoLoadFailed: true, kakaoFailStage: 'config' });
+        return;
+      }
+      if (window.kakao && window.kakao.maps) {
+        console.log('[map] Kakao SDK already loaded, calling kakao.maps.load');
+        window.kakao.maps.load(() => this.initKakaoMap());
+        return;
+      }
+      console.log('[map] loading Kakao Maps SDK script');
       const script = document.createElement('script');
       script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${data.javascriptKey}&autoload=false`;
-      script.onload = () => window.kakao.maps.load(() => this.initKakaoMap());
-      script.onerror = () => this.setState({ kakaoLoadFailed: true });
+      script.onload = () => {
+        console.log('[map] Kakao SDK script loaded');
+        console.log('[map] window.kakao exists:', !!window.kakao ? 'yes' : 'no');
+        if (!window.kakao) {
+          console.error('[map] Kakao SDK script loaded but window.kakao is missing (possible domain/appkey mismatch in Kakao Developers console)');
+          this.setState({ kakaoLoadFailed: true, kakaoFailStage: 'no-window-kakao' });
+          return;
+        }
+        console.log('[map] window.kakao.maps exists:', !!window.kakao.maps ? 'yes' : 'no');
+        if (!window.kakao.maps) {
+          console.error('[map] window.kakao loaded but window.kakao.maps is missing');
+          this.setState({ kakaoLoadFailed: true, kakaoFailStage: 'no-kakao-maps' });
+          return;
+        }
+        console.log('[map] calling kakao.maps.load');
+        try {
+          window.kakao.maps.load(() => {
+            console.log('[map] Kakao Maps SDK ready');
+            this.initKakaoMap();
+          });
+        } catch (err) {
+          console.error('[map] kakao.maps.load threw:', err);
+          this.setState({ kakaoLoadFailed: true, kakaoFailStage: 'maps-load-throw' });
+        }
+      };
+      script.onerror = (e) => {
+        console.error('[map] Kakao SDK script failed to load (network/appkey/domain issue). src:', script.src.replace(data.javascriptKey, '***'));
+        this.setState({ kakaoLoadFailed: true, kakaoFailStage: 'script-error' });
+      };
       document.head.appendChild(script);
     } catch (err) {
-      console.error('Kakao SDK load failed:', err);
-      this.setState({ kakaoLoadFailed: true });
+      console.error('[map] loadKakaoSdk unexpected error:', err);
+      this.setState({ kakaoLoadFailed: true, kakaoFailStage: 'exception' });
     }
   };
 
   initKakaoMap = () => {
-    if (!this.mapRef.current || !window.kakao) return;
-    this.kakaoMap = new window.kakao.maps.Map(this.mapRef.current, {
-      center: new window.kakao.maps.LatLng(37.5665, 126.9780),
-      level: 6,
-    });
-    this.setState({ kakaoReady: true });
+    console.log('[map] initializing map, mapRef.current exists:', !!this.mapRef.current ? 'yes' : 'no');
+    if (!this.mapRef.current) {
+      console.error('[map] mapRef.current is null — map container not mounted yet');
+      this.setState({ kakaoLoadFailed: true, kakaoFailStage: 'no-map-ref' });
+      return;
+    }
+    if (!window.kakao || !window.kakao.maps) {
+      console.error('[map] window.kakao.maps missing at initKakaoMap time');
+      this.setState({ kakaoLoadFailed: true, kakaoFailStage: 'no-kakao-maps-at-init' });
+      return;
+    }
+    try {
+      this.kakaoMap = new window.kakao.maps.Map(this.mapRef.current, {
+        center: new window.kakao.maps.LatLng(37.5665, 126.9780),
+        level: 6,
+      });
+    } catch (err) {
+      console.error('[map] new kakao.maps.Map() failed:', err);
+      this.setState({ kakaoLoadFailed: true, kakaoFailStage: 'map-construct-throw' });
+      return;
+    }
+    console.log('[map] Kakao map created successfully');
+    this.setState({ kakaoReady: true, kakaoLoadFailed: false });
     this.syncKakaoMarkers();
   };
 
@@ -1083,23 +1134,23 @@ class Component extends DCLogic {
         body: JSON.stringify({ action: mode, params: { originX: a.x, originY: a.y, destX: b.x, destY: b.y, priority: this.state.criteria } }),
       });
       const data = await r.json();
-      if (!r.ok) { console.error(`fetchSegmentRoute(${mode}) error:`, data); return; }
-      let distanceKm = null, minutes = null;
-      if (mode === 'car') {
-        const route = data?.routes?.[0];
-        distanceKm = route?.summary?.distance ? route.summary.distance / 1000 : null;
-        minutes = route?.summary?.duration ? Math.round(route.summary.duration / 60) : null;
-      } else {
-        // Kakao routing(walk/publictraffic/bicycle) 응답 형태: routes[0].summary.{distance,duration}
-        const route = data?.routes?.[0];
-        distanceKm = route?.summary?.distance ? route.summary.distance / 1000 : null;
-        minutes = route?.summary?.duration ? Math.round(route.summary.duration / 60) : null;
+      if (!r.ok) {
+        console.error(`fetchSegmentRoute(${mode}) error:`, data);
+        this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: data?.error || '경로 정보를 불러오지 못했습니다' } } }));
+        return;
       }
+      // Kakao routing(walk/publictraffic/bicycle) 및 Mobility(car) 응답 모두 routes[0].summary.{distance,duration}
+      const route = data?.routes?.[0];
+      const distanceKm = route?.summary?.distance ? route.summary.distance / 1000 : null;
+      const minutes = route?.summary?.duration ? Math.round(route.summary.duration / 60) : null;
       if (distanceKm != null && minutes != null) {
         this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { distanceKm, minutes } } }));
+      } else {
+        this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: '경로 정보를 불러오지 못했습니다' } } }));
       }
     } catch (err) {
       console.error('fetchSegmentRoute fetch failed:', err);
+      this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: '경로 정보를 불러오지 못했습니다' } } }));
     }
   };
 
@@ -1172,6 +1223,8 @@ class Component extends DCLogic {
 
   // MOCK: 실제 연동 시 localStorage 대신 서버 API로 내 일정 목록을 저장/조회
   componentDidMount() {
+    this.loadKakaoSdk();
+    this.syncPolyline();
     this._onKeyDown = (e) => {
       if (e.key !== 'Escape') return;
       const s = this.state;
@@ -1357,9 +1410,11 @@ class Component extends DCLogic {
         x: geo?.x ?? null, y: geo?.y ?? null,
       }];
       return { places, nextId: s.nextId + 1, newAddress: '', segments: this.resizeSegments(places, s.segments), addConfirmOpen: false, pendingAddress: '', pendingName: '', geocoding: false };
+    }, () => {
+      // setState callback: this.state.places now includes the new place before we read it
+      this.syncKakaoMarkers();
+      this.refreshAllSegmentRoutes();
     });
-    this.syncKakaoMarkers();
-    this.refreshAllSegmentRoutes();
     this.logActivity(`${name}을 추가했습니다`);
     this.showToast(geo ? '방문지가 일정에 추가됐어요' : '방문지가 추가됐어요 (좌표를 찾지 못해 지도에는 표시되지 않아요)');
   };
@@ -1444,7 +1499,7 @@ class Component extends DCLogic {
       this.setState({ lastAppliedMode: null });
       return;
     }
-    this.setState(s => ({ segments: s.segments.map(() => mode), lastAppliedMode: mode }));
+    this.setState(s => ({ segments: s.segments.map(() => mode), lastAppliedMode: mode }), () => this.refreshAllSegmentRoutes());
     this.logActivity(`전체 구간 이동수단을 ${MODE_MAP[mode].label}(으)로 일괄 변경했습니다`);
   };
   toggleExpand = (idx) => this.setState(s => ({ expandedSegments: { ...s.expandedSegments, [idx]: !s.expandedSegments[idx] } }));
@@ -1506,10 +1561,16 @@ class Component extends DCLogic {
       this.showToast('변경된 상황을 동선에 반영했어요');
     }, 800);
   };
-  recalc = () => {
+  // 실제 Kakao 경로 API로 모든 구간을 재계산. 순열 최적화 없이 현재 방문 순서를 유지한 채
+  // 각 구간의 실제 거리/시간을 다시 조회한다(경로 기준 변경 시 priority가 바뀌므로 캐시를 비운다).
+  recalc = async () => {
     if (this.state.loading) return;
-    this.setState({ loading: true });
-    setTimeout(() => this.setState(s => ({ loading: false, mapOrderIds: s.places.map(p => p.id) })), 900);
+    this.setState(s => ({ loading: true, routeCache: {}, mapOrderIds: s.places.map(p => p.id) }));
+    const segCount = this.state.segments.length;
+    await Promise.all(Array.from({ length: segCount }, (_, idx) => this.fetchSegmentRoute(idx)));
+    this.setState({ loading: false });
+    this.logActivity('경로를 다시 계산했습니다');
+    this.showToast('최적 경로가 업데이트됐어요');
   };
 
   segStyle(active) {
@@ -1551,7 +1612,7 @@ class Component extends DCLogic {
 
     const hasCoordPlaces = places.some(p => p.x && p.y);
     const showMockOverlay = !(this.state.kakaoReady && hasCoordPlaces);
-    const mapStatusLabel = this.state.kakaoLoadFailed
+    const mapStatusLabel = (this.state.kakaoLoadFailed && !this.state.kakaoReady)
       ? 'MOCK MAP · Kakao 지도 로드 실패'
       : (this.state.kakaoReady ? 'MOCK MAP · 좌표가 확인된 방문지가 없어요' : 'MOCK MAP · 실제 지도 연결 중...');
 
@@ -1628,10 +1689,21 @@ class Component extends DCLogic {
       const fromP = places[idx], toP = places[idx + 1];
       const pairKey = fromP && toP ? (Number(fromP.id) * 131 + Number(toP.id) * 17) : idx;
       const cached = this.state.routeCache[this.segmentCacheKey(idx)];
-      const dist = cached ? cached.distanceKm : SEGMENT_DISTANCES[Math.abs(pairKey) % SEGMENT_DISTANCES.length];
-      const rawSteps = cached
-        ? [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: cached.minutes, distanceKm: cached.distanceKm, nodeLabel: null }]
-        : computeMockSteps(mode, dist, idx);
+      const hasRealCoords = !!(fromP?.x && fromP?.y && toP?.x && toP?.y);
+      let rawSteps, isPending = false, isFailed = false;
+      if (cached && !cached.failed) {
+        rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: cached.minutes, distanceKm: cached.distanceKm, nodeLabel: null }];
+      } else if (cached?.failed) {
+        isFailed = true;
+        rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: 0, distanceKm: 0, nodeLabel: null }];
+      } else if (hasRealCoords) {
+        isPending = true;
+        rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: 0, distanceKm: 0, nodeLabel: null }];
+      } else {
+        // 좌표가 없는 데모/미리보기 방문지에 한해 예시 데이터 사용 (실제 API 결과를 대신하지 않음)
+        const dist = SEGMENT_DISTANCES[Math.abs(pairKey) % SEGMENT_DISTANCES.length];
+        rawSteps = computeMockSteps(mode, dist, idx);
+      }
       const steps = rawSteps.map((st, si) => ({
         ...st,
         durationLabel: `${st.minutes}분`,
@@ -1654,7 +1726,8 @@ class Component extends DCLogic {
         color: (this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK : MODE_TOP_STYLE)[mode].color,
         borderColor: (this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK : MODE_TOP_STYLE)[mode].border,
         distanceKm: totalDist, minutes: totalMinutes,
-        durationLabel: `${totalMinutes}분`, distanceLabel: `${totalDist.toFixed(1)}km`,
+        durationLabel: isFailed ? '경로 정보를 불러오지 못했어요' : (isPending ? '경로 정보를 불러오는 중...' : `${totalMinutes}분`),
+        distanceLabel: (isFailed || isPending) ? '' : `${totalDist.toFixed(1)}km`,
         onCycle: () => this.cycleSegmentMode(idx),
         hasDetail: steps.length > 1,
         expanded, onToggle: () => this.toggleExpand(idx),
