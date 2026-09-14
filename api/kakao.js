@@ -1,14 +1,7 @@
 // POST /api/kakao — single proxy for Kakao REST endpoints. Body: { action, params }
 // Requires KAKAO_REST_API_KEY. Never exposes the key to the client.
-//
-// IMPORTANT permission note (confirmed via Kakao Developers docs/devtalk):
-// - /v2/local/search/address.json, /v2/local/search/keyword.json → available to any REST key.
-// - /v1/directions (apis-navi.kakaomobility.com, car) → available to any REST key.
-// - /v2/routing/walk, /v2/routing/publictraffic, /v2/routing/bicycle (dapi.kakao.com) use
-//   start_x/start_y/end_x/end_y params. Kakao devtalk reports these can return a permission-
-//   looking error ("API limit has been exceeded", code -10) on apps that don't have the
-//   routing product explicitly enabled in Kakao Developers Console, independent of actual
-//   quota usage. If you hit that, enable the "길찾기(Routing)" product for this app there.
+// car/walk/transit responses are normalized server-side to { distanceKm, minutes, transfers, pathPoints }
+// so the frontend never has to special-case each Kakao response shape.
 
 const LOCAL_BASE = 'https://dapi.kakao.com';
 const MOBILITY_BASE = 'https://apis-navi.kakaomobility.com';
@@ -21,6 +14,57 @@ async function kakaoGet(url, params) {
   const r = await fetch(u, { headers: { Authorization: `KakaoAK ${process.env.KAKAO_REST_API_KEY}` } });
   const data = await r.json().catch(() => null);
   return { ok: r.ok, status: r.status, data };
+}
+
+// Kakao Navi(자동차): routes[0].summary.{distance(m), duration(s)}, routes[0].sections[].roads[].vertexes ([x,y,x,y,...])
+function parseCarRoute(data) {
+  const route = data?.routes?.[0];
+  if (!route || !route.summary) return null;
+  const pathPoints = [];
+  (route.sections || []).forEach(sec => (sec.roads || []).forEach(road => {
+    const v = road.vertexes || [];
+    for (let i = 0; i < v.length; i += 2) pathPoints.push({ x: v[i], y: v[i + 1] });
+  }));
+  return {
+    distanceKm: route.summary.distance / 1000,
+    minutes: Math.round(route.summary.duration / 60),
+    transfers: null,
+    pathPoints,
+  };
+}
+
+// Kakao 도보: route.properties.{totalDistance(m), totalTime(s)}, route.legs[].steps[].path.points ([x,y] pairs)
+function parseWalkRoute(data) {
+  const route = data?.routes?.[0] || data?.route || data;
+  const props = route?.properties;
+  if (!props) return null;
+  const pathPoints = [];
+  (route.legs || []).forEach(leg => (leg.steps || []).forEach(step => {
+    (step.path?.points || []).forEach(pt => pathPoints.push({ x: pt[0], y: pt[1] }));
+  }));
+  return {
+    distanceKm: props.totalDistance / 1000,
+    minutes: Math.round(props.totalTime / 60),
+    transfers: null,
+    pathPoints,
+  };
+}
+
+// Kakao 대중교통: route.properties.{totalDistance(m), totalTime(s), transferCount?}, path.points per step
+function parseTransitRoute(data) {
+  const route = data?.routes?.[0] || data?.route || data;
+  const props = route?.properties;
+  if (!props) return null;
+  const pathPoints = [];
+  (route.legs || []).forEach(leg => (leg.steps || []).forEach(step => {
+    (step.path?.points || []).forEach(pt => pathPoints.push({ x: pt[0], y: pt[1] }));
+  }));
+  return {
+    distanceKm: props.totalDistance / 1000,
+    minutes: Math.round(props.totalTime / 60),
+    transfers: props.transferCount ?? props.transferCnt ?? null,
+    pathPoints,
+  };
 }
 
 export default async function handler(req, res) {
@@ -48,8 +92,13 @@ export default async function handler(req, res) {
           destination: `${params?.destX},${params?.destY}`,
           priority: params?.priority === 'distance' ? 'SHORTEST' : 'RECOMMEND',
         });
-        if (!r.ok) { console.error('kakao car route error', r.status, r.data); res.status(502).json({ error: '자동차 경로를 찾지 못했습니다.', detail: r.data }); return; }
-        res.status(200).json(r.data);
+        if (!r.ok) {
+          console.error('kakao car route error', r.status, r.data, r.status === 429 ? '(무료 쿼터 초과 가능성)' : '');
+          res.status(502).json({ error: '자동차 경로를 찾지 못했습니다.', detail: r.data }); return;
+        }
+        const parsed = parseCarRoute(r.data);
+        if (!parsed) { res.status(502).json({ error: '자동차 경로 응답을 해석하지 못했습니다.' }); return; }
+        res.status(200).json(parsed);
         return;
       }
       case 'walk': {
@@ -58,11 +107,12 @@ export default async function handler(req, res) {
           end_x: params?.destX, end_y: params?.destY,
         });
         if (!r.ok) {
-          console.error('kakao walk route error', r.status, r.data);
-          res.status(502).json({ error: '도보 경로를 찾지 못했습니다. (앱에 길찾기 권한이 활성화되어 있는지 Kakao Developers 콘솔을 확인해주세요)', detail: r.data });
-          return;
+          console.error('kakao walk route error', r.status, r.data, r.status === 429 ? '(무료 쿼터 초과 가능성)' : '');
+          res.status(502).json({ error: '도보 경로를 불러오지 못했습니다.', detail: r.data }); return;
         }
-        res.status(200).json(r.data);
+        const parsed = parseWalkRoute(r.data);
+        if (!parsed) { res.status(502).json({ error: '도보 경로 응답을 해석하지 못했습니다.', detail: r.data }); return; }
+        res.status(200).json(parsed);
         return;
       }
       case 'transit': {
@@ -71,24 +121,12 @@ export default async function handler(req, res) {
           end_x: params?.destX, end_y: params?.destY,
         });
         if (!r.ok) {
-          console.error('kakao transit route error', r.status, r.data);
-          res.status(502).json({ error: '대중교통 경로를 찾지 못했습니다. (앱에 길찾기 권한이 활성화되어 있는지 Kakao Developers 콘솔을 확인해주세요)', detail: r.data });
-          return;
+          console.error('kakao transit route error', r.status, r.data, r.status === 429 ? '(무료 쿼터 초과 가능성)' : '');
+          res.status(502).json({ error: '대중교통 경로를 불러오지 못했습니다.', detail: r.data }); return;
         }
-        res.status(200).json(r.data);
-        return;
-      }
-      case 'bike': {
-        const r = await kakaoGet(`${LOCAL_BASE}/v2/routing/bicycle`, {
-          start_x: params?.originX, start_y: params?.originY,
-          end_x: params?.destX, end_y: params?.destY,
-        });
-        if (!r.ok) {
-          console.error('kakao bike route error', r.status, r.data);
-          res.status(502).json({ error: '자전거 경로를 찾지 못했습니다. (앱에 길찾기 권한이 활성화되어 있는지 Kakao Developers 콘솔을 확인해주세요)', detail: r.data });
-          return;
-        }
-        res.status(200).json(r.data);
+        const parsed = parseTransitRoute(r.data);
+        if (!parsed) { res.status(502).json({ error: '대중교통 경로 응답을 해석하지 못했습니다.', detail: r.data }); return; }
+        res.status(200).json(parsed);
         return;
       }
       default:

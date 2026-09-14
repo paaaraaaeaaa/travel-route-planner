@@ -231,9 +231,6 @@ a:hover{color:#146030}
         <div onClick="{{ modeTransit.onApplyAll }}" style="cursor:pointer;padding:6px 10px;border-radius:11px;font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:5px;color:{{ modeTransit.chipColor }};background:{{ modeTransit.chipBg }};border:1px solid {{ modeTransit.chipBorder }};opacity:{{ modeTransit.opacity }}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="3"></rect><path d="M4 11h16"></path><circle cx="8" cy="17.5" r="1.4"></circle><circle cx="16" cy="17.5" r="1.4"></circle><path d="M7 20l-1.5 1.5M17 20l1.5 1.5"></path></svg>{{ modeTransit.label }}
         </div>
-        <div onClick="{{ modeBike.onApplyAll }}" style="cursor: pointer; padding: 6px 10px; border-radius: 11px; font-size: 11.5px; font-weight: 500; display: flex; align-items: center; gap: 5px; color: {{ modeBike.chipColor }}; background: {{ modeBike.chipBg }}; border: 1px solid {{ modeBike.chipBorder }}; opacity: {{ modeBike.opacity }}; border-color: #BFEFCF">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.2"></circle><circle cx="18.5" cy="17.5" r="3.2"></circle><path d="M5.5 17.5L10 8h4l4.5 9.5M10 8L8.5 5.5h-2"></path><path d="M10 8l3 5h4"></path></svg>{{ modeBike.label }}
-        </div>
       </div>
     </div>
   </div>
@@ -553,6 +550,9 @@ a:hover{color:#146030}
         </div>
       </sc-if>
       <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ canSearchRoutes }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ searchAllRoutes }}" style="background:#171719;color:#fff;border-radius:10px;height:40px;padding:0 16px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:{{ routeSearchOpacity }}">{{ routeSearchLabel }}</div>
+        </sc-if>
         <div onClick="{{ recalc }}" class="rp-btn-primary" style="background:{{ recalcBtnBg }};color:{{ recalcBtnColor }};border-radius:10px;height:40px;padding:0 20px;display:flex;align-items:center;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:{{ recalcOpacity }}">경로 계산</div>
       </sc-if>
     </div>
@@ -749,7 +749,7 @@ a:hover{color:#146030}
 
 <!-- AI 도우미: 평소엔 작은 진입 버튼, 클릭 시 패널로 확장 -->
 <sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
-<div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: 76px; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
+<div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: 132px; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
   <span>✨</span><span style="white-space:nowrap">AI 도우미</span>
 </div>
 
@@ -766,7 +766,7 @@ const PRIORITY_ORDER = ['high', 'normal', 'low'];
 const PIN_POS = ['20%,80%', '40%,54%', '64%,62%', '84%,28%'];
 
 const CATEGORY_OPTIONS = ['카페·베이커리', '식당', '쇼핑', '관광명소', '생활서비스', '기타'];
-const MODE_ORDER = ['car', 'walk', 'transit', 'bike'];
+const MODE_ORDER = ['car', 'walk', 'transit']; // 자전거 제외 (이번 작업 범위 밖)
 const MODE_MAP = {
   car: { label: '자동차', bg: '#F4F4F5', color: '#171719', border: '#E1E2E4', minPerKm: 2.0, wait: 0, icon: '🚗' },
   walk: { label: '도보', bg: '#EAF2FE', color: '#0054D1', border: '#C9DEFE', minPerKm: 12, wait: 0, icon: '🚶' },
@@ -1014,8 +1014,10 @@ class Component extends DCLogic {
     kakaoReady: false,
     kakaoLoadFailed: false,
     geocoding: false,
-    // 구간별 실제 API 경로 결과 캐시: { "fromId_toId_mode": { distanceKm, minutes } }
+    // 구간별 실제 API 경로 결과 캐시: { "mode_fromId_toId": { distanceKm, minutes, transfers, pathPoints } }
     routeCache: {},
+    routeSearching: false,
+    routeSearched: false,
   };
 
   mapRef = { current: null };
@@ -1159,19 +1161,35 @@ class Component extends DCLogic {
     }
   };
 
-  segmentCacheKey = (idx) => {
+  segmentCacheKey = (idx, mode) => {
     const a = this.state.places[idx], b = this.state.places[idx + 1];
+    const m = mode || this.state.segments[idx];
     if (!a || !b) return `_${idx}`;
-    return `${a.id}_${b.id}_${this.state.segments[idx]}`;
+    return `${m}_${a.id}_${b.id}`;
+  };
+  // 실제 Kakao Polyline(선택된 이동수단의 실제 pathPoints)로 지도 경로선을 갱신. 캐시에 없으면 그리지 않음(가짜 직선 금지)
+  syncKakaoRoutePolyline = () => {
+    if (this.kakaoRoutePolyline) { this.kakaoRoutePolyline.setMap(null); this.kakaoRoutePolyline = null; }
+    if (!this.kakaoMap || !window.kakao || !window.kakao.maps) return;
+    const { places, segments, routeCache } = this.state;
+    const allPoints = [];
+    for (let idx = 0; idx < segments.length; idx++) {
+      const cache = routeCache[this.segmentCacheKey(idx)];
+      if (!cache || cache.failed || !cache.pathPoints || !cache.pathPoints.length) return; // 일부 구간이라도 실제 데이터 없으면 전체를 그리지 않음(가짜 연결 금지)
+      cache.pathPoints.forEach(pt => allPoints.push(pt));
+    }
+    if (allPoints.length < 2) return;
+    const path = allPoints.map(pt => new window.kakao.maps.LatLng(pt.y, pt.x)); // Kakao: x=lng, y=lat → LatLng(y, x)
+    this.kakaoRoutePolyline = new window.kakao.maps.Polyline({ map: this.kakaoMap, path, strokeWeight: 4, strokeColor: '#2C8F4A', strokeOpacity: 0.85, strokeStyle: 'solid' });
   };
 
-  // 실제 Kakao 경로 API(car/walk/transit/bike) 호출 후 routeCache에 저장. 좌표 없으면 스킵(기존 mock 계산이 fallback)
-  fetchSegmentRoute = async (idx) => {
-    const { places, segments } = this.state;
+  // 특정 구간(idx)의 특정 이동수단(mode) 실제 Kakao 경로를 조회해 routeCache[mode_fromId_toId]에 저장.
+  // 캐시에 이미 있으면 재호출하지 않는다. [경로 검색] 버튼에서만 호출됨(자동 호출 금지).
+  fetchSegmentRouteForMode = async (idx, mode) => {
+    const { places } = this.state;
     const a = places[idx], b = places[idx + 1];
-    const mode = segments[idx];
     if (!a || !b || !a.x || !a.y || !b.x || !b.y) return;
-    const key = this.segmentCacheKey(idx);
+    const key = `${mode}_${a.id}_${b.id}`;
     if (this.state.routeCache[key]) return;
     try {
       const r = await fetch('/api/kakao', {
@@ -1181,27 +1199,33 @@ class Component extends DCLogic {
       });
       const data = await r.json();
       if (!r.ok) {
-        console.error(`fetchSegmentRoute(${mode}) error:`, data);
+        console.error(`fetchSegmentRouteForMode(${mode}) error:`, data);
         this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: data?.error || '경로 정보를 불러오지 못했습니다' } } }));
         return;
       }
-      // Kakao routing(walk/publictraffic/bicycle) 및 Mobility(car) 응답 모두 routes[0].summary.{distance,duration}
-      const route = data?.routes?.[0];
-      const distanceKm = route?.summary?.distance ? route.summary.distance / 1000 : null;
-      const minutes = route?.summary?.duration ? Math.round(route.summary.duration / 60) : null;
-      if (distanceKm != null && minutes != null) {
-        this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { distanceKm, minutes } } }));
-      } else {
-        this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: '경로 정보를 불러오지 못했습니다' } } }));
-      }
+      // api/kakao.js가 이미 { distanceKm, minutes, transfers, pathPoints }로 정규화해서 반환
+      this.setState(s => ({ routeCache: { ...s.routeCache, [key]: data } }));
     } catch (err) {
-      console.error('fetchSegmentRoute fetch failed:', err);
+      console.error('fetchSegmentRouteForMode fetch failed:', err);
       this.setState(s => ({ routeCache: { ...s.routeCache, [key]: { failed: true, errorMsg: '경로 정보를 불러오지 못했습니다' } } }));
     }
   };
 
-  refreshAllSegmentRoutes = () => {
-    this.state.segments.forEach((_, idx) => this.fetchSegmentRoute(idx));
+  // [경로 검색] 버튼: 현재 구간들에 대해 car/walk/transit 3개 모두, 캐시에 없는 것만 병렬 조회
+  searchAllRoutes = async () => {
+    if (this.state.routeSearching) return;
+    const segCount = this.state.segments.length;
+    if (segCount < 1) return;
+    this.setState({ routeSearching: true });
+    const tasks = [];
+    for (let idx = 0; idx < segCount; idx++) {
+      for (const mode of MODE_ORDER) tasks.push(this.fetchSegmentRouteForMode(idx, mode));
+    }
+    await Promise.all(tasks);
+    this.setState({ routeSearching: false, routeSearched: true });
+    this.syncKakaoRoutePolyline();
+    this.logActivity('경로를 검색했습니다');
+    this.showToast('실제 경로 검색이 완료됐어요');
   };
 
   logActivity = (text) => this.setState(s => ({
@@ -1223,7 +1247,7 @@ class Component extends DCLogic {
       places: places.map((p, i) => ({ order: i + 1, name: p.name, address: p.address, x: p.x ?? null, y: p.y ?? null, durationMin: p.duration })),
       segments: segments.map((mode, i) => {
         const cache = this.state.routeCache?.[this.segmentCacheKey(i)];
-        return { from: places[i]?.name, to: places[i + 1]?.name, mode, distanceKm: cache?.distanceKm ?? null, minutes: cache?.minutes ?? null, isRealData: !!cache };
+        return { from: places[i]?.name, to: places[i + 1]?.name, mode, distanceKm: cache?.distanceKm ?? null, minutes: cache?.minutes ?? null, transfers: cache?.transfers ?? null, isRealData: !!(cache && !cache.failed) };
       }),
       routeCriteria: criteria, tripStart, tripEnd,
     };
@@ -1517,10 +1541,9 @@ class Component extends DCLogic {
         x: Number(doc.x), y: Number(doc.y),
         priority: 'normal', duration: 15, hours: 'unknown', hoursLabel: '영업시간 확인 필요', day,
       }];
-      return { places, nextId: s.nextId + 1, newAddress: '', pendingSelectedDoc: null, segments: this.resizeSegments(places, s.segments) };
+      return { places, nextId: s.nextId + 1, newAddress: '', pendingSelectedDoc: null, segments: this.resizeSegments(places, s.segments), routeCache: {}, routeSearched: false };
     }, () => {
       this.syncKakaoMarkers();
-      this.refreshAllSegmentRoutes();
     });
     this.logActivity(`${doc.place_name}을 추가했습니다`);
     this.showToast('방문지가 일정에 추가됐어요');
@@ -1540,11 +1563,10 @@ class Component extends DCLogic {
         hours: 'unknown', hoursLabel: '영업시간 확인 필요', day: s.pendingDay || 0,
         x: geo?.x ?? null, y: geo?.y ?? null,
       }];
-      return { places, nextId: s.nextId + 1, newAddress: '', segments: this.resizeSegments(places, s.segments), addConfirmOpen: false, pendingAddress: '', pendingName: '', geocoding: false };
+      return { places, nextId: s.nextId + 1, newAddress: '', segments: this.resizeSegments(places, s.segments), addConfirmOpen: false, pendingAddress: '', pendingName: '', geocoding: false, routeCache: {}, routeSearched: false };
     }, () => {
       // setState callback: this.state.places now includes the new place before we read it
       this.syncKakaoMarkers();
-      this.refreshAllSegmentRoutes();
     });
     this.logActivity(`${name}을 추가했습니다`);
     this.showToast(geo ? '방문지가 일정에 추가됐어요' : '방문지가 추가됐어요 (좌표를 찾지 못해 지도에는 표시되지 않아요)');
@@ -1622,7 +1644,8 @@ class Component extends DCLogic {
   cycleSegmentMode = (idx) => {
     const curMode = this.state.segments[idx];
     const nextMode = MODE_ORDER[(MODE_ORDER.indexOf(curMode) + 1) % MODE_ORDER.length];
-    this.setState(s => ({ segments: s.segments.map((m, i) => i === idx ? nextMode : m) }), () => this.fetchSegmentRoute(idx));
+    // 이동수단 변경은 화면 상태만 바꾼다. 실제 데이터는 routeCache(mode_from_to)에서 즉시 읽고, 없으면 [경로 검색] 유도
+    this.setState(s => ({ segments: s.segments.map((m, i) => i === idx ? nextMode : m) }), () => this.syncKakaoRoutePolyline());
     this.logActivity(`${idx + 1}-${idx + 2} 구간의 이동수단을 ${MODE_MAP[nextMode].label}(으)로 변경했습니다`);
   };
   applyModeToAll = (mode) => {
@@ -1630,7 +1653,7 @@ class Component extends DCLogic {
       this.setState({ lastAppliedMode: null });
       return;
     }
-    this.setState(s => ({ segments: s.segments.map(() => mode), lastAppliedMode: mode }), () => this.refreshAllSegmentRoutes());
+    this.setState(s => ({ segments: s.segments.map(() => mode), lastAppliedMode: mode }), () => this.syncKakaoRoutePolyline());
     this.logActivity(`전체 구간 이동수단을 ${MODE_MAP[mode].label}(으)로 일괄 변경했습니다`);
   };
   toggleExpand = (idx) => this.setState(s => ({ expandedSegments: { ...s.expandedSegments, [idx]: !s.expandedSegments[idx] } }));
@@ -1664,9 +1687,9 @@ class Component extends DCLogic {
       const arr = [...s.places];
       const [moved] = arr.splice(s.dragIndex, 1);
       arr.splice(idx, 0, moved);
-      return { places: arr, dragIndex: null, segments: this.resizeSegments(arr, s.segments) };
+      return { places: arr, dragIndex: null, segments: this.resizeSegments(arr, s.segments), routeCache: {}, routeSearched: false };
     });
-    if (wasDragging) { this.logActivity('방문 순서를 변경했습니다'); this.refreshAllSegmentRoutes(); }
+    if (wasDragging) this.logActivity('방문 순서를 변경했습니다');
   };
   onDragEnd = () => this.setState({ dragIndex: null });
   setCriteria = (c) => this.setState({ criteria: c });
@@ -1692,16 +1715,11 @@ class Component extends DCLogic {
       this.showToast('변경된 상황을 동선에 반영했어요');
     }, 800);
   };
-  // 실제 Kakao 경로 API로 모든 구간을 재계산. 순열 최적화 없이 현재 방문 순서를 유지한 채
-  // 각 구간의 실제 거리/시간을 다시 조회한다(경로 기준 변경 시 priority가 바뀌므로 캐시를 비운다).
-  recalc = async () => {
+  // "경로 다시 계산"은 방문 순서만 정리한다. 실제 거리/시간 재조회는 [경로 검색]에서만 수행(자동 호출 금지)
+  recalc = () => {
     if (this.state.loading) return;
-    this.setState(s => ({ loading: true, routeCache: {}, mapOrderIds: s.places.map(p => p.id) }));
-    const segCount = this.state.segments.length;
-    await Promise.all(Array.from({ length: segCount }, (_, idx) => this.fetchSegmentRoute(idx)));
-    this.setState({ loading: false });
-    this.logActivity('경로를 다시 계산했습니다');
-    this.showToast('최적 경로가 업데이트됐어요');
+    this.setState(s => ({ loading: true, mapOrderIds: s.places.map(p => p.id) }));
+    setTimeout(() => this.setState({ loading: false }), 300);
   };
 
   segStyle(active) {
@@ -1821,14 +1839,14 @@ class Component extends DCLogic {
       const pairKey = fromP && toP ? (Number(fromP.id) * 131 + Number(toP.id) * 17) : idx;
       const cached = this.state.routeCache[this.segmentCacheKey(idx)];
       const hasRealCoords = !!(fromP?.x && fromP?.y && toP?.x && toP?.y);
-      let rawSteps, isPending = false, isFailed = false;
+      let rawSteps, isPending = false, isFailed = false, isUnsearched = false;
       if (cached && !cached.failed) {
-        rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: cached.minutes, distanceKm: cached.distanceKm, nodeLabel: null }];
+        rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: cached.minutes, distanceKm: cached.distanceKm, nodeLabel: null, transfers: cached.transfers }];
       } else if (cached?.failed) {
         isFailed = true;
         rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: 0, distanceKm: 0, nodeLabel: null }];
       } else if (hasRealCoords) {
-        isPending = true;
+        isUnsearched = true;
         rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: 0, distanceKm: 0, nodeLabel: null }];
       } else {
         // 좌표가 없는 데모/미리보기 방문지에 한해 예시 데이터 사용 (실제 API 결과를 대신하지 않음)
@@ -1857,8 +1875,8 @@ class Component extends DCLogic {
         color: (this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK : MODE_TOP_STYLE)[mode].color,
         borderColor: (this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK : MODE_TOP_STYLE)[mode].border,
         distanceKm: totalDist, minutes: totalMinutes,
-        durationLabel: isFailed ? '경로 정보를 불러오지 못했어요' : (isPending ? '경로 정보를 불러오는 중...' : `${totalMinutes}분`),
-        distanceLabel: (isFailed || isPending) ? '' : `${totalDist.toFixed(1)}km`,
+        durationLabel: isFailed ? '경로 정보를 불러오지 못했어요' : (isUnsearched ? '경로 검색 버튼을 눌러 실제 경로를 조회해주세요' : `${totalMinutes}분`),
+        distanceLabel: (isFailed || isUnsearched) ? '' : `${totalDist.toFixed(1)}km${(rawSteps[0]?.transfers != null && mode === 'transit') ? ` · 환승 ${rawSteps[0].transfers}회` : ''}`,
         onCycle: () => this.cycleSegmentMode(idx),
         hasDetail: steps.length > 1,
         expanded, onToggle: () => this.toggleExpand(idx),
@@ -2072,7 +2090,7 @@ class Component extends DCLogic {
       hasRoute: pinLayout.length > 1,
       routePolylinePoints,
       modeOptions,
-      modeCar: modeOptions[0], modeWalk: modeOptions[1], modeTransit: modeOptions[2], modeBike: modeOptions[3],
+      modeCar: modeOptions[0], modeWalk: modeOptions[1], modeTransit: modeOptions[2],
       criteriaOptions,
       newAddress,
       onAddressInput: this.onAddressInput,
@@ -2134,6 +2152,10 @@ class Component extends DCLogic {
       recalc: this.recalc,
       recalcLabel: loading ? '계산 중...' : '경로 다시 계산',
       recalcOpacity: loading ? 0.7 : 1,
+      searchAllRoutes: this.searchAllRoutes,
+      routeSearchLabel: this.state.routeSearching ? '경로 검색 중...' : '경로 검색',
+      routeSearchOpacity: this.state.routeSearching ? 0.7 : 1,
+      canSearchRoutes: places.length > 1,
       summary: {
         count: places.length,
         distanceLabel: places.length ? `${distance.toFixed(1)}km` : '-',
