@@ -402,16 +402,43 @@ a:hover{color:#146030}
   </div>
 </sc-if>
 <sc-if value="{{ mapExpanded }}" hint-placeholder-val="{{ true }}">
-  <div style="flex:1;position:relative;background:#EAF2FE;overflow:hidden;min-height:280px">
-    <div style="position:absolute;inset:0;background-image:linear-gradient(#DCE7F5 1px,transparent 1px),linear-gradient(90deg,#DCE7F5 1px,transparent 1px);background-size:38px 38px;opacity:.7"></div>
-    <div style="position:absolute;top:14px;left:14px;background:rgba(23,23,25,.72);color:#fff;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.02em">MOCK MAP · 실제 지도 API 연동 전</div>
+  <div id="kakao-map" style="flex:1;position:relative;background:#EAF2FE;overflow:hidden;min-height:280px">
+    <div id="kakao-map-status" style="position:absolute;top:14px;left:14px;z-index:5;background:rgba(23,23,25,.72);color:#fff;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.02em">KAKAO MAP · 연결 준비 중</div>
     
 
     <sc-if value="{{ hasRoute }}" hint-placeholder-val="{{ true }}">
       <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 100 100" preserveAspectRatio="none">
         <polyline points="{{ routePolylinePoints }}" fill="none" stroke="#2C8F4A" stroke-width="1.6" stroke-dasharray="3 2.4" stroke-linecap="butt" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
-      </svg>
- 
+      </svg><div class="{{ aiPanelClass }}">
+  <div style="padding:14px 16px;border-bottom:1px solid #EAEBEC;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#171719;display:flex;align-items:center;gap:5px"><span>✨</span>경로 AI</div>
+      <div style="font-size:11px;color:rgba(23,23,25,.5);margin-top:2px">경로 계획을 도와드릴게요</div>
+    </div>
+    <div onClick="{{ toggleAi }}" class="rp-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C;flex-shrink:0">✕</div>
+  </div>
+  <div style="padding:8px 16px;border-bottom:1px solid #EAEBEC;flex-shrink:0">
+    <div style="font-size:11px;color:rgba(23,23,25,.45);background:#F7F7F8;border-radius:7px;padding:6px 9px">현재 경로 · {{ aiContextLabel }}</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:0">
+    <sc-for list="{{ aiMessages }}" as="msg" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:{{ msg.align }}">
+        <div style="align-self:{{ msg.align }};max-width:82%;background:{{ msg.bg }};color:{{ msg.color }};border-radius:{{ msg.radius }};padding:9px 12px;font-size:13px;line-height:1.5">{{ msg.text }}</div>
+        <sc-if value="{{ msg.showSuggestions }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;max-width:100%">
+            <sc-for list="{{ msg.suggestions }}" as="sug" hint-placeholder-count="3">
+              <div onClick="{{ sug.onClick }}" style="border:1px solid #E1E2E4;border-radius:14px;padding:6px 12px;font-size:12px;font-weight:600;color:#171719;background:#fff;cursor:pointer;white-space:nowrap" class="rp-seg-item">{{ sug.text }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+  <div style="padding: 10px 12px; border-top: 1px solid #EAEBEC; display: flex; gap: 6px; flex-shrink: 0; border-width: 1px; border-color: #679D67">
+    <input value="{{ aiInput }}" onChange="{{ onAiInput }}" onKeyDown="{{ onAiInputKeyDown }}" placeholder="메시지를 입력하세요..." style="flex:1;min-width:0;border:1px solid #E1E2E4;border-radius:20px;padding:8px 13px;font-size:12.5px;font-family:inherit;color:#171719;outline:none">
+    <div onClick="{{ sendAiMessage }}" style="background:#7BCB93;color:#12321F;border-radius:20px;padding:8px 15px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:{{ aiSendOpacity }}">{{ aiSendLabel }}</div>
+  </div>
+</div>
     </sc-if>
     <sc-for list="{{ mapPins }}" as="pin" hint-placeholder-count="4">
       <div style="position:absolute;left:{{ pin.left }};top:{{ pin.top }};transform:translate(-50%,-100%)">
@@ -464,42 +491,6 @@ a:hover{color:#146030}
   </div>
 </sc-if>
 </div>
-</div>
-
-<!-- AI 도우미: 평소엔 작은 진입 버튼, 클릭 시 패널로 확장 -->
-      <div class="{{ aiPanelClass }}">
-  <div style="padding:14px 16px;border-bottom:1px solid #EAEBEC;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-    <div>
-      <div style="font-size:14px;font-weight:700;color:#171719;display:flex;align-items:center;gap:5px"><span>✨</span>경로 AI</div>
-      <div style="font-size:11px;color:rgba(23,23,25,.5);margin-top:2px">경로 계획을 도와드릴게요</div>
-    </div>
-    <div onClick="{{ toggleAi }}" class="rp-icon-btn" style="cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#70737C;flex-shrink:0">✕</div>
-  </div>
-  <div style="padding:8px 16px;border-bottom:1px solid #EAEBEC;flex-shrink:0">
-    <div style="font-size:11px;color:rgba(23,23,25,.45);background:#F7F7F8;border-radius:7px;padding:6px 9px">현재 경로 · {{ aiContextLabel }}</div>
-  </div>
-  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:0">
-    <sc-for list="{{ aiMessages }}" as="msg" hint-placeholder-count="2">
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:{{ msg.align }}">
-        <div style="align-self:{{ msg.align }};max-width:82%;background:{{ msg.bg }};color:{{ msg.color }};border-radius:{{ msg.radius }};padding:9px 12px;font-size:13px;line-height:1.5">{{ msg.text }}</div>
-        <sc-if value="{{ msg.showSuggestions }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-wrap:wrap;gap:6px;max-width:100%">
-            <sc-for list="{{ msg.suggestions }}" as="sug" hint-placeholder-count="3">
-              <div onClick="{{ sug.onClick }}" style="border:1px solid #E1E2E4;border-radius:14px;padding:6px 12px;font-size:12px;font-weight:600;color:#171719;background:#fff;cursor:pointer;white-space:nowrap" class="rp-seg-item">{{ sug.text }}</div>
-            </sc-for>
-          </div>
-        </sc-if>
-      </div>
-    </sc-for>
-  </div>
-  <div style="padding: 10px 12px; border-top: 1px solid #EAEBEC; display: flex; gap: 6px; flex-shrink: 0; border-width: 1px; border-color: #679D67">
-    <input value="{{ aiInput }}" onChange="{{ onAiInput }}" onKeyDown="{{ onAiInputKeyDown }}" placeholder="메시지를 입력하세요..." style="flex:1;min-width:0;border:1px solid #E1E2E4;border-radius:20px;padding:8px 13px;font-size:12.5px;font-family:inherit;color:#171719;outline:none">
-    <div onClick="{{ sendAiMessage }}" style="background:#7BCB93;color:#12321F;border-radius:20px;padding:8px 15px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:{{ aiSendOpacity }}">{{ aiSendLabel }}</div>
-  </div>
-</div>
-
-<div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: 76px; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
-  <span>✨</span><span style="white-space:nowrap">AI 도우미</span>
 </div>
 
 <sc-if value="{{ myRoutesOpen }}" hint-placeholder-val="{{ false }}">
@@ -674,6 +665,11 @@ a:hover{color:#146030}
   </div>
 </sc-if>
 
+<!-- AI 도우미: 평소엔 작은 진입 버튼, 클릭 시 패널로 확장 -->
+<sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
+<div onClick="{{ toggleAi }}" class="rp-ai-fab" style="position: fixed; right: 20px; bottom: 76px; z-index: 44; display: {{ aiFabDisplay }}; align-items: center; gap: 7px; padding: 11px 16px; border-radius: 999px; background: #171719; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0px 6px 16px -4px rgba(23,23,25,.35); white-space: nowrap; margin-top: 10px; margin-bottom: 10px">
+  <span>✨</span><span style="white-space:nowrap">AI 도우미</span>
+</div>
 
 
 
@@ -919,9 +915,84 @@ class Component extends DCLogic {
     aiMessages: [
       { role: 'ai', text: '안녕하세요! 경로를 계획하시면서 궁금한 점이 있으면 편하게 물어보세요.', suggestions: ['현재 경로 괜찮아?', '더 빠른 순서 있어?', '주변 추천해줘'] },
     ],
-    // 활동 로그는 현재 브라우저에서만 관리합니다.
+    // MOCK: 실제 서버 연동 시 activityLog를 API 응답으로 교체하고 logActivity를 POST 호출로 바꾸면 됨
     activityLog: [],
+    kakaoMapReady: false,
+    kakaoMap: null,
+    kakaoOverlays: [],
   };
+
+  componentDidMount() {
+    this.initKakaoMap();
+  }
+
+  async initKakaoMap() {
+    try {
+      const cfgRes = await fetch('/api/kakao-config');
+      if (!cfgRes.ok) throw new Error('Kakao config를 불러오지 못했습니다.');
+      const cfg = await cfgRes.json();
+      if (!cfg.javascriptKey) throw new Error('KAKAO_JS_KEY 환경변수가 없습니다.');
+      if (!window.kakao || !window.kakao.maps) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(cfg.javascriptKey)}&autoload=false`;
+          script.onload = resolve;
+          script.onerror = () => reject(new Error('카카오 지도 SDK를 불러오지 못했습니다.'));
+          document.head.appendChild(script);
+        });
+      }
+      await new Promise(resolve => window.kakao.maps.load(resolve));
+      const el = document.getElementById('kakao-map');
+      if (!el) return;
+      const center = new window.kakao.maps.LatLng(37.5665, 126.9780);
+      const map = new window.kakao.maps.Map(el, { center, level: 7 });
+      this.kakaoMap = map;
+      this.setState({ kakaoMapReady: true, kakaoMap: map });
+      const status = document.getElementById('kakao-map-status');
+      if (status) status.textContent = 'KAKAO MAP · 실제 지도 연결 완료';
+      this.syncKakaoPlaces();
+    } catch (e) {
+      console.error(e);
+      const status = document.getElementById('kakao-map-status');
+      if (status) status.textContent = 'KAKAO MAP · JavaScript 키 설정 필요';
+    }
+  }
+
+  async syncKakaoPlaces() {
+    if (!this.kakaoMap || !this.state.places.length) return;
+    try {
+      const resolved = [];
+      for (const place of this.state.places) {
+        if (place.x && place.y) { resolved.push(place); continue; }
+        const res = await fetch(`/api/kakao?type=search&query=${encodeURIComponent(place.address || place.name)}`);
+        const data = await res.json();
+        const doc = data.documents && data.documents[0];
+        if (doc) {
+          resolved.push({ ...place, x: Number(doc.x), y: Number(doc.y), kakaoPlaceId: doc.id, kakaoUrl: doc.place_url, address: doc.road_address_name || doc.address_name || place.address });
+        } else resolved.push(place);
+      }
+      this.setState({ places: resolved });
+      this.drawKakaoMarkers();
+    } catch (e) { console.error('Kakao 장소 좌표 변환 실패', e); }
+  }
+
+  drawKakaoMarkers() {
+    if (!this.kakaoMap || !window.kakao?.maps) return;
+    this.state.kakaoOverlays.forEach(o => o.setMap(null));
+    const overlays = [];
+    const bounds = new window.kakao.maps.LatLngBounds();
+    this.state.places.forEach((p, idx) => {
+      if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
+      const pos = new window.kakao.maps.LatLng(p.y, p.x);
+      const marker = new window.kakao.maps.Marker({ position: pos, map: this.kakaoMap });
+      const label = new window.kakao.maps.CustomOverlay({ position: pos, content: `<div style="background:#171719;color:#fff;padding:4px 7px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;transform:translateY(-42px)">${idx + 1}. ${String(p.name || '').replace(/</g,'&lt;')}</div>`, yAnchor: 1 });
+      label.setMap(this.kakaoMap);
+      overlays.push(marker, label);
+      bounds.extend(pos);
+    });
+    if (this.state.places.some(p => Number.isFinite(p.x) && Number.isFinite(p.y))) this.kakaoMap.setBounds(bounds);
+    this.setState({ kakaoOverlays: overlays });
+  }
 
   logActivity = (text) => this.setState(s => ({
     activityLog: [{
@@ -936,68 +1007,15 @@ class Component extends DCLogic {
   toggleAi = () => this.setState(s => ({ aiOpen: !s.aiOpen }));
   onAiInput = (e) => this.setState({ aiInput: e.target.value });
   onAiInputKeyDown = (e) => { if (e.key === 'Enter') this.sendAiMessage(); };
-  sendAiMessage = async (overrideText) => {
+  // MOCK: 실제 연동 시 이 함수를 현재 경로 상태를 컨텍스트로 넘기는 API 호출로 교체
+  sendAiMessage = (overrideText) => {
     const text = (overrideText ?? this.state.aiInput).trim();
-    if (!text || this.state.aiLoading) return;
-
-    const previousMessages = this.state.aiMessages.map(msg => ({
-      role: msg.role,
-      text: msg.text,
-    }));
-
-    const context = {
-      places: this.state.places,
-      segments: this.state.segments,
-      criteria: this.state.criteria,
-      tripStart: this.state.tripStart,
-      tripEnd: this.state.tripEnd,
-    };
-
-    this.setState(s => ({
-      aiMessages: [...s.aiMessages, { role: 'user', text }],
-      aiInput: '',
-      aiLoading: true,
-    }));
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          history: previousMessages,
-          context,
-        }),
-      });
-
-      let data = null;
-      try {
-        data = await response.json();
-      } catch (_) {
-        data = null;
-      }
-
-      if (!response.ok) {
-        throw new Error(data?.error || `AI 요청 실패 (${response.status})`);
-      }
-
-      const reply = String(data?.reply || '').trim();
-      if (!reply) throw new Error('AI가 답변을 반환하지 않았어요.');
-
-      this.setState(s => ({
-        aiMessages: [...s.aiMessages, { role: 'ai', text: reply }],
-        aiLoading: false,
-      }));
-    } catch (error) {
-      console.error('AI chat error:', error);
-      this.setState(s => ({
-        aiMessages: [...s.aiMessages, {
-          role: 'ai',
-          text: error?.message || 'AI 답변을 가져오지 못했어요. 잠시 후 다시 시도해주세요.',
-        }],
-        aiLoading: false,
-      }));
-    }
+    if (!text) return;
+    this.setState(s => ({ aiMessages: [...s.aiMessages, { role: 'user', text }], aiInput: '' }));
+    setTimeout(() => {
+      // MOCK: 다음 예상 질문 제안도 실제로는 API 응답에 함께 포함되는 형태로 교체
+      this.setState(s => ({ aiMessages: [...s.aiMessages, { role: 'ai', text: '현재 설정된 경로를 기준으로 확인해볼게요. (mock 응답)', suggestions: ['거리 얼마나 줄어?', '이동수단 바꿔볼까?', '경유지 추천해줘'] }] }));
+    }, 500);
   };
   onSuggestionClick = (text) => this.sendAiMessage(text);
 
@@ -1229,6 +1247,7 @@ class Component extends DCLogic {
       editModalOpen: false, editingId: null,
     }));
     this.logActivity(`방문지 정보를 "${name}"(으)로 수정했습니다`);
+    setTimeout(() => this.syncKakaoPlaces(), 0);
   };
   openCategoryModal = (id) => this.setState({ categoryModalOpen: true, categoryTargetId: id });
   closeCategoryModal = () => this.setState({ categoryModalOpen: false, categoryTargetId: null });
@@ -1288,7 +1307,7 @@ class Component extends DCLogic {
       arr.splice(idx, 0, moved);
       return { places: arr, dragIndex: null, segments: this.resizeSegments(arr, s.segments) };
     });
-    if (wasDragging) this.logActivity('방문 순서를 변경했습니다');
+    if (wasDragging) { this.logActivity('방문 순서를 변경했습니다'); setTimeout(() => this.drawKakaoMarkers(), 0); }
   };
   onDragEnd = () => this.setState({ dragIndex: null });
   setCriteria = (c) => this.setState({ criteria: c });
