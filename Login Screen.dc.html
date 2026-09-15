@@ -25,6 +25,8 @@
     [style*="cursor:pointer"]:hover,[style*="cursor: pointer"]:hover{filter:brightness(1.03)}
     [style*="cursor:pointer"]:active,[style*="cursor: pointer"]:active{transform:scale(0.95)}
     .pd-logo-link,.pd-logo-link:hover,.pd-logo-link:active{transform:none !important;filter:none !important}
+    .pd-login-btn:hover{background-color:#68BC82;transform:translateY(-1px);box-shadow:0 4px 10px rgba(23,59,37,.2)}
+    .pd-login-btn:active{transform:translateY(0) scale(0.99);box-shadow:0 1px 2px rgba(23,59,37,.15)}
   </style>
 </helmet>
 
@@ -52,6 +54,7 @@
           <svg viewBox="0 0 24 24" width="18" height="18" style="flex-shrink:0"><path fill="{{ c.textSub }}" fill-rule="evenodd" clip-rule="evenodd" d="M4 5.5C2.89543 5.5 2 6.39543 2 7.5V16.5C2 17.6046 2.89543 18.5 4 18.5H20C21.1046 18.5 22 17.6046 22 16.5V7.5C22 6.39543 21.1046 5.5 20 5.5H4ZM4.6 7.3L12 12.5L19.4 7.3H4.6Z"></path></svg>
           <input type="email" placeholder="you@example.com" value="{{ email }}" oninput="{{ onEmailChange }}" style="border:none;outline:none;background:transparent;font:inherit;font-size:15px;color:{{ c.text }};width:100%">
         </div>
+        
       </div>
 
       <div style="display:flex;flex-direction:column;gap:6px">
@@ -66,11 +69,14 @@
         <span style="font-size:12px;color:#E5484D">{{ error }}</span>
       </sc-if>
 
-      <div style="display:flex;justify-content:flex-end">
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;margin-top:2px">
+          <input type="checkbox" checked="{{ saveId }}" onChange="{{ onToggleSaveId }}" style="width:15px;height:15px;accent-color:#7BCB93;cursor:pointer">
+          <span style="font-size:12.5px;color:{{ c.textSub }}">아이디 저장</span>
+        </label><div style="display:flex;justify-content:flex-end">
         <a href="#" style="font-size: 12.5px; font-weight: 600; color: #1F7A44; text-decoration: none">비밀번호를 잊으셨나요?</a>
       </div>
 
-      <button type="submit" class="pd-btn" style="border:none;padding:13px 20px;border-radius:999px;background:#7BCB93;color:#12321F;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;width:100%">
+      <button type="submit" class="pd-login-btn" style="border:none;padding:13px 20px;border-radius:11px;background:#7BCB93;color:#163B25;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;width:100%;box-shadow:0 1px 2px rgba(23,59,37,.15);transition:background-color .18s ease,transform .18s ease,box-shadow .18s ease">
         로그인
       </button>
     </form>
@@ -112,7 +118,11 @@ const DARK = {
 };
 
 class Component extends DCLogic {
-  state = { theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || this.props.defaultTheme || 'light', email: '', password: '', error: '', googleLoading: false, googleUser: '', googleError: '' };
+  state = (() => {
+    let savedId = '';
+    try { savedId = (typeof localStorage !== 'undefined' && localStorage.getItem('pd-saved-id')) || ''; } catch (e) {}
+    return { theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || this.props.defaultTheme || 'light', email: savedId, password: '', error: '', googleLoading: false, googleUser: '', googleError: '', saveId: !!savedId };
+  })();
 
   GOOGLE_CLIENT_ID = '356356472447-08t0m833394b59rschmd23oog33359gi.apps.googleusercontent.com';
 
@@ -162,7 +172,18 @@ class Component extends DCLogic {
 
   stopPropagation = (e) => e.stopPropagation();
 
-  onEmailChange = (e) => this.setState({ email: e.target.value, error: '' });
+  onEmailChange = (e) => {
+    this.setState({ email: e.target.value, error: '' });
+    try { if (this.state.saveId) localStorage.setItem('pd-saved-id', e.target.value); } catch (err) {}
+  };
+  onToggleSaveId = (e) => {
+    const checked = e.target.checked;
+    this.setState({ saveId: checked });
+    try {
+      if (checked) localStorage.setItem('pd-saved-id', this.state.email || '');
+      else localStorage.removeItem('pd-saved-id');
+    } catch (err) {}
+  };
   onPasswordChange = (e) => this.setState({ password: e.target.value, error: '' });
 
   handleSubmit = (e) => {
@@ -203,6 +224,7 @@ class Component extends DCLogic {
       error: this.state.error,
       emailBorderColor: this.state.error ? '#E5484D' : c.border,
       onEmailChange: this.onEmailChange,
+      saveId: this.state.saveId, onToggleSaveId: this.onToggleSaveId,
       onPasswordChange: this.onPasswordChange,
       handleSubmit: this.handleSubmit,
       googleError: this.state.googleError,

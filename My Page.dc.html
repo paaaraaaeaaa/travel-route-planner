@@ -112,7 +112,10 @@
           <div onClick="{{ onCheckNickname }}" style="flex-shrink:0;padding:0 14px;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;background:{{ c.checkBg }};color:{{ c.checkColor }}">{{ checkButtonLabel }}</div>
         </div>
         <sc-if value="{{ nicknameCheckMessage }}" hint-placeholder-val="{{ false }}">
-          <div style="font-size:12.5px;font-weight:600;color:{{ nicknameCheckColor }}">{{ nicknameCheckMessage }}</div>
+          <div style="font-size:12.5px;font-weight:600;color:{{ nicknameCheckColor }};display:flex;align-items:center;gap:5px">
+            <sc-if value="{{ nicknameCheckIsSuccess }}" hint-placeholder-val="{{ false }}"><img src="./uploads/check-icon-brand.png" alt="" style="width:12px;height:12px;object-fit:contain"></sc-if>
+            {{ nicknameCheckMessage }}
+          </div>
         </sc-if>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
           <div onClick="{{ onCloseEditNickname }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};color:{{ c.text }}">취소</div>
@@ -123,7 +126,7 @@
   </sc-if>
 
   <sc-if value="{{ nicknameSavedToast }}" hint-placeholder-val="{{ false }}">
-    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:60;background:#12321F;color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.2)">✓ 닉네임이 변경되었어요.</div>
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:60;background:#12321F;color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.2);display:flex;align-items:center;gap:6px"><img src="./uploads/check-icon-brand.png" alt="" style="width:13px;height:13px;object-fit:contain;filter:brightness(0) invert(1)">닉네임이 변경되었어요.</div>
   </sc-if>
 
   <sc-if value="{{ notificationSettingsOpen }}" hint-placeholder-val="{{ false }}">
@@ -224,7 +227,7 @@
         </sc-if>
 
         <sc-if value="{{ showSuccessStep }}" hint-placeholder-val="{{ false }}">
-          <div style="font-size:15px;font-weight:800;margin-bottom:8px">✓ 회원 탈퇴가 완료되었습니다</div>
+          <div style="font-size:15px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:6px"><img src="./uploads/check-icon-brand.png" alt="" style="width:15px;height:15px;object-fit:contain">회원 탈퇴가 완료되었습니다</div>
           <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.6">로그인 화면으로 이동할게요.</div>
         </sc-if>
 
@@ -279,6 +282,7 @@ class Component extends DCLogic {
       return;
     }
     this.setState({ withdrawStep: 'success' });
+    setTimeout(() => { window.location.href = './Login Screen.dc.html'; }, 1400);
   };
   stopPropagation = (e) => e && e.stopPropagation && e.stopPropagation();
   // ---- mock 닉네임 repository/service — 실제 DB 연결 시 이 3개 함수 내부만 실제 API 호출로 교체 ----
@@ -424,7 +428,11 @@ class Component extends DCLogic {
       nicknameCheckMessage: (() => {
         const chk = this.state.nicknameCheck;
         if (!chk || chk.forValue !== this.state.nicknameDraft.trim()) return '';
-        return (chk.available ? '✓ ' : '✕ ') + chk.message;
+        return (chk.available ? '' : '✕ ') + chk.message;
+      })(),
+      nicknameCheckIsSuccess: (() => {
+        const chk = this.state.nicknameCheck;
+        return !!(chk && chk.forValue === this.state.nicknameDraft.trim() && chk.available);
       })(),
       nicknameCheckColor: (() => {
         const chk = this.state.nicknameCheck;

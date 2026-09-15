@@ -236,8 +236,8 @@ a:hover{color:#146030}
         <div style="font-size:15px;font-weight:700;color:{{ c.text }}">내 일정에서 삭제하시겠습니까?</div>
         <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.5">내 일정 목록에서만 제거됩니다.</div>
         <div style="background:#EAF6EE;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:#1F7A44;line-height:1.5">
-          <div>✓ 공유된 원본 일정은 삭제되지 않습니다.</div>
-          <div>✓ 다른 참여자의 일정에는 영향을 주지 않습니다.</div>
+          <div style="display:flex;align-items:center;gap:5px"><img src="./uploads/check-icon-brand.png" alt="" style="width:12px;height:12px;object-fit:contain">공유된 원본 일정은 삭제되지 않습니다.</div>
+          <div style="display:flex;align-items:center;gap:5px"><img src="./uploads/check-icon-brand.png" alt="" style="width:12px;height:12px;object-fit:contain">다른 참여자의 일정에는 영향을 주지 않습니다.</div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
           <div onClick="{{ closeDeleteConfirm }}" style="cursor:pointer;font-size:13px;font-weight:600;color:{{ c.textSub }};background:{{ c.chipBg }};border-radius:8px;padding:9px 16px">취소</div>
