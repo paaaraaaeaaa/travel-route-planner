@@ -1564,7 +1564,7 @@ class Component extends DCLogic {
     const day = this.state.newAddressDay || 0;
     this.setState(s => {
       const places = [...s.places, {
-        id: s.nextId, name: doc.place_name, category: '미분류',
+        id: s.nextId, name: doc.place_name, category: doc.category_group_name || doc.category_name || '미분류',
         address: doc.road_address_name || doc.address_name, roadAddress: doc.road_address_name,
         jibunAddress: doc.address_name, placeId: doc.id,
         x: Number(doc.x), y: Number(doc.y),

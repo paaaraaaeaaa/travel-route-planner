@@ -68,13 +68,7 @@ class Component extends DCLogic {
     const isPhone = active.key !== 'desktop';
     const scrollbarHide = isPhone ? '18px' : '0px';
     const scrollbarHideX = isPhone ? (this.state.page === 'login' ? '5px' : this.state.page === 'community' ? '20px' : '18px') : '0px';
-    // Route Planner is a fixed-width desktop layout; on phone frames scale it down to fit instead of clipping.
-    const needsScale = isPhone && this.state.page === 'planner';
-    const unscaledW = 1440;
-    const scale = needsScale ? (active.width / unscaledW) : 1;
-    const iframeStyle = needsScale
-      ? `width:${unscaledW}px;height:${Math.round(parseInt(active.height) / scale)}px;border:none;display:block;margin:0;transform:scale(${scale});transform-origin:top left`
-      : `width:calc(100% + ${scrollbarHideX});height:calc(100% + ${scrollbarHide});border:none;display:block;margin:0`;
+    const iframeStyle = `width:calc(100% + ${scrollbarHideX});height:calc(100% + ${scrollbarHide});border:none;display:block;margin:0`;
     return {
       modes: MODES.map(m => ({
         label: m.label, onSelect: () => this.selectMode(m.key),

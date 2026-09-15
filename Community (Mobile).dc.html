@@ -20,7 +20,7 @@ a:hover{color:#146030}
 .cm-like:hover{opacity:.8}
 .cm-btn{background:#7BCB93;color:#12321F;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer;border:none;font-family:inherit}
 .cm-region-col{width:180px;flex-shrink:0;background:#fff;border:1px solid #E1E2E4;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:4px;max-height:520px;overflow-y:auto}
-.cm-region-item{cursor:pointer;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700;color:#171719;background:transparent;transition:background-color .15s,color .15s}
+.cm-region-item{cursor:pointer;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700;color:#171719;background:transparent;transition:background-color .15s,color .15s;text-align:center}
 .cm-region-item:hover{background:#EAEBEC}
 .cm-region-active{background:#7BCB93 !important;color:#12321F !important;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important}
 .cm-dark .cm-region-col{background:#17181A;border-color:#292A2D;border-width:1px}
@@ -37,7 +37,7 @@ a:hover{color:#146030}
 .cm-dark .cm-side-card{background:#17181A;border-color:#292A2D}
 @media (max-width:1024px){ .cm-side-col{display:none} }
 @media (max-width:640px){
-  .cm-row{flex-direction:column}
+  .cm-row{flex-direction:column;align-items:stretch!important}
   .cm-region-col{width:100%;max-height:none;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 }
 @media (max-width:767px){
