@@ -1669,7 +1669,7 @@ class Component extends DCLogic {
     this.setState(s => ({ segments: s.segments.map(() => mode), lastAppliedMode: mode }), () => this.syncKakaoRoutePolyline());
     this.logActivity(`전체 구간 이동수단을 ${MODE_MAP[mode].label}(으)로 일괄 변경했습니다`);
   };
-  toggleExpand = (idx) => this.setState(s => ({ expandedSegments: { ...s.expandedSegments, [idx]: !s.expandedSegments[idx] } }));
+  toggleExpand = (idx, currentVal) => this.setState(s => ({ expandedSegments: { ...s.expandedSegments, [idx]: currentVal !== undefined ? !currentVal : !s.expandedSegments[idx] } }));
   togglePlaceExpand = (id) => this.setState(s => ({ expandedPlaces: { ...s.expandedPlaces, [id]: !s.expandedPlaces[id] } }));
   updatePlaceField = (id, field, value) => this.setState(s => ({
     places: s.places.map(p => p.id === id ? { ...p, [field]: value } : p),
@@ -1902,7 +1902,12 @@ class Component extends DCLogic {
       }));
       const totalMinutes = steps.reduce((s, st) => s + st.minutes, 0);
       const totalDist = steps.reduce((s, st) => s + st.distanceKm, 0);
-      const expanded = !!expandedSegments[idx];
+      // 대중교통에 실제 다단계(도보→버스/지하철→도보) 상세가 있으면 클릭 없이도 바로 보이게 기본 펼침.
+      // 사용자가 토글로 명시적으로 접었을 때만(expandedSegments[idx]===false) 접힌 상태 유지.
+      const hasMultiStep = steps.length > 1;
+      const expanded = mode === 'transit' && hasMultiStep
+        ? expandedSegments[idx] !== false
+        : !!expandedSegments[idx];
       return {
         mode, label: info.label, icon: info.icon, isFirst,
         isCar: mode === 'car', isWalk: mode === 'walk', isTransit: mode === 'transit', isBike: mode === 'bike',
@@ -1914,7 +1919,7 @@ class Component extends DCLogic {
         distanceLabel: (isFailed || isUnsearched) ? '' : `${totalDist.toFixed(1)}km${(rawSteps[0]?.transfers != null && mode === 'transit') ? ` · 환승 ${rawSteps[0].transfers}회` : ''}`,
         onCycle: () => this.cycleSegmentMode(idx),
         hasDetail: steps.length > 1,
-        expanded, onToggle: () => this.toggleExpand(idx),
+        expanded, onToggle: () => this.toggleExpand(idx, expanded),
         chevronDeg: expanded ? 180 : 0,
         steps,
       };
