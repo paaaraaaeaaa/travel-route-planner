@@ -550,6 +550,9 @@ a:hover{color:#146030}
         </div>
       </sc-if>
       <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ canSearchRoutes }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ searchAllRoutes }}" style="background:#171719;color:#fff;border-radius:10px;height:40px;padding:0 16px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:{{ routeSearchOpacity }}">{{ routeSearchLabel }}</div>
+        </sc-if>
         <div onClick="{{ recalcAndSearch }}" class="rp-btn-primary" style="background:{{ recalcBtnBg }};color:{{ recalcBtnColor }};border-radius:10px;height:40px;padding:0 20px;display:flex;align-items:center;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:{{ recalcOpacity }}">경로 계산</div>
       </sc-if>
     </div>

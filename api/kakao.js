@@ -50,20 +50,36 @@ function parseWalkRoute(data) {
   };
 }
 
-// Kakao 대중교통: route.properties.{totalDistance(m), totalTime(s), transferCount?}, path.points per step
+// Kakao 대중교통: route.properties.{totalDistance(m), totalTime(s), transferCount?}, path.points per step.
+// transitSteps는 각 step의 실제 API 필드만 사용해서 만든다 — 응답에 없는 값은 null로 두고 지어내지 않는다.
 function parseTransitRoute(data) {
   const route = data?.routes?.[0] || data?.route || data;
   const props = route?.properties;
   if (!props) return null;
   const pathPoints = [];
+  const transitSteps = [];
   (route.legs || []).forEach(leg => (leg.steps || []).forEach(step => {
     (step.path?.points || []).forEach(pt => pathPoints.push({ x: pt[0], y: pt[1] }));
+    const rawType = step.trafficType ?? step.type ?? (step.lane ? 'BUS' : 'WALKING');
+    const type = /walk/i.test(String(rawType)) ? 'WALKING' : (/subway|rail|metro/i.test(String(rawType)) ? 'SUBWAY' : (/bus/i.test(String(rawType)) ? 'BUS' : String(rawType).toUpperCase()));
+    const minutes = step.sectionTime != null ? Math.round(step.sectionTime / 60) : (step.time != null ? Math.round(step.time / 60) : null);
+    const distanceKm = step.distance != null ? step.distance / 1000 : null;
+    transitSteps.push({
+      type,
+      minutes,
+      distanceKm,
+      fromName: step.start?.name ?? step.startName ?? null,
+      toName: step.end?.name ?? step.endName ?? null,
+      vehicleName: step.lane?.name ?? step.lane?.busNo ?? step.lane?.busNumber ?? step.routeName ?? null,
+      stopCount: step.passStopList?.length ?? step.stationCount ?? step.passStopCnt ?? null,
+    });
   }));
   return {
     distanceKm: props.totalDistance / 1000,
     minutes: Math.round(props.totalTime / 60),
     transfers: props.transferCount ?? props.transferCnt ?? null,
     pathPoints,
+    transitSteps,
   };
 }
 

@@ -113,8 +113,7 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif;overflow-x:hidde
         <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:16px;height:16px;object-fit:contain"></sc-if>
       </div>
       <a href="./Login Screen.dc.html" class="pd-nav-links pd-btn" style="text-decoration:none;background:#7BCB93;color:#12321F;border-radius:10px;padding:9px 18px;font-size:13.5px;font-weight:700;white-space:nowrap">로그인</a>
-    </div>
-    <div class="pd-mobile-menu-wrap" style="position:relative;display:none">
+      <div class="pd-mobile-menu-wrap" style="position:relative;display:none">
       <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:16px;color:{{ c.text }}">☰</div>
       <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
         <div style="position:fixed;inset:0;z-index:9" onClick="{{ toggleMobileMenu }}"></div>
@@ -125,6 +124,7 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif;overflow-x:hidde
           <a href="./Login Screen.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:700;color:#1F7A44;text-decoration:none;white-space:nowrap">로그인</a>
         </div>
       </sc-if>
+    </div>
     </div>
   </div>
 </div>
