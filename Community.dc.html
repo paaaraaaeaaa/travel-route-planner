@@ -82,7 +82,7 @@ a:hover{color:#146030}
       <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:{{ c.text }};background:{{ mobileMenuOpen ? '#fff' : 'transparent' }}">☰</div>
       <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
         <div style="position:fixed;inset:0;z-index:9" onClick="{{ toggleMobileMenu }}"></div>
-        <div style="position:absolute;top:44px;right:0;z-index:10;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;min-width:140px">
+        <div style="position:absolute;top:44px;right:0;z-index:10;background-color:#ffffff;opacity:1;backdrop-filter:none;-webkit-backdrop-filter:none;border:1px solid {{ c.border }};border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;min-width:140px">
           <a href="./Explore Destinations.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none">여행지 탐색</a>
           <a href="./My Routes.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none">내 일정</a>
           <a href="./Community.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:700;color:#7BCB93;text-decoration:none">커뮤니티</a>
@@ -130,7 +130,7 @@ a:hover{color:#146030}
     <div class="cm-row">
       <div class="cm-region-outer">
         <div onClick="{{ toggleRegionCollapsed }}" class="cm-region-toggle" style="display:flex;align-items:center;justify-content:flex-start;gap:7px;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
-          <span>지역 카테고리</span><span>{{ regionCollapseIcon }}</span>
+          <span>지역 선택</span><span>{{ regionCollapseIcon }}</span>
         </div>
         <sc-if value="{{ regionExpanded }}" hint-placeholder-val="{{ true }}">
           <div class="cm-region-col" style="background-color: {{ legendColBg }}">

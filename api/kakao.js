@@ -58,10 +58,16 @@ function parseTransitRoute(data) {
   if (!props) return null;
   const pathPoints = [];
   const transitSteps = [];
-  // 실제 Kakao 응답에서 leg/step 컨테이너 이름이 legs/steps가 아닐 수 있어 여러 후보를 시도한다.
-  const legs = route.legs || route.sections || route.paths || route.legList || [];
-  const collectSteps = (leg) => leg.steps || leg.roads || leg.details || leg.stepList || [];
-  legs.forEach(leg => collectSteps(leg).forEach(step => {
+  // 실제 Kakao publictraffic 응답은 steps가 route 바로 아래(legs 없이)에 있는 경우가 많다.
+  // route.steps가 있으면 그것을 쓰고, 없을 때만 legs/sections 등 다른 컨테이너를 시도한다.
+  let stepLists;
+  if (Array.isArray(route.steps) && route.steps.length > 0) {
+    stepLists = [route.steps];
+  } else {
+    const legs = route.legs || route.sections || route.paths || route.legList || [];
+    stepLists = legs.map(leg => leg.steps || leg.roads || leg.details || leg.stepList || []);
+  }
+  stepLists.forEach(stepList => stepList.forEach(step => {
     (step.path?.points || step.points || step.vertexes || []).forEach(pt => {
       if (Array.isArray(pt)) pathPoints.push({ x: pt[0], y: pt[1] });
     });
@@ -82,8 +88,9 @@ function parseTransitRoute(data) {
       stopCount: step.passStopList?.length ?? step.stationCount ?? step.passStopCnt ?? null,
     });
   }));
+  console.log('[route] transit parse', { stepListCount: stepLists.length, transitStepsLength: transitSteps.length, types: transitSteps.map(s => s.type) });
   if (transitSteps.length === 0) {
-    console.error('kakao transit parse: no steps found in response, keys:', Object.keys(route || {}));
+    console.error('kakao transit parse: no steps found in response, route keys:', Object.keys(route || {}));
   }
   return {
     distanceKm: props.totalDistance / 1000,
