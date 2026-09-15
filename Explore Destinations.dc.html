@@ -84,7 +84,6 @@ a:hover{color:#146030}
         <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
         <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:15px;height:15px;object-fit:contain"></sc-if>
       </div>
-    </div>
     <div class="ed-mobile-menu-wrap" style="position:relative;display:none">
       <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:{{ c.text }};letter-spacing:1px">···</div>
       <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">

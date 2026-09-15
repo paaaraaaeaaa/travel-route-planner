@@ -312,7 +312,8 @@ a:hover{color:#146030}
                       <sc-if value="{{ item.place.memoIsSaved }}" hint-placeholder-val="{{ false }}"><img src="./uploads/check.png" alt="" style="width:11px;height:11px;object-fit:contain"></sc-if>
                     </div>
                   </div>
-                  <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:{{ c.textSub }};width:100%;justify-content:flex-end;margin-right:-6px">
+                  <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:{{ c.textSub }};width:100%">
+                    <div style="flex:1"></div>
                     <div onClick="{{ item.place.onDurationDown }}" style="width:18px;height:18px;border-radius:5px;background:{{ c.chipBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700">−</div>
                     <div style="min-width:44px;text-align:center;color:{{ c.text }}">체류 {{ item.place.duration }}분</div>
                     <div onClick="{{ item.place.onDurationUp }}" style="width:18px;height:18px;border-radius:5px;background:{{ c.chipBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700">+</div>
@@ -764,6 +765,14 @@ const PIN_POS = ['20%,80%', '40%,54%', '64%,62%', '84%,28%'];
 
 const CATEGORY_OPTIONS = ['카페·베이커리', '식당', '쇼핑', '관광명소', '생활서비스', '기타'];
 const MODE_ORDER = ['car', 'walk', 'transit']; // 자전거 제외 (이번 작업 범위 밖)
+// 총 소요시간 표시 포맷: 내부 minutes 숫자는 그대로 두고 화면 표시만 이 함수로 변환.
+function formatDuration(mins) {
+  const m = Math.round(mins || 0);
+  if (m < 60) return `${m}분`;
+  const h = Math.floor(m / 60);
+  const rest = m % 60;
+  return rest === 0 ? `${h}시간` : `${h}시간 ${rest}분`;
+}
 const MODE_MAP = {
   car: { label: '자동차', bg: '#F4F4F5', color: '#171719', border: '#E1E2E4', minPerKm: 2.0, wait: 0, icon: '🚗' },
   walk: { label: '도보', bg: '#EAF2FE', color: '#0054D1', border: '#C9DEFE', minPerKm: 12, wait: 0, icon: '🚶' },
@@ -1890,7 +1899,7 @@ class Component extends DCLogic {
       }
       const steps = rawSteps.map((st, si) => ({
         ...st,
-        durationLabel: `${st.minutes}분`,
+        durationLabel: formatDuration(st.minutes),
         lineOpacity: si === rawSteps.length - 1 ? 0 : 1,
         distanceLabel: `${st.distanceKm.toFixed(1)}km`,
         hasNode: !!st.nodeLabel,
@@ -1915,7 +1924,7 @@ class Component extends DCLogic {
         color: (this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK : MODE_TOP_STYLE)[mode].color,
         borderColor: (this.state.theme === 'dark' ? MODE_TOP_STYLE_DARK : MODE_TOP_STYLE)[mode].border,
         distanceKm: totalDist, minutes: totalMinutes,
-        durationLabel: isFailed ? '경로 정보를 불러오지 못했어요' : (isUnsearched ? '경로 검색 버튼을 눌러 실제 경로를 조회해주세요' : `${totalMinutes}분`),
+        durationLabel: isFailed ? '경로 정보를 불러오지 못했어요' : (isUnsearched ? '경로 검색 버튼을 눌러 실제 경로를 조회해주세요' : formatDuration(totalMinutes)),
         distanceLabel: (isFailed || isUnsearched) ? '' : `${totalDist.toFixed(1)}km${(rawSteps[0]?.transfers != null && mode === 'transit') ? ` · 환승 ${rawSteps[0].transfers}회` : ''}`,
         onCycle: () => this.cycleSegmentMode(idx),
         hasDetail: steps.length > 1,

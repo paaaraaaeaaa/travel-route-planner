@@ -67,25 +67,31 @@ function parseTransitRoute(data) {
     const legs = route.legs || route.sections || route.paths || route.legList || [];
     stepLists = legs.map(leg => leg.steps || leg.roads || leg.details || leg.stepList || []);
   }
-  stepLists.forEach(stepList => stepList.forEach(step => {
-    (step.path?.points || step.points || step.vertexes || []).forEach(pt => {
+  stepLists.forEach((stepList, li) => stepList.forEach((step, si) => {
+    if (li === 0 && si === 0) console.log('[route] transit first raw step keys:', JSON.stringify(step));
+    (step.path?.points || step.points || step.vertexes || step.linePassStopList?.map?.(p => [p.x, p.y]) || []).forEach(pt => {
       if (Array.isArray(pt)) pathPoints.push({ x: pt[0], y: pt[1] });
     });
-    const rawType = step.trafficType ?? step.type ?? step.mode ?? (step.lane ? 'BUS' : 'WALKING');
-    const type = /walk/i.test(String(rawType)) ? 'WALKING' : (/subway|rail|metro/i.test(String(rawType)) ? 'SUBWAY' : (/bus/i.test(String(rawType)) ? 'BUS' : String(rawType).toUpperCase()));
+    const rawType = step.trafficType ?? step.type ?? step.mode ?? step.stepType ?? step.transportType ?? (step.lane ? 'BUS' : (step.name || step.roadName ? 'WALKING' : null));
+    const type = /walk|foot/i.test(String(rawType)) ? 'WALKING' : (/subway|rail|metro|train/i.test(String(rawType)) ? 'SUBWAY' : (/bus/i.test(String(rawType)) ? 'BUS' : (rawType ? String(rawType).toUpperCase() : 'WALKING')));
     const minutes = step.sectionTime != null ? Math.round(step.sectionTime / 60)
       : step.time != null ? Math.round(step.time / 60)
       : step.duration != null ? Math.round(step.duration / 60)
+      : step.stayTime != null ? Math.round(step.stayTime / 60)
       : null;
-    const distanceKm = step.distance != null ? step.distance / 1000 : null;
+    const distanceKm = step.distance != null ? step.distance / 1000
+      : step.sectionDistance != null ? step.sectionDistance / 1000
+      : step.length != null ? step.length / 1000
+      : null;
+    const lane = step.lane || (Array.isArray(step.lanes) ? step.lanes[0] : null);
     transitSteps.push({
       type,
       minutes,
       distanceKm,
-      fromName: step.start?.name ?? step.startName ?? step.startStop?.name ?? null,
-      toName: step.end?.name ?? step.endName ?? step.endStop?.name ?? null,
-      vehicleName: step.lane?.name ?? step.lane?.busNo ?? step.lane?.busNumber ?? step.routeName ?? step.name ?? null,
-      stopCount: step.passStopList?.length ?? step.stationCount ?? step.passStopCnt ?? null,
+      fromName: step.start?.name ?? step.startName ?? step.startStop?.name ?? step.start_name ?? null,
+      toName: step.end?.name ?? step.endName ?? step.endStop?.name ?? step.end_name ?? null,
+      vehicleName: lane?.name ?? lane?.busNo ?? lane?.busNumber ?? step.routeName ?? step.name ?? step.lineName ?? null,
+      stopCount: step.passStopList?.length ?? step.stationCount ?? step.passStopCnt ?? step.passStopCount ?? null,
     });
   }));
   console.log('[route] transit parse', { stepListCount: stepLists.length, transitStepsLength: transitSteps.length, types: transitSteps.map(s => s.type) });
