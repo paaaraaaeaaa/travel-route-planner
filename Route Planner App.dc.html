@@ -1305,11 +1305,18 @@ class Component extends DCLogic {
   togglePanelCollapsed = () => this.setState(s => {
     const next = !s.panelCollapsed;
     return { panelCollapsed: next, mapCollapsed: next ? false : s.mapCollapsed };
-  });
+  }, this.relayoutKakaoMapSoon);
   toggleMapCollapsed = () => this.setState(s => {
     const next = !s.mapCollapsed;
     return { mapCollapsed: next, panelCollapsed: next ? false : s.panelCollapsed };
-  });
+  }, this.relayoutKakaoMapSoon);
+  relayoutKakaoMapSoon = () => {
+    // 패널/지도 접기·펼치기로 지도 컨테이너 크기가 바뀌면 Kakao 지도가 즉시 다시 그려지도록 relayout을 호출한다.
+    if (!this.kakaoMap) return;
+    requestAnimationFrame(() => {
+      try { this.kakaoMap.relayout(); if (this._lastMapCenter) this.kakaoMap.setCenter(this._lastMapCenter); } catch (e) { console.error('[map] relayout failed', e); }
+    });
+  };
 
   resizeSegments(places, segments) {
     const need = Math.max(0, places.length - 1);
@@ -1844,6 +1851,9 @@ class Component extends DCLogic {
         kakaoDirectionsUrl: (() => {
           const prev = places[idx - 1];
           if (!prev || prev.x == null || prev.y == null || p.x == null || p.y == null) return '#';
+          const segMode = segments[idx - 1];
+          const cached = segMode ? this.state.routeCache[this.segmentCacheKey(idx - 1, segMode)] : null;
+          if (cached && cached.landingURL) return cached.landingURL;
           const sName = encodeURIComponent(prev.name || '출발지');
           const eName = encodeURIComponent(p.name || '도착지');
           return `https://map.kakao.com/link/from/${sName},${prev.y},${prev.x}/to/${eName},${p.y},${p.x}`;

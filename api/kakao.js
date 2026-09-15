@@ -30,6 +30,7 @@ function parseCarRoute(data) {
     minutes: Math.round(route.summary.duration / 60),
     transfers: null,
     pathPoints,
+    landingURL: data?.landingURL ?? route?.landingURL ?? null,
   };
 }
 
@@ -47,6 +48,7 @@ function parseWalkRoute(data) {
     minutes: Math.round(props.totalTime / 60),
     transfers: null,
     pathPoints,
+    landingURL: data?.landingURL ?? route?.landingURL ?? null,
   };
 }
 
@@ -114,6 +116,7 @@ function parseTransitRoute(data, criteria) {
     transfers: props.transferCount ?? props.transferCnt ?? null,
     pathPoints,
     transitSteps,
+    landingURL: data?.landingURL ?? route?.landingURL ?? null,
   };
 }
 
