@@ -232,6 +232,9 @@ a:hover{color:#146030}
         <div onClick="{{ modeTransit.onApplyAll }}" style="cursor:pointer;padding:6px 10px;border-radius:11px;font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:5px;color:{{ modeTransit.chipColor }};background:{{ modeTransit.chipBg }};border:1px solid {{ modeTransit.chipBorder }};opacity:{{ modeTransit.opacity }}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="3"></rect><path d="M4 11h16"></path><circle cx="8" cy="17.5" r="1.4"></circle><circle cx="16" cy="17.5" r="1.4"></circle><path d="M7 20l-1.5 1.5M17 20l1.5 1.5"></path></svg>{{ modeTransit.label }}
         </div>
+        <div onClick="{{ modeBike.onApplyAll }}" style="cursor:pointer;padding:6px 10px;border-radius:11px;font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:5px;color:{{ modeBike.chipColor }};background:{{ modeBike.chipBg }};border:1px solid {{ modeBike.chipBorder }}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.2"></circle><circle cx="18.5" cy="17.5" r="3.2"></circle><path d="M5.5 17.5L10 8h4l4.5 9.5M10 8L8.5 5.5h-2"></path><path d="M10 8l3 5h4"></path></svg>{{ modeBike.label }}
+        </div>
       </div>
     </div>
   </div>
@@ -356,7 +359,13 @@ a:hover{color:#146030}
                 <sc-if value="{{ item.segment.hasDetail }}" hint-placeholder-val="{{ true }}">
                   <div onClick="{{ item.segment.onToggle }}" class="rp-icon-btn" style="cursor:pointer;width:20px;height:20px;border-radius:6px;background:{{ item.segment.bg }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="{{ item.segment.color }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ item.segment.chevronDeg }}deg);transition:transform .15s"><path d="M6 9l6 6 6-6"></path></svg>
-                  </div><div style="font-size:10.5px;color:{{ c.textSub }}">클릭해 변경</div>
+                  </div>
+                  <sc-if value="{{ item.segment.isTransit }}" hint-placeholder-val="{{ false }}">
+                    <a href="{{ item.segment.transitKakaoUrl }}" target="_blank" rel="noopener" onClick="{{ item.segment.stopPropagation }}" style="font-size:10.5px;font-weight:600;color:{{ item.segment.color }};text-decoration:none">카카오맵</a>
+                  </sc-if>
+                  <sc-if value="{{ item.segment.showCycleHint }}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size:10.5px;color:{{ c.textSub }}">클릭해 변경</div>
+                  </sc-if>
                 </sc-if>
               </div>
               <sc-if value="{{ item.segment.expanded }}" hint-placeholder-val="{{ false }}">
@@ -1969,6 +1978,16 @@ class Component extends DCLogic {
         distanceLabel: (isFailed || isUnsearched) ? '' : `${totalDist.toFixed(1)}km${(rawSteps[0]?.transfers != null && mode === 'transit') ? ` · 환승 ${rawSteps[0].transfers}회` : ''}`,
         onCycle: () => this.cycleSegmentMode(idx),
         hasDetail: steps.length > 1,
+        showCycleHint: mode !== 'transit',
+        stopPropagation: (e) => e && e.stopPropagation && e.stopPropagation(),
+        transitKakaoUrl: (() => {
+          if (mode !== 'transit') return '#';
+          if (cached && cached.landingURL) return cached.landingURL;
+          if (!fromP || !toP || fromP.x == null || fromP.y == null || toP.x == null || toP.y == null) return '#';
+          const sName = encodeURIComponent(fromP.name || '출발지');
+          const eName = encodeURIComponent(toP.name || '도착지');
+          return `https://map.kakao.com/link/from/${sName},${fromP.y},${fromP.x}/to/${eName},${toP.y},${toP.x}`;
+        })(),
         ...(mode === 'walk' ? (console.log('[debug] walk final display value', { idx, totalDist, totalMinutes, isFailed, isUnsearched }), {}) : {}),
         expanded, onToggle: () => this.toggleExpand(idx, expanded),
         chevronDeg: expanded ? 180 : 0,
@@ -2181,7 +2200,7 @@ class Component extends DCLogic {
       hasRoute: pinLayout.length > 1,
       routePolylinePoints,
       modeOptions,
-      modeCar: modeOptions[0], modeWalk: modeOptions[1], modeTransit: modeOptions[2],
+      modeCar: modeOptions[0], modeWalk: modeOptions[1], modeTransit: modeOptions[2], modeBike: modeOptions[3],
       criteriaOptions,
       newAddress,
       onAddressInput: this.onAddressInput,

@@ -52,12 +52,11 @@
         </div>
         <div style="color:{{ c.textSub }};font-size:16px">›</div>
       </div>
-      <div class="mp-row" onClick="{{ onEditEmail }}" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer">
+      <div class="mp-row" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px">
         <div>
           <div style="font-size:11.5px;color:{{ c.textSub }};margin-bottom:2px">이메일</div>
           <div style="font-size:14px;font-weight:600">{{ user.email }}</div>
         </div>
-        <div style="color:{{ c.textSub }};font-size:16px">›</div>
       </div>
     </div>
 
@@ -82,14 +81,55 @@
     </div>
   </div>
 
+  <sc-if value="{{ editNicknameOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px" onClick="{{ onCloseEditNickname }}">
+      <div style="width:320px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:14px" onClick="{{ stopPropagation }}">
+        <div style="font-size:16px;font-weight:800">닉네임 수정</div>
+        <input value="{{ nicknameDraft }}" onChange="{{ onNicknameDraftChange }}" style="border:1px solid {{ c.border }};border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:{{ c.text }};background:{{ c.bg }};outline:none">
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <div onClick="{{ onCloseEditNickname }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};color:{{ c.text }}">취소</div>
+          <div onClick="{{ onSaveNickname }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:#7BCB93;color:#12321F">저장</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
   <sc-if value="{{ withdrawOpen }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px" onClick="{{ onCloseWithdraw }}">
-      <div style="width:340px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3)" onClick="{{ stopPropagation }}">
-        <div style="font-size:16px;font-weight:800;margin-bottom:8px">정말 탈퇴하시겠습니까?</div>
-        <div style="font-size:13px;color:{{ c.textSub }};line-height:1.5;margin-bottom:18px">회원 탈퇴 기능은 준비 중입니다. 실제 탈퇴 처리는 다음 단계에서 연결됩니다.</div>
-        <div style="display:flex;gap:8px;justify-content:flex-end">
-          <div onClick="{{ onCloseWithdraw }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};color:{{ c.text }}">취소</div>
-        </div>
+      <div style="width:360px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3)" onClick="{{ stopPropagation }}">
+
+        <sc-if value="{{ blockedByCreatorSchedules }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:16px;font-weight:800;margin-bottom:8px">탈퇴하기 전에 확인해주세요</div>
+          <div style="font-size:13px;color:{{ c.text }};line-height:1.6;margin-bottom:10px">현재 제작자(Creator)인 일정이 있습니다.</div>
+          <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.6;margin-bottom:14px">제작자인 일정은 회원 탈퇴 전에 일정 삭제 또는 소유권 이전 등의 처리가 필요해요. 다른 참여자에게 영향을 줄 수 있어 탈퇴를 진행할 수 없어요.</div>
+          <div style="border:1px solid {{ c.border }};border-radius:10px;overflow:hidden;margin-bottom:18px">
+            <sc-for list="{{ creatorSchedules }}" as="sc" hint-placeholder-count="1">
+              <div style="padding:10px 12px;font-size:12.5px;font-weight:600;border-bottom:1px solid {{ c.border }}">{{ sc.title }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <div onClick="{{ onCloseWithdraw }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:#7BCB93;color:#12321F">확인</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showConfirmStep }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:16px;font-weight:800;margin-bottom:8px">정말 탈퇴하시겠어요?</div>
+          <div style="font-size:13px;color:{{ c.text }};line-height:1.6;margin-bottom:10px">탈퇴하면 계정과 내 계정에 연결된 정보가 삭제되거나 더 이상 이용할 수 없게 됩니다.</div>
+          <div style="font-size:11.5px;color:{{ c.dangerText }};margin-bottom:18px">⚠️ 탈퇴 후에는 계정을 복구할 수 없습니다.</div>
+          <sc-if value="{{ withdrawError }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px;color:{{ c.dangerText }};background:{{ c.dangerBg }};border-radius:8px;padding:9px 11px;margin-bottom:14px">회원 탈퇴에 실패했어요. 잠시 후 다시 시도해주세요.</div>
+          </sc-if>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <div onClick="{{ onCloseWithdraw }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};color:{{ c.text }}">취소</div>
+            <div onClick="{{ onConfirmWithdraw }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:{{ c.dangerBg }};color:{{ c.dangerText }};opacity:{{ withdrawLoadingOpacity }}">{{ withdrawButtonLabel }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showSuccessStep }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:15px;font-weight:800;margin-bottom:8px">✓ 회원 탈퇴가 완료되었습니다</div>
+          <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.6">로그인 화면으로 이동할게요.</div>
+        </sc-if>
+
       </div>
     </div>
   </sc-if>
@@ -99,27 +139,91 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || 'light', withdrawOpen: false };
-  onOpenWithdraw = () => this.setState({ withdrawOpen: true });
+  state = {
+    theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || 'light',
+    withdrawOpen: false, withdrawStep: 'confirm', withdrawError: false,
+    editNicknameOpen: false, nicknameDraft: '', nickname: '유수',
+  };
+  onOpenWithdraw = () => this.setState({ withdrawOpen: true, withdrawStep: 'confirm', withdrawError: false });
   onCloseWithdraw = () => this.setState({ withdrawOpen: false });
   stopPropagation = (e) => e && e.stopPropagation && e.stopPropagation();
-  // 아직 실제 수정 화면이 없으므로 클릭 시 아무 동작 없이 UI만 유지 (다음 단계에서 연결)
+  onEditNickname = () => this.setState(s => ({ editNicknameOpen: true, nicknameDraft: s.nickname }));
+  onCloseEditNickname = () => this.setState({ editNicknameOpen: false });
+  onNicknameDraftChange = (e) => this.setState({ nicknameDraft: e.target.value });
+  onSaveNickname = () => {
+    // TODO(backend): await fetch('/api/account/nickname', { method:'PATCH', body: JSON.stringify({ nickname }) })
+    this.setState(s => ({ nickname: s.nicknameDraft.trim() || s.nickname, editNicknameOpen: false }));
+  };
   noop = () => {};
+
+  // 회원 탈퇴는 "계정 삭제"만 담당한다 — 일정 삭제(Route Planner의 원본 일정 삭제)와는 완전히 분리된 별도 흐름.
+  // 실제 백엔드가 연결되면 이 함수 내부만 실제 API 호출로 교체하면 되도록 단계를 명시적으로 나눠둔다.
+  deleteAccount = async (user, mySchedules) => {
+    // 1) Creator 소유 일정이 남아있으면 탈퇴를 막는다 — 소유권 임의 이전/타인 데이터 삭제 금지.
+    const creatorSchedules = (mySchedules || []).filter(s => s.role === 'creator');
+    if (creatorSchedules.length > 0) return { ok: false, reason: 'has_creator_schedules', creatorSchedules };
+
+    // 2) 역할별 관계 정리 — 원본 일정은 절대 건드리지 않고, "이 계정과의 관계"만 제거한다.
+    //    editor  → 해당 일정의 participants에서 이 계정만 제거 (일정 자체는 유지)
+    //    viewer  → 공유 일정 참여 관계만 제거 (일정 자체는 유지)
+    //    savedViewer → 이 계정의 My Routes 저장 항목만 제거 (원본/Creator/Editor 영향 없음)
+    // TODO(backend): await fetch('/api/account/relations', { method:'DELETE', body: JSON.stringify({ userId: user.id }) })
+
+    // 3) 계정 삭제 (실제 인증 시스템 연동 전까지는 자리만 마련 — mock으로 완료 처리하지 않고 명시적 실패 케이스도 남겨둔다)
+    // TODO(backend): const res = await fetch('/api/account', { method: 'DELETE' }); if (!res.ok) return { ok:false, reason:'server_error' };
+
+    // 4) 로그아웃 처리
+    try { if (typeof localStorage !== 'undefined') localStorage.removeItem('pd-session'); } catch (e) {}
+
+    return { ok: true };
+  };
+
+  onConfirmWithdraw = async () => {
+    this.setState({ withdrawStep: 'loading', withdrawError: false });
+    // mock: 실제 탈퇴 대상 사용자의 일정 목록 — 백엔드 연결 시 실제 My Routes 데이터로 교체
+    const mySchedules = [
+      { id: 's1', title: '제주 3박4일', role: 'creator' },
+    ];
+    const result = await this.deleteAccount(this.mockUser(), mySchedules);
+    if (!result.ok && result.reason === 'has_creator_schedules') {
+      this.setState({ withdrawStep: 'blocked', creatorSchedules: result.creatorSchedules });
+      return;
+    }
+    if (!result.ok) {
+      this.setState({ withdrawStep: 'confirm', withdrawError: true });
+      return;
+    }
+    this.setState({ withdrawStep: 'success' });
+    setTimeout(() => { window.location.href = './Login Screen.dc.html'; }, 1200);
+  };
+  mockUser = () => ({ id: 'u1', nickname: this.state.nickname, email: 'yusoo@example.com' });
 
   renderVals() {
     const isDark = this.state.theme === 'dark';
     const c = isDark
       ? { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.55)', border: '#3A3B3E', headerBg: 'rgba(15,15,16,.85)', cardBg: '#17181A', rowHover: '#1F2022', dangerText: '#E58888' }
-      : { bg: '#F7F7F8', text: '#171719', textSub: 'rgba(23,23,25,.5)', border: '#E1E2E4', headerBg: 'rgba(255,255,255,.85)', cardBg: '#fff', rowHover: '#F7F7F8', dangerText: '#D9534F' };
+      : { bg: '#F7F7F8', text: '#171719', textSub: 'rgba(23,23,25,.5)', border: '#E1E2E4', headerBg: 'rgba(255,255,255,.85)', cardBg: '#fff', rowHover: '#F7F7F8', dangerText: '#D9534F', dangerBg: '#FDECEC' };
+    if (isDark) c.dangerBg = 'rgba(229,136,136,.12)';
     // 실제 인증 연결 전까지는 mock user 데이터 — 나중에 실제 로그인 사용자로 교체
-    const user = { id: 'u1', nickname: '유수', email: 'yusoo@example.com' };
+    const user = this.mockUser();
+    const step = this.state.withdrawStep;
     return {
       c, user,
-      onEditNickname: this.noop, onEditEmail: this.noop,
+      onEditNickname: this.onEditNickname,
       onNotificationSettings: this.noop, onTerms: this.noop,
+      editNicknameOpen: this.state.editNicknameOpen, onCloseEditNickname: this.onCloseEditNickname,
+      nicknameDraft: this.state.nicknameDraft, onNicknameDraftChange: this.onNicknameDraftChange, onSaveNickname: this.onSaveNickname,
       withdrawOpen: this.state.withdrawOpen,
       onOpenWithdraw: this.onOpenWithdraw, onCloseWithdraw: this.onCloseWithdraw,
+      onConfirmWithdraw: this.onConfirmWithdraw,
       stopPropagation: this.stopPropagation,
+      blockedByCreatorSchedules: step === 'blocked',
+      creatorSchedules: this.state.creatorSchedules || [],
+      showConfirmStep: step === 'confirm' || step === 'loading',
+      showSuccessStep: step === 'success',
+      withdrawError: this.state.withdrawError,
+      withdrawButtonLabel: step === 'loading' ? '탈퇴 처리 중...' : '회원 탈퇴',
+      withdrawLoadingOpacity: step === 'loading' ? 0.6 : 1,
     };
   }
 }
