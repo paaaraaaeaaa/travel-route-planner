@@ -32,7 +32,7 @@ body{margin:0;font-family:-apple-system,sans-serif;background:#EEEFF1}
 
   <div style="background:#000;border-radius:{{ frameRadius }};padding:{{ framePad }};box-shadow:0 20px 50px -10px rgba(0,0,0,.35)">
     <div style="width:{{ frameWidth }}px;height:{{ frameHeight }};border-radius:{{ screenRadius }};overflow:hidden;background:#fff">
-      <iframe src="{{ pageSrc }}" style="width:calc(100% + {{ scrollbarHideX }});height:calc(100% + {{ scrollbarHide }});border:none;display:block;margin:0"></iframe>
+      <iframe src="{{ pageSrc }}" style="{{ iframeStyle }}"></iframe>
     </div>
   </div>
 
@@ -66,6 +66,15 @@ class Component extends DCLogic {
     const active = MODES.find(m => m.key === this.state.mode) || MODES[0];
     const activePage = PAGES.find(p => p.key === this.state.page) || PAGES[0];
     const isPhone = active.key !== 'desktop';
+    const scrollbarHide = isPhone ? '18px' : '0px';
+    const scrollbarHideX = isPhone ? (this.state.page === 'login' ? '5px' : this.state.page === 'community' ? '20px' : '18px') : '0px';
+    // Route Planner is a fixed-width desktop layout; on phone frames scale it down to fit instead of clipping.
+    const needsScale = isPhone && this.state.page === 'planner';
+    const unscaledW = 1440;
+    const scale = needsScale ? (active.width / unscaledW) : 1;
+    const iframeStyle = needsScale
+      ? `width:${unscaledW}px;height:${Math.round(parseInt(active.height) / scale)}px;border:none;display:block;margin:0;transform:scale(${scale});transform-origin:top left`
+      : `width:calc(100% + ${scrollbarHideX});height:calc(100% + ${scrollbarHide});border:none;display:block;margin:0`;
     return {
       modes: MODES.map(m => ({
         label: m.label, onSelect: () => this.selectMode(m.key),
@@ -84,9 +93,9 @@ class Component extends DCLogic {
       framePad: isPhone ? '14px' : '0px',
       frameRadius: isPhone ? '44px' : '0px',
       screenRadius: isPhone ? '30px' : '0px',
-      scrollbarHide: isPhone ? '18px' : '0px',
-      scrollbarHideX: isPhone ? (this.state.page === 'login' ? '5px' : this.state.page === 'community' ? '20px' : '18px') : '0px',
-
+      scrollbarHide,
+      scrollbarHideX,
+      iframeStyle,
     };
   }
 }

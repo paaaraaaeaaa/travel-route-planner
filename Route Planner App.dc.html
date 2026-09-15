@@ -1541,6 +1541,8 @@ class Component extends DCLogic {
   };
   // 검색 결과 클릭 → 아직 방문지에 추가하지 않고, 실제 좌표로 지도만 이동 + 선택 마커 표시
   selectMapResult = (doc) => {
+    console.log('[debug] selectedMapDoc raw', doc);
+    console.log('[debug] selectedMapDoc category fields', { category_group_name: doc?.category_group_name, category_name: doc?.category_name });
     this.setState({ selectedMapDoc: doc });
     if (this.kakaoMap && window.kakao && window.kakao.maps) {
       const pos = new window.kakao.maps.LatLng(Number(doc.y), Number(doc.x));
@@ -1897,6 +1899,7 @@ class Component extends DCLogic {
             transfers: cached.transfers,
           }));
         } else {
+          if (mode === 'walk') console.log('[debug] walk routeCache value for display', { idx, cached });
           rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: cached.minutes, distanceKm: cached.distanceKm, nodeLabel: null, transfers: cached.transfers }];
         }
       } else if (cached?.failed) {
@@ -1941,6 +1944,7 @@ class Component extends DCLogic {
         distanceLabel: (isFailed || isUnsearched) ? '' : `${totalDist.toFixed(1)}km${(rawSteps[0]?.transfers != null && mode === 'transit') ? ` · 환승 ${rawSteps[0].transfers}회` : ''}`,
         onCycle: () => this.cycleSegmentMode(idx),
         hasDetail: steps.length > 1,
+        ...(mode === 'walk' ? (console.log('[debug] walk final display value', { idx, totalDist, totalMinutes, isFailed, isUnsearched }), {}) : {}),
         expanded, onToggle: () => this.toggleExpand(idx, expanded),
         chevronDeg: expanded ? 180 : 0,
         steps,

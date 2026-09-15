@@ -41,10 +41,15 @@ a:hover{color:#146030}
   .cm-region-col{width:100%;max-height:none;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 }
 @media (max-width:767px){
-  body{overflow-x:hidden}
+  html{overflow-y:scroll!important}
+  body{overflow-x:hidden;overflow-y:scroll!important}
   .cm-nav-links{display:none!important}
   .cm-mobile-menu-wrap{display:block!important}
-  .cm-sort-row{flex-wrap:wrap!important;row-gap:10px!important}
+  .cm-sort-row{flex-wrap:nowrap!important;flex-shrink:0!important;display:grid!important;grid-template-columns:auto 1fr auto!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+  .cm-sort-row>div{flex-shrink:0!important;white-space:nowrap!important;min-width:0!important}
+  .cm-sort-row>div:first-child{grid-column:1}
+  .cm-sort-row>div:last-child{grid-column:3;justify-self:end}
+  .cm-region-outer{width:100%!important;box-sizing:border-box!important;flex-shrink:0!important}
   .cm-region-col{width:100%!important;max-height:none!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;grid-auto-rows:1fr!important;flex-wrap:unset!important;gap:4px!important;padding:8px!important;box-sizing:border-box!important}
   .cm-region-item{font-size:11.5px!important;padding:6px 10px!important;box-sizing:border-box!important;line-height:1.4!important;min-height:26px!important}
   .cm-sort-row{flex-shrink:0!important}
