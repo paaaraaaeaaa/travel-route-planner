@@ -22,11 +22,11 @@ a:hover{color:#146030}
 .cm-region-col{width:180px;flex-shrink:0;background:#fff;border:1px solid #E1E2E4;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:4px;max-height:520px;overflow-y:auto}
 .cm-region-item{cursor:pointer;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700;color:#171719;background:transparent;transition:background-color .15s,color .15s}
 .cm-region-item:hover{background:#EAEBEC}
-.cm-region-active{background:#7BCB93 !important;color:#12321F !important}
+.cm-region-active{background:#7BCB93 !important;color:#12321F !important;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important}
 .cm-dark .cm-region-col{background:#17181A;border-color:#292A2D;border-width:1px}
 .cm-dark .cm-region-item{color:#fff}
 .cm-dark .cm-region-item:hover{background:rgba(255,255,255,.1)}
-.cm-dark .cm-region-active{background:#357849 !important;color:#fff !important}
+.cm-dark .cm-region-active{background:#357849 !important;color:#fff !important;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important}
 .cm-dark .cm-nav-link-active{color:#7BCB93 !important;border-color:#7BCB93 !important}
 .cm-row{display:flex;gap:20px;align-items:flex-start}
 .cm-tag{padding:6px 11px;background:#F4F4F5;color:rgba(23,23,25,.6);border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;transition:background-color .15s,color .15s}
@@ -129,7 +129,7 @@ a:hover{color:#146030}
 
     <div class="cm-row">
       <div class="cm-region-outer">
-        <div onClick="{{ toggleRegionCollapsed }}" class="cm-region-toggle" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
+        <div onClick="{{ toggleRegionCollapsed }}" class="cm-region-toggle" style="display:flex;align-items:center;justify-content:flex-start;gap:7px;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
           <span>카테고리</span><span>{{ regionCollapseIcon }}</span>
         </div>
         <sc-if value="{{ regionExpanded }}" hint-placeholder-val="{{ true }}">

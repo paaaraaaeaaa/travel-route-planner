@@ -58,22 +58,33 @@ function parseTransitRoute(data) {
   if (!props) return null;
   const pathPoints = [];
   const transitSteps = [];
-  (route.legs || []).forEach(leg => (leg.steps || []).forEach(step => {
-    (step.path?.points || []).forEach(pt => pathPoints.push({ x: pt[0], y: pt[1] }));
-    const rawType = step.trafficType ?? step.type ?? (step.lane ? 'BUS' : 'WALKING');
+  // 실제 Kakao 응답에서 leg/step 컨테이너 이름이 legs/steps가 아닐 수 있어 여러 후보를 시도한다.
+  const legs = route.legs || route.sections || route.paths || route.legList || [];
+  const collectSteps = (leg) => leg.steps || leg.roads || leg.details || leg.stepList || [];
+  legs.forEach(leg => collectSteps(leg).forEach(step => {
+    (step.path?.points || step.points || step.vertexes || []).forEach(pt => {
+      if (Array.isArray(pt)) pathPoints.push({ x: pt[0], y: pt[1] });
+    });
+    const rawType = step.trafficType ?? step.type ?? step.mode ?? (step.lane ? 'BUS' : 'WALKING');
     const type = /walk/i.test(String(rawType)) ? 'WALKING' : (/subway|rail|metro/i.test(String(rawType)) ? 'SUBWAY' : (/bus/i.test(String(rawType)) ? 'BUS' : String(rawType).toUpperCase()));
-    const minutes = step.sectionTime != null ? Math.round(step.sectionTime / 60) : (step.time != null ? Math.round(step.time / 60) : null);
+    const minutes = step.sectionTime != null ? Math.round(step.sectionTime / 60)
+      : step.time != null ? Math.round(step.time / 60)
+      : step.duration != null ? Math.round(step.duration / 60)
+      : null;
     const distanceKm = step.distance != null ? step.distance / 1000 : null;
     transitSteps.push({
       type,
       minutes,
       distanceKm,
-      fromName: step.start?.name ?? step.startName ?? null,
-      toName: step.end?.name ?? step.endName ?? null,
-      vehicleName: step.lane?.name ?? step.lane?.busNo ?? step.lane?.busNumber ?? step.routeName ?? null,
+      fromName: step.start?.name ?? step.startName ?? step.startStop?.name ?? null,
+      toName: step.end?.name ?? step.endName ?? step.endStop?.name ?? null,
+      vehicleName: step.lane?.name ?? step.lane?.busNo ?? step.lane?.busNumber ?? step.routeName ?? step.name ?? null,
       stopCount: step.passStopList?.length ?? step.stationCount ?? step.passStopCnt ?? null,
     });
   }));
+  if (transitSteps.length === 0) {
+    console.error('kakao transit parse: no steps found in response, keys:', Object.keys(route || {}));
+  }
   return {
     distanceKm: props.totalDistance / 1000,
     minutes: Math.round(props.totalTime / 60),

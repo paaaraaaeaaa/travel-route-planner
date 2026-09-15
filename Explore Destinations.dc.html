@@ -37,14 +37,14 @@ a:hover{color:#146030}
 .ed-dark .ed-legend-col{background:#D6E0D9 !important;border-color:#D6E0D9 !important}
 .ed-dark .ed-legend-item{color:#12321F !important}
 .ed-dark .ed-legend-item:hover{background:rgba(0,0,0,.08)}
-.ed-dark .ed-legend-active{background:#fff !important;color:#12321F !important}
-.ed-dark .ed-legend-all-active{background:#fff !important;color:#12321F !important}
+.ed-dark .ed-legend-active{background:#fff !important;color:#12321F !important;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important}
+.ed-dark .ed-legend-all-active{background:#fff !important;color:#12321F !important;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important}
 .ed-dark .ed-pin-active .ed-pin-dot{background:#fff}
 .ed-dark .ed-nav-link-active{color:#7BCB93 !important;border-color:#7BCB93 !important}
 
 .ed-legend-item:hover{background:#EAEBEC}
-.ed-legend-active{background:#7BCB93 !important;color:#12321F !important}
-.ed-legend-all-active{background:#7BCB93 !important;color:#12321F !important}
+.ed-legend-active{background:#7BCB93 !important;color:#12321F !important;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important}
+.ed-legend-all-active{background:#7BCB93 !important;color:#12321F !important;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important}
 .ed-map-row{display:flex;gap:20px;align-items:flex-start}
 .ed-legend-col{width:180px;flex-shrink:0;background:#fff;border:1px solid #E1E2E4;border-radius:14px;padding:10px;max-height:520px;overflow-y:auto}
 @media (max-width:700px){ .ed-map-row{flex-direction:column}
@@ -129,7 +129,7 @@ a:hover{color:#146030}
 
     <div class="ed-map-row" style="margin-bottom:32px">
       <div class="ed-legend-outer">
-        <div onClick="{{ toggleRegionCollapsed }}" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
+        <div onClick="{{ toggleRegionCollapsed }}" style="display:flex;align-items:center;justify-content:flex-start;gap:7px;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
           <span>카테고리</span><span>{{ regionCollapseIcon }}</span>
         </div>
         <sc-if value="{{ regionExpanded }}" hint-placeholder-val="{{ true }}">
