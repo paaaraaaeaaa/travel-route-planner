@@ -2016,7 +2016,6 @@ class Component extends DCLogic {
 
     let distance = enrichedSegments.reduce((sum, s) => sum + s.distanceKm, 0);
     let time = enrichedSegments.reduce((sum, s) => sum + s.minutes, 0);
-    if (criteria === 'distance') { distance = distance * 0.92; } else { time = time * 0.9; }
     const h = Math.floor(time / 60), m = Math.round(time % 60);
     const aiContextLabel = places.length
       ? `경유지 ${places.length}곳 · ${distance.toFixed(1)}km · ${h > 0 ? h + '시간 ' : ''}${m}분`

@@ -83,15 +83,26 @@
 
   <sc-if value="{{ editNicknameOpen }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px" onClick="{{ onCloseEditNickname }}">
-      <div style="width:320px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:14px" onClick="{{ stopPropagation }}">
+      <div style="width:340px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:12px" onClick="{{ stopPropagation }}">
         <div style="font-size:16px;font-weight:800">닉네임 수정</div>
-        <input value="{{ nicknameDraft }}" onChange="{{ onNicknameDraftChange }}" style="border:1px solid {{ c.border }};border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:{{ c.text }};background:{{ c.bg }};outline:none">
-        <div style="display:flex;gap:8px;justify-content:flex-end">
+        <div style="font-size:11.5px;color:{{ c.textSub }}">닉네임</div>
+        <div style="display:flex;gap:8px">
+          <input value="{{ nicknameDraft }}" onChange="{{ onNicknameDraftChange }}" maxlength="12" style="flex:1;min-width:0;border:1px solid {{ c.border }};border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:{{ c.text }};background:{{ c.bg }};outline:none">
+          <div onClick="{{ onCheckNickname }}" style="flex-shrink:0;padding:0 14px;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;background:{{ c.checkBg }};color:{{ c.checkColor }}">{{ checkButtonLabel }}</div>
+        </div>
+        <sc-if value="{{ nicknameCheckMessage }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px;font-weight:600;color:{{ nicknameCheckColor }}">{{ nicknameCheckMessage }}</div>
+        </sc-if>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
           <div onClick="{{ onCloseEditNickname }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};color:{{ c.text }}">취소</div>
-          <div onClick="{{ onSaveNickname }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:#7BCB93;color:#12321F">저장</div>
+          <div onClick="{{ onSaveNickname }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:{{ saveBtnBg }};color:{{ saveBtnColor }}">저장</div>
         </div>
       </div>
     </div>
+  </sc-if>
+
+  <sc-if value="{{ nicknameSavedToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:60;background:#12321F;color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.2)">✓ 닉네임이 변경되었어요.</div>
   </sc-if>
 
   <sc-if value="{{ withdrawOpen }}" hint-placeholder-val="{{ false }}">
@@ -147,12 +158,62 @@ class Component extends DCLogic {
   onOpenWithdraw = () => this.setState({ withdrawOpen: true, withdrawStep: 'confirm', withdrawError: false });
   onCloseWithdraw = () => this.setState({ withdrawOpen: false });
   stopPropagation = (e) => e && e.stopPropagation && e.stopPropagation();
-  onEditNickname = () => this.setState(s => ({ editNicknameOpen: true, nicknameDraft: s.nickname }));
+  // ---- mock 닉네임 repository/service — 실제 DB 연결 시 이 3개 함수 내부만 실제 API 호출로 교체 ----
+  NICKNAME_RULES = { min: 2, max: 12, pattern: /^[가-힣a-zA-Z0-9_]+$/ };
+  _takenNicknames = ['관리자', '다연', '옐']; // mock: 다른 사용자가 이미 쓰는 닉네임
+  _nicknameHistory = []; // { nickname, userId, changedAt, reusableAt } — 변경 시 7일 보호
+
+  validateNicknameFormat = (raw) => {
+    const n = (raw || '').trim();
+    if (!n) return '닉네임을 입력해주세요.';
+    if (n.length < this.NICKNAME_RULES.min || n.length > this.NICKNAME_RULES.max) return `닉네임은 ${this.NICKNAME_RULES.min}~${this.NICKNAME_RULES.max}자로 입력해주세요.`;
+    if (!this.NICKNAME_RULES.pattern.test(n)) return '한글, 영문, 숫자, _만 사용할 수 있어요.';
+    return null;
+  };
+  // 다른 사용자가 사용 중인지 + 최근 변경으로 7일 보호 중인지, 두 가지 모두 확인
+  checkNickname = async (nickname, userId) => {
+    const n = nickname.trim();
+    const formatError = this.validateNicknameFormat(n);
+    if (formatError) return { available: false, reason: 'invalid', message: formatError };
+    if (n === this.state.nickname) return { available: true, reason: 'same_as_current', message: '현재 사용 중인 닉네임이에요.' };
+    if (this._takenNicknames.includes(n)) return { available: false, reason: 'taken', message: '이미 사용 중인 닉네임이에요.' };
+    const now = Date.now();
+    const protectedEntry = this._nicknameHistory.find(h => h.nickname === n && h.userId !== userId && h.reusableAt > now);
+    if (protectedEntry) return { available: false, reason: 'protected', message: '사용할 수 없는 닉네임이에요.' };
+    return { available: true, reason: 'ok', message: '사용 가능한 닉네임이에요.' };
+  };
+  updateNickname = async (userId, prevNickname, nextNickname) => {
+    // 저장 직전에 다시 한번 서버 기준으로 확인 (그 사이 다른 사용자가 선점했을 수 있음)
+    const recheck = await this.checkNickname(nextNickname, userId);
+    if (!recheck.available && recheck.reason !== 'same_as_current') return { ok: false, message: recheck.message };
+    if (nextNickname !== prevNickname) {
+      const changedAt = Date.now();
+      this._nicknameHistory.push({ nickname: prevNickname, userId, changedAt, reusableAt: changedAt + 7 * 24 * 60 * 60 * 1000 });
+    }
+    // TODO(backend): await fetch('/api/account/nickname', { method:'PATCH', body: JSON.stringify({ userId, nickname: nextNickname }) })
+    return { ok: true, nickname: nextNickname };
+  };
+
+  onEditNickname = () => this.setState(s => ({ editNicknameOpen: true, nicknameDraft: s.nickname, nicknameCheck: null }));
   onCloseEditNickname = () => this.setState({ editNicknameOpen: false });
-  onNicknameDraftChange = (e) => this.setState({ nicknameDraft: e.target.value });
-  onSaveNickname = () => {
-    // TODO(backend): await fetch('/api/account/nickname', { method:'PATCH', body: JSON.stringify({ nickname }) })
-    this.setState(s => ({ nickname: s.nicknameDraft.trim() || s.nickname, editNicknameOpen: false }));
+  onNicknameDraftChange = (e) => {
+    // 입력값이 바뀌면 이전 중복확인 결과는 즉시 무효화 — 확인된 닉네임과 현재 입력이 같을 때만 결과를 유지
+    this.setState({ nicknameDraft: e.target.value, nicknameCheck: null });
+  };
+  onCheckNickname = async () => {
+    const draft = this.state.nicknameDraft.trim();
+    this.setState({ nicknameChecking: true });
+    const result = await this.checkNickname(draft, this.mockUser().id);
+    this.setState({ nicknameChecking: false, nicknameCheck: { forValue: draft, ...result } });
+  };
+  onSaveNickname = async () => {
+    const check = this.state.nicknameCheck;
+    const draft = this.state.nicknameDraft.trim();
+    if (!check || check.forValue !== draft || !check.available) return; // 확인 안 됐거나 사용 불가면 저장 안 함
+    const result = await this.updateNickname(this.mockUser().id, this.state.nickname, draft);
+    if (!result.ok) { this.setState({ nicknameCheck: { forValue: draft, available: false, message: result.message } }); return; }
+    this.setState({ nickname: result.nickname, editNicknameOpen: false, nicknameSavedToast: true });
+    setTimeout(() => this.setState({ nicknameSavedToast: false }), 2200);
   };
   noop = () => {};
 
@@ -202,7 +263,8 @@ class Component extends DCLogic {
     const isDark = this.state.theme === 'dark';
     const c = isDark
       ? { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.55)', border: '#3A3B3E', headerBg: 'rgba(15,15,16,.85)', cardBg: '#17181A', rowHover: '#1F2022', dangerText: '#E58888' }
-      : { bg: '#F7F7F8', text: '#171719', textSub: 'rgba(23,23,25,.5)', border: '#E1E2E4', headerBg: 'rgba(255,255,255,.85)', cardBg: '#fff', rowHover: '#F7F7F8', dangerText: '#D9534F', dangerBg: '#FDECEC' };
+      : { bg: '#F7F7F8', text: '#171719', textSub: 'rgba(23,23,25,.5)', border: '#E1E2E4', headerBg: 'rgba(255,255,255,.85)', cardBg: '#fff', rowHover: '#F7F7F8', dangerText: '#D9534F', dangerBg: '#FDECEC', chipDisabled: '#F0F0F1' };
+    if (isDark) c.chipDisabled = '#2A2B2D';
     if (isDark) c.dangerBg = 'rgba(229,136,136,.12)';
     // 실제 인증 연결 전까지는 mock user 데이터 — 나중에 실제 로그인 사용자로 교체
     const user = this.mockUser();
@@ -213,6 +275,29 @@ class Component extends DCLogic {
       onNotificationSettings: this.noop, onTerms: this.noop,
       editNicknameOpen: this.state.editNicknameOpen, onCloseEditNickname: this.onCloseEditNickname,
       nicknameDraft: this.state.nicknameDraft, onNicknameDraftChange: this.onNicknameDraftChange, onSaveNickname: this.onSaveNickname,
+      onCheckNickname: this.onCheckNickname,
+      checkButtonLabel: this.state.nicknameChecking ? '확인 중...' : '중복 확인',
+      checkBg: isDark ? '#2E332D' : '#F2F6ED', checkColor: isDark ? '#8FE3A8' : '#1F7A44',
+      nicknameCheckMessage: (() => {
+        const chk = this.state.nicknameCheck;
+        if (!chk || chk.forValue !== this.state.nicknameDraft.trim()) return '';
+        return (chk.available ? '✓ ' : '✕ ') + chk.message;
+      })(),
+      nicknameCheckColor: (() => {
+        const chk = this.state.nicknameCheck;
+        if (!chk || chk.forValue !== this.state.nicknameDraft.trim()) return c.textSub;
+        return chk.available ? (isDark ? '#8FE3A8' : '#3F8F5B') : c.dangerText;
+      })(),
+      saveBtnBg: (() => {
+        const chk = this.state.nicknameCheck;
+        const canSave = chk && chk.forValue === this.state.nicknameDraft.trim() && chk.available;
+        return canSave ? '#7BCB93' : c.chipDisabled;
+      })(),
+      saveBtnColor: (() => {
+        const chk = this.state.nicknameCheck;
+        const canSave = chk && chk.forValue === this.state.nicknameDraft.trim() && chk.available;
+        return canSave ? '#12321F' : c.textSub;
+      })(),
       withdrawOpen: this.state.withdrawOpen,
       onOpenWithdraw: this.onOpenWithdraw, onCloseWithdraw: this.onCloseWithdraw,
       onConfirmWithdraw: this.onConfirmWithdraw,
@@ -224,6 +309,7 @@ class Component extends DCLogic {
       withdrawError: this.state.withdrawError,
       withdrawButtonLabel: step === 'loading' ? '탈퇴 처리 중...' : '회원 탈퇴',
       withdrawLoadingOpacity: step === 'loading' ? 0.6 : 1,
+      nicknameSavedToast: this.state.nicknameSavedToast,
     };
   }
 }
