@@ -302,8 +302,8 @@ class Component extends DCLogic {
     const noResults = sections.every(s => !s.hasItems);
     return {
       c, isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
-      regionExpanded: !this.state.regionCollapsed, toggleRegionCollapsed: this.toggleRegionCollapsed,
-      regionCollapseIcon: this.state.regionCollapsed ? '▾' : '▴',
+      regionExpanded: this.state.regionCollapsed === false, toggleRegionCollapsed: this.toggleRegionCollapsed,
+      regionCollapseIcon: this.state.regionCollapsed === false ? '▴' : '▾',
       mobileMenuOpen: this.state.mobileMenuOpen, toggleMobileMenu: this.toggleMobileMenu,
       darkClass: this.state.theme === 'dark' ? 'ed-dark' : '',
       legendColBg: this.state.theme === 'dark' ? '#D6E0D9' : '#fff',

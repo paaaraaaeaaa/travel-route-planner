@@ -690,8 +690,8 @@ class Component extends DCLogic {
     return {
       c, isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
       mobileMenuOpen: this.state.mobileMenuOpen, toggleMobileMenu: this.toggleMobileMenu,
-      regionExpanded: !this.state.regionCollapsed, toggleRegionCollapsed: this.toggleRegionCollapsed,
-      regionCollapseIcon: this.state.regionCollapsed ? '▾' : '▴',
+      regionExpanded: this.state.regionCollapsed === false, toggleRegionCollapsed: this.toggleRegionCollapsed,
+      regionCollapseIcon: this.state.regionCollapsed === false ? '▴' : '▾',
       darkClass: this.state.theme === 'dark' ? 'cm-dark' : '',
       legendColBg: this.state.theme === 'dark' ? '#17181A' : '#fff',
       trending, popularTags,

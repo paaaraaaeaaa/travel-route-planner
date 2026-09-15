@@ -349,12 +349,12 @@ a:hover{color:#146030}
                   <span style="font-size:11px;font-weight:600;opacity:.8">· {{ item.segment.durationLabel }} · {{ item.segment.distanceLabel }}</span>
                 </div>
                 <sc-if value="{{ item.segment.isFirst }}" hint-placeholder-val="{{ false }}">
-                  <div style="font-size:10.5px;color:{{ c.textSub }}">클릭해 변경</div>
+                  
                 </sc-if>
                 <sc-if value="{{ item.segment.hasDetail }}" hint-placeholder-val="{{ true }}">
                   <div onClick="{{ item.segment.onToggle }}" class="rp-icon-btn" style="cursor:pointer;width:20px;height:20px;border-radius:6px;background:{{ item.segment.bg }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="{{ item.segment.color }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ item.segment.chevronDeg }}deg);transition:transform .15s"><path d="M6 9l6 6 6-6"></path></svg>
-                  </div>
+                  </div><div style="font-size:10.5px;color:{{ c.textSub }}">클릭해 변경</div>
                 </sc-if>
               </div>
               <sc-if value="{{ item.segment.expanded }}" hint-placeholder-val="{{ false }}">
@@ -1861,7 +1861,22 @@ class Component extends DCLogic {
       const hasRealCoords = !!(fromP?.x && fromP?.y && toP?.x && toP?.y);
       let rawSteps, isPending = false, isFailed = false, isUnsearched = false;
       if (cached && !cached.failed) {
-        rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: cached.minutes, distanceKm: cached.distanceKm, nodeLabel: null, transfers: cached.transfers }];
+        // 대중교통은 실제 Kakao API의 transitSteps(도보→버스/지하철→도보)가 있으면 그 단계별로 표시.
+        // 없으면(구버전 캐시 등) 기존처럼 요약 한 줄로 표시.
+        if (mode === 'transit' && Array.isArray(cached.transitSteps) && cached.transitSteps.length > 0) {
+          rawSteps = cached.transitSteps.map(ts => ({
+            mode: ts.type === 'WALKING' ? 'walk' : 'transit',
+            arrowLabel: ts.type === 'WALKING' ? '도보' : (ts.type === 'SUBWAY' ? '지하철' : '버스'),
+            minutes: ts.minutes ?? 0,
+            distanceKm: ts.distanceKm ?? 0,
+            nodeLabel: ts.type === 'WALKING'
+              ? [ts.fromName, ts.toName].filter(Boolean).join(' → ') || null
+              : [ts.vehicleName, [ts.fromName, ts.toName].filter(Boolean).join(' → '), ts.stopCount != null ? `${ts.stopCount}개 정류장` : null].filter(Boolean).join(' · ') || null,
+            transfers: cached.transfers,
+          }));
+        } else {
+          rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: cached.minutes, distanceKm: cached.distanceKm, nodeLabel: null, transfers: cached.transfers }];
+        }
       } else if (cached?.failed) {
         isFailed = true;
         rawSteps = [{ mode, arrowLabel: MODE_MAP[mode].label, minutes: 0, distanceKm: 0, nodeLabel: null }];

@@ -32,7 +32,7 @@ body{margin:0;font-family:-apple-system,sans-serif;background:#EEEFF1}
 
   <div style="background:#000;border-radius:{{ frameRadius }};padding:{{ framePad }};box-shadow:0 20px 50px -10px rgba(0,0,0,.35)">
     <div style="width:{{ frameWidth }}px;height:{{ frameHeight }};border-radius:{{ screenRadius }};overflow:hidden;background:#fff">
-      <iframe src="{{ pageSrc }}" style="width:calc(100% + {{ scrollbarHide }});height:calc(100% + {{ scrollbarHide }});border:none;display:block;margin:0"></iframe>
+      <iframe src="{{ pageSrc }}" style="width:calc(100% + {{ scrollbarHideX }});height:calc(100% + {{ scrollbarHide }});border:none;display:block;margin:0"></iframe>
     </div>
   </div>
 
@@ -85,6 +85,7 @@ class Component extends DCLogic {
       frameRadius: isPhone ? '44px' : '0px',
       screenRadius: isPhone ? '30px' : '0px',
       scrollbarHide: isPhone ? '18px' : '0px',
+      scrollbarHideX: isPhone ? (this.state.page === 'aiplanner' ? '24px' : '18px') : '0px',
 
     };
   }
