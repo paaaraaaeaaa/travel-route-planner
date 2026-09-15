@@ -73,7 +73,7 @@ a:hover{color:#146030}
       <a href="./My Routes.dc.html" class="cm-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">내 일정</a>
       <a href="./Community.dc.html" class="cm-nav-link-active" style="font-size:14px;font-weight:700;color:#7BCB93;text-decoration:none;border-bottom:2px solid #7BCB93;padding-bottom:20px;margin-bottom:-21px;white-space:nowrap">커뮤니티</a>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
       <div onClick="{{ toggleTheme }}" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">
         <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
         <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:15px;height:15px;object-fit:contain"></sc-if>

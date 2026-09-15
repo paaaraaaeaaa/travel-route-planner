@@ -55,11 +55,10 @@ function parseWalkRoute(data) {
 function parseTransitRoute(data) {
   const route = data?.routes?.[0] || data?.route || data;
   const props = route?.properties;
-  if (!props) return null;
+  if (!props) { console.error('kakao transit parse: no properties in route, route keys:', Object.keys(route || {})); return null; }
+  console.log('[route] transit props raw:', JSON.stringify(props));
   const pathPoints = [];
   const transitSteps = [];
-  // 실제 Kakao publictraffic 응답은 steps가 route 바로 아래(legs 없이)에 있는 경우가 많다.
-  // route.steps가 있으면 그것을 쓰고, 없을 때만 legs/sections 등 다른 컨테이너를 시도한다.
   let stepLists;
   if (Array.isArray(route.steps) && route.steps.length > 0) {
     stepLists = [route.steps];
@@ -68,21 +67,28 @@ function parseTransitRoute(data) {
     stepLists = legs.map(leg => leg.steps || leg.roads || leg.details || leg.stepList || []);
   }
   stepLists.forEach((stepList, li) => stepList.forEach((step, si) => {
-    if (li === 0 && si === 0) console.log('[route] transit first raw step keys:', JSON.stringify(step));
-    (step.path?.points || step.points || step.vertexes || step.linePassStopList?.map?.(p => [p.x, p.y]) || []).forEach(pt => {
+    if (li === 0 && si === 0) console.log('[route] transit first raw step:', JSON.stringify(step));
+    (step.path?.points || step.points || step.vertexes || []).forEach(pt => {
       if (Array.isArray(pt)) pathPoints.push({ x: pt[0], y: pt[1] });
     });
-    const rawType = step.trafficType ?? step.type ?? step.mode ?? step.stepType ?? step.transportType ?? (step.lane ? 'BUS' : (step.name || step.roadName ? 'WALKING' : null));
-    const type = /walk|foot/i.test(String(rawType)) ? 'WALKING' : (/subway|rail|metro|train/i.test(String(rawType)) ? 'SUBWAY' : (/bus/i.test(String(rawType)) ? 'BUS' : (rawType ? String(rawType).toUpperCase() : 'WALKING')));
+    const rawType = step.trafficType ?? step.type ?? step.mode ?? step.stepType ?? step.transportType ?? (step.lane ? 'BUS' : null);
+    let type = null;
+    if (rawType != null) {
+      type = /walk|foot/i.test(String(rawType)) ? 'WALKING' : (/subway|rail|metro|train/i.test(String(rawType)) ? 'SUBWAY' : (/bus/i.test(String(rawType)) ? 'BUS' : String(rawType).toUpperCase()));
+    } else {
+      console.error(`kakao transit parse: step[${li}][${si}] has no recognizable type field, keys:`, Object.keys(step || {}));
+    }
     const minutes = step.sectionTime != null ? Math.round(step.sectionTime / 60)
       : step.time != null ? Math.round(step.time / 60)
       : step.duration != null ? Math.round(step.duration / 60)
       : step.stayTime != null ? Math.round(step.stayTime / 60)
       : null;
+    if (minutes == null) console.error(`kakao transit parse: step[${li}][${si}] has no time field, keys:`, Object.keys(step || {}));
     const distanceKm = step.distance != null ? step.distance / 1000
       : step.sectionDistance != null ? step.sectionDistance / 1000
       : step.length != null ? step.length / 1000
       : null;
+    if (distanceKm == null) console.error(`kakao transit parse: step[${li}][${si}] has no distance field, keys:`, Object.keys(step || {}));
     const lane = step.lane || (Array.isArray(step.lanes) ? step.lanes[0] : null);
     transitSteps.push({
       type,
@@ -98,9 +104,13 @@ function parseTransitRoute(data) {
   if (transitSteps.length === 0) {
     console.error('kakao transit parse: no steps found in response, route keys:', Object.keys(route || {}));
   }
+  const totalDistanceRaw = props.totalDistance ?? props.distance ?? props.total_distance ?? route.distance ?? null;
+  const totalTimeRaw = props.totalTime ?? props.time ?? props.total_time ?? route.duration ?? null;
+  if (totalDistanceRaw == null) console.error('kakao transit parse: no total distance field, properties keys:', Object.keys(props || {}));
+  if (totalTimeRaw == null) console.error('kakao transit parse: no total time field, properties keys:', Object.keys(props || {}));
   return {
-    distanceKm: props.totalDistance / 1000,
-    minutes: Math.round(props.totalTime / 60),
+    distanceKm: totalDistanceRaw != null ? totalDistanceRaw / 1000 : 0,
+    minutes: totalTimeRaw != null ? Math.round(totalTimeRaw / 60) : 0,
     transfers: props.transferCount ?? props.transferCnt ?? null,
     pathPoints,
     transitSteps,

@@ -302,7 +302,7 @@ a:hover{color:#146030}
               </div>
               <div style="font-size:12px;color:{{ c.textSub }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.place.address }}</div>
               <sc-if value="{{ item.place.expanded }}" hint-placeholder-val="{{ false }}">
-                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; width: 100%">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; width: 238px; height: 95px">
                   <div style="font-size: 10.5px; font-weight: 600; padding: 4px 7px; border-radius: 6px; background: {{ item.place.hoursBg }}; color: {{ item.place.hoursColor }}; white-space: nowrap; line-height:1; box-sizing:border-box">{{ item.place.hoursLabel }}</div>
                   <div onClick="{{ item.place.onOpenCategory }}" style="cursor:pointer;font-size:10.5px;font-weight:600;padding:4px 8px;border-radius:6px;background:{{ item.place.categoryBg }};color:{{ item.place.categoryColor }};line-height:1;box-sizing:border-box">{{ item.place.category }}</div>
                   <div style="display:flex;align-items:center;gap:6px;width:100%">
