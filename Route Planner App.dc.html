@@ -360,12 +360,7 @@ a:hover{color:#146030}
                   <div onClick="{{ item.segment.onToggle }}" class="rp-icon-btn" style="cursor:pointer;width:20px;height:20px;border-radius:6px;background:{{ item.segment.bg }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="{{ item.segment.color }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ item.segment.chevronDeg }}deg);transition:transform .15s"><path d="M6 9l6 6 6-6"></path></svg>
                   </div>
-                  <sc-if value="{{ item.segment.isTransit }}" hint-placeholder-val="{{ false }}">
-                    <a href="{{ item.segment.transitKakaoUrl }}" target="_blank" rel="noopener" onClick="{{ item.segment.stopPropagation }}" style="font-size:10.5px;font-weight:600;color:{{ item.segment.color }};text-decoration:none">카카오맵</a>
-                  </sc-if>
-                  <sc-if value="{{ item.segment.showCycleHint }}" hint-placeholder-val="{{ true }}">
-                    <div style="font-size:10.5px;color:{{ c.textSub }}">클릭해 변경</div>
-                  </sc-if>
+                  <div style="font-size:10.5px;color:{{ c.textSub }}">클릭해 변경</div>
                 </sc-if>
               </div>
               <sc-if value="{{ item.segment.expanded }}" hint-placeholder-val="{{ false }}">
@@ -1978,16 +1973,6 @@ class Component extends DCLogic {
         distanceLabel: (isFailed || isUnsearched) ? '' : `${totalDist.toFixed(1)}km${(rawSteps[0]?.transfers != null && mode === 'transit') ? ` · 환승 ${rawSteps[0].transfers}회` : ''}`,
         onCycle: () => this.cycleSegmentMode(idx),
         hasDetail: steps.length > 1,
-        showCycleHint: mode !== 'transit',
-        stopPropagation: (e) => e && e.stopPropagation && e.stopPropagation(),
-        transitKakaoUrl: (() => {
-          if (mode !== 'transit') return '#';
-          if (cached && cached.landingURL) return cached.landingURL;
-          if (!fromP || !toP || fromP.x == null || fromP.y == null || toP.x == null || toP.y == null) return '#';
-          const sName = encodeURIComponent(fromP.name || '출발지');
-          const eName = encodeURIComponent(toP.name || '도착지');
-          return `https://map.kakao.com/link/from/${sName},${fromP.y},${fromP.x}/to/${eName},${toP.y},${toP.x}`;
-        })(),
         ...(mode === 'walk' ? (console.log('[debug] walk final display value', { idx, totalDist, totalMinutes, isFailed, isUnsearched }), {}) : {}),
         expanded, onToggle: () => this.toggleExpand(idx, expanded),
         chevronDeg: expanded ? 180 : 0,
