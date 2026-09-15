@@ -32,7 +32,7 @@ body{margin:0;font-family:-apple-system,sans-serif;background:#EEEFF1}
 
   <div style="background:#000;border-radius:{{ frameRadius }};padding:{{ framePad }};box-shadow:0 20px 50px -10px rgba(0,0,0,.35)">
     <div style="width:{{ frameWidth }}px;height:{{ frameHeight }};border-radius:{{ screenRadius }};overflow:hidden;background:#fff">
-      <iframe src="{{ pageSrc }}" style="{{ iframeStyle }}"></iframe>
+      <iframe src="{{ pageSrc }}" onLoad="{{ onFrameLoad }}" style="width:100%;height:100%;border:none;display:block;margin:0"></iframe>
     </div>
   </div>
 
@@ -49,7 +49,7 @@ const PAGES = [
   { key: 'main', label: 'Main (Home)', file: 'main(home).dc.html' },
   { key: 'community', label: 'Community', file: 'Community (Mobile).dc.html' },
   { key: 'explore', label: 'Explore', file: 'Explore Destinations (Mobile).dc.html' },
-  { key: 'myroutes', label: 'My Routes', file: 'My Routes.dc.html' },
+  { key: 'myroutes', label: 'My Routes', file: 'My Routes (Mobile).dc.html' },
   { key: 'planner', label: 'Route Planner', file: 'Route Planner App.dc.html' },
   { key: 'login', label: 'Login', file: 'Login Screen.dc.html' },
   { key: 'signup', label: 'Signup', file: 'Signup Screen.dc.html' },
@@ -62,13 +62,25 @@ class Component extends DCLogic {
   selectMode = (key) => this.setState({ mode: key });
   selectPage = (key) => this.setState({ page: key });
 
+  onFrameLoad = (e) => {
+    try {
+      const doc = e.target.contentDocument;
+      if (!doc) return;
+      const style = doc.createElement('style');
+      style.textContent = `
+        html{scrollbar-width:none;-ms-overflow-style:none}
+        html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
+        *{scrollbar-width:none;-ms-overflow-style:none}
+        *::-webkit-scrollbar{display:none;width:0;height:0}
+      `;
+      doc.head.appendChild(style);
+    } catch (err) {}
+  };
+
   renderVals() {
     const active = MODES.find(m => m.key === this.state.mode) || MODES[0];
     const activePage = PAGES.find(p => p.key === this.state.page) || PAGES[0];
     const isPhone = active.key !== 'desktop';
-    const scrollbarHide = isPhone ? '18px' : '0px';
-    const scrollbarHideX = isPhone ? (this.state.page === 'login' ? '5px' : this.state.page === 'community' ? '20px' : '18px') : '0px';
-    const iframeStyle = `width:calc(100% + ${scrollbarHideX});height:calc(100% + ${scrollbarHide});border:none;display:block;margin:0`;
     return {
       modes: MODES.map(m => ({
         label: m.label, onSelect: () => this.selectMode(m.key),
@@ -87,9 +99,7 @@ class Component extends DCLogic {
       framePad: isPhone ? '14px' : '0px',
       frameRadius: isPhone ? '44px' : '0px',
       screenRadius: isPhone ? '30px' : '0px',
-      scrollbarHide,
-      scrollbarHideX,
-      iframeStyle,
+      onFrameLoad: this.onFrameLoad,
     };
   }
 }

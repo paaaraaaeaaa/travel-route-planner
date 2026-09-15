@@ -303,7 +303,7 @@ a:hover{color:#146030}
               <div style="font-size:12px;color:{{ c.textSub }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.place.address }}</div>
               <sc-if value="{{ item.place.expanded }}" hint-placeholder-val="{{ false }}">
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; width: 238px; height: 95px">
-                  <div style="font-size: 10.5px; font-weight: 600; padding: 4px 7px; border-radius: 6px; background: {{ item.place.hoursBg }}; color: {{ item.place.hoursColor }}; white-space: nowrap; line-height:1; box-sizing:border-box">{{ item.place.hoursLabel }}</div>
+                  <a href="{{ item.place.kakaoDirectionsUrl }}" target="_blank" rel="noopener" onClick="{{ item.place.onKakaoDirectionsClick }}" style="font-size: 10.5px; font-weight: 600; padding: 4px 7px; border-radius: 6px; background: {{ item.place.kakaoDirectionsBg }}; color: {{ item.place.kakaoDirectionsColor }}; white-space: nowrap; line-height:1; box-sizing:border-box; text-decoration:none; display:inline-flex; align-items:center; opacity: {{ item.place.kakaoDirectionsOpacity }}; cursor: {{ item.place.kakaoDirectionsCursor }}; pointer-events: {{ item.place.kakaoDirectionsPointerEvents }}">카카오맵에서 길찾기</a>
                   <div onClick="{{ item.place.onOpenCategory }}" style="cursor:pointer;font-size:10.5px;font-weight:600;padding:4px 8px;border-radius:6px;background:{{ item.place.categoryBg }};color:{{ item.place.categoryColor }};line-height:1;box-sizing:border-box">{{ item.place.category }}</div>
                   <div style="display:flex;align-items:center;gap:6px;width:100%">
                     <input value="{{ item.place.packItems }}" onChange="{{ item.place.onPackItemsChange }}" placeholder="메모 (예: 우산, 신분증)" style="flex:1;min-width:0;font-size:11px;font-family:inherit;color:{{ c.text }};background:{{ c.chipBg }};border:1px solid {{ c.border }};border-radius:6px;padding:5px 8px;box-sizing:border-box">
@@ -1841,6 +1841,20 @@ class Component extends DCLogic {
         hoursColor: this.state.theme === 'dark'
           ? (p.hours === 'open' ? '#6FCB93' : p.hours === 'unknown' ? '#E0B372' : '#E58888')
           : (p.hours === 'open' ? '#3F8F5B' : p.hours === 'unknown' ? '#C9822B' : '#D9534F'),
+        kakaoDirectionsUrl: (() => {
+          const prev = places[idx - 1];
+          if (!prev || prev.x == null || prev.y == null || p.x == null || p.y == null) return '#';
+          const sName = encodeURIComponent(prev.name || '출발지');
+          const eName = encodeURIComponent(p.name || '도착지');
+          return `https://map.kakao.com/link/from/${sName},${prev.y},${prev.x}/to/${eName},${p.y},${p.x}`;
+        })(),
+        kakaoDirectionsEnabled: !!(places[idx - 1] && places[idx - 1].x != null && places[idx - 1].y != null && p.x != null && p.y != null),
+        kakaoDirectionsBg: this.state.theme === 'dark' ? '#2A2520' : '#FEE500',
+        kakaoDirectionsColor: this.state.theme === 'dark' ? '#F0DDA0' : '#191919',
+        kakaoDirectionsCursor: (places[idx - 1] && places[idx - 1].x != null && places[idx - 1].y != null && p.x != null && p.y != null) ? 'pointer' : 'default',
+        kakaoDirectionsOpacity: (places[idx - 1] && places[idx - 1].x != null && places[idx - 1].y != null && p.x != null && p.y != null) ? 1 : .45,
+        kakaoDirectionsPointerEvents: (places[idx - 1] && places[idx - 1].x != null && places[idx - 1].y != null && p.x != null && p.y != null) ? 'auto' : 'none',
+        onKakaoDirectionsClick: (e) => { if (!(places[idx - 1] && places[idx - 1].x != null && places[idx - 1].y != null && p.x != null && p.y != null)) e.preventDefault(); },
         bg: isDragging ? cEarly.cardBgAlt : cEarly.cardBg,
         borderColor: isDragging ? '#7BCB93' : (this.state.theme === 'dark' ? '#8A8B8F' : cEarly.border),
         expanded, expandChevronDeg: expanded ? 180 : 0,

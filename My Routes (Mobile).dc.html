@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<style>
+body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
+a{color:#1F7A44}
+a:hover{color:#146030}
+.pd-fade{transition:background-color .35s ease,color .35s ease,border-color .35s ease}
+.mr-card:hover{box-shadow:0 2px 10px rgba(23,23,25,.06);border-color:#CFE8D9}
+.mr-icon-btn:hover{background-color:#EAEBEC}
+.mr-nav-link{transition:color .15s ease}
+.mr-nav-link:hover{color:#95C898 !important}
+[style*="cursor:pointer"],[style*="cursor: pointer"]{transition:transform .06s ease,filter .1s ease}
+[style*="cursor:pointer"]:hover,[style*="cursor: pointer"]:hover{filter:brightness(1.03)}
+@media (max-width:767px){
+  body{overflow-x:hidden}
+  .mr-nav-links{display:none!important}
+  .mr-mobile-menu-wrap{display:block!important}
+}
+[style*="cursor:pointer"]:active,[style*="cursor: pointer"]:active{transform:scale(0.95)}
+</style>
+</helmet>
+
+<div class="pd-fade" style="min-height:100vh;background:{{ c.bg }};color:{{ c.text }}" data-screen-label="내 일정">
+
+  <div class="pd-fade" style="position:sticky;top:0;z-index:5;background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }};box-shadow:0 1px 8px rgba(23,23,25,.04);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
+    <a href="./main(home).dc.html" style="font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: {{ c.text }}; text-decoration: none; cursor: pointer">p<span style="color:#26AB4E;font-size:1.4em;position:relative;top:-0.05em">:</span>nder</a>
+    <div class="mr-nav-links" style="display:flex;align-items:center;gap:32px;margin-left:auto">
+      <a href="./Explore Destinations.dc.html" class="mr-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">여행지 탐색</a>
+      <a href="./My Routes.dc.html" class="mr-nav-link" style="font-size:14px;font-weight:700;color:#7BCB93;text-decoration:none;border-bottom:2px solid #7BCB93;padding-bottom:20px;margin-bottom:-21px">내 일정</a>
+      <a href="./Community.dc.html" class="mr-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none">커뮤니티</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div onClick="{{ toggleTheme }}" class="mr-icon-btn" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:15px;height:15px;object-fit:contain"></sc-if>
+      </div>
+      <div class="mr-mobile-menu-wrap" style="position:relative;display:none">
+        <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:{{ c.text }}">☰</div>
+        <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:fixed;inset:0;z-index:9" onClick="{{ toggleMobileMenu }}"></div>
+          <div style="position:absolute;top:44px;right:0;z-index:10;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;min-width:140px">
+            <a href="./Explore Destinations.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none">여행지 탐색</a>
+            <a href="./My Routes.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:700;color:#7BCB93;text-decoration:none">내 일정</a>
+            <a href="./Community.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none">커뮤니티</a>
+            <a href="./Login Screen.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none">로그인</a>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1140px;margin:0 auto;padding:32px 24px 80px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px">
+      <div style="margin-left:8px">
+        <div style="font-size:24px;font-weight:800;color:{{ c.text }};letter-spacing:-0.01em;margin-bottom:5px">내 일정</div>
+        <div style="font-size:13px;color:{{ c.textSub }}">저장해둔 동선을 확인하고<br>이어서 계획할 수 있어요</div>
+      </div>
+      <div onClick="{{ openNewTripModal }}" style="cursor:pointer;font-size:13.5px;font-weight:700;background:#7BCB93;color:#12321F;border-radius:10px;padding:10px 18px;white-space:nowrap;flex-shrink:0">＋ 새 일정</div>
+    </div>
+
+    <sc-if value="{{ hasRoutes }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:flex-end;gap:24px;margin-bottom:19px;padding-bottom:0;padding-left:10px;border-bottom:1px solid {{ c.border }}">
+        <sc-for list="{{ statusTabs }}" as="tab" hint-placeholder-count="2">
+          <div onClick="{{ tab.onSelect }}" style="cursor:pointer;padding:0 2px 11px 2px;font-size:12.2px;font-weight:600;background:transparent;color:{{ tab.color }};border-bottom:2px solid {{ tab.underline }};margin-bottom:-1px;white-space:nowrap">{{ tab.label }}</div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ pagedRoutes }}" as="route" hint-placeholder-count="3">
+          <div class="pd-fade mr-card" style="position:relative;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;padding:16px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;opacity:{{ route.cardOpacity }}">
+            <div style="position:absolute;top:14px;right:16px;display:flex;align-items:center;gap:11px">
+              
+              <a href="{{ route.openHref }}" style="font-size:12.5px;font-weight:700;color:#12321F;background:#EAF9EF;border-radius:8px;padding:8px 14px;text-decoration:none;white-space:nowrap">열기</a><div onClick="{{ route.onDeleteClick }}" style="width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:{{ c.textSub }};opacity:.6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></div>
+            </div>
+            <div style="flex:1;min-width:220px;padding-right:120px;display:flex;flex-direction:column;gap:7px">
+              <sc-if value="{{ route.isEditing }}" hint-placeholder-val="{{ false }}">
+                <input value="{{ route.editValue }}" onChange="{{ route.onEditChange }}" onBlur="{{ route.onEditSave }}" onKeyDown="{{ route.onEditKeyDown }}" autoFocus="{{ true }}" style="font-size:15.5px;font-weight:700;color:{{ c.text }};background:{{ c.bg }};border:1px solid {{ c.border }};border-radius:6px;padding:2px 6px;width:100%;box-sizing:border-box;font-family:inherit">
+              </sc-if>
+              <sc-if value="{{ route.notEditing }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ route.onEditStart }}" style="font-size:15.5px;font-weight:700;color:{{ c.text }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;min-width:0" title="클릭해서 제목 수정">{{ route.name }}</div>
+              </sc-if>
+              <sc-if value="{{ route.isDateEditing }}" hint-placeholder-val="{{ false }}">
+                <div style="position:relative;opacity:1" onClick="{{ stopClick }}">
+                  <div onClick="{{ route.onDateEditCancel }}" style="position:fixed;inset:0;z-index:19"></div>
+                  <div style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:{{ c.text }};border:1px solid {{ c.border }};border-radius:6px;padding:3px 8px">{{ route.editStart }} - {{ route.editEnd }}</div>
+                  <div style="position:absolute;top:calc(100% + 6px);left:0;z-index:20;background:{{ c.bg }};border:1px solid {{ c.border }};border-radius:12px;padding:12px;width:260px;box-shadow:0px 10px 24px -6px rgba(23,23,25,.25);opacity:1">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                      <div onClick="{{ route.onCardCalPrev }}" style="cursor:pointer;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:{{ c.textSub }}">‹</div>
+                      <div style="font-size:12.5px;font-weight:700;color:{{ c.text }}">{{ route.cardCalLabel }}</div>
+                      <div onClick="{{ route.onCardCalNext }}" style="cursor:pointer;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:{{ c.textSub }}">›</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(7,1fr);row-gap:3px;column-gap:0">
+                      <sc-for list="{{ route.cardCalCells }}" as="cell" hint-placeholder-count="42">
+                        <div onClick="{{ cell.onClick }}" style="cursor:pointer;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;border-radius:{{ cell.rangeRadius }};background:{{ cell.rangeBg }};color:{{ cell.textColor }}">{{ cell.day }}</div>
+                      </sc-for>
+                    </div>
+                    <div onClick="{{ route.onDateSave }}" style="margin-top:10px;cursor:pointer;text-align:center;font-size:12px;font-weight:700;color:#12321F;background:#7BCB93;border-radius:8px;padding:7px">확인</div>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ route.notDateEditing }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ route.onDateEditStart }}" style="cursor:pointer;font-size:12px;color:{{ c.textSub }}" title="클릭해서 날짜 수정">{{ route.dateOnly }} · 방문지 {{ route.countLabel }}</div>
+              </sc-if>
+              <sc-if value="{{ route.hasMembers }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:5px;margin-top:1px">
+                  <sc-for list="{{ route.memberAvatars }}" as="mem" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:4px">
+                      <div style="width:18px;height:18px;border-radius:50%;background:{{ mem.bg }};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ mem.initial }}</div>
+                      <span style="font-size:11.5px;color:{{ c.textSub }}">{{ mem.name }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:1px">
+                <sc-for list="{{ route.placeChips }}" as="chip" hint-placeholder-count="3">
+                  <div style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;background:{{ c.chipBg }};color:{{ c.textSub }}">{{ chip }}</div>
+                </sc-for>
+                <sc-if value="{{ route.hasMoreChips }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:11px;font-weight:700;color:{{ c.textSub }}">+{{ route.moreChipsCount }}</div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="display:none">
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ hasMultiplePages }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:24px">
+          <div onClick="{{ onPrevPage }}" style="cursor:pointer;width:30px;height:30px;border-radius:8px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;color:{{ c.text }};opacity:{{ prevPageOpacity }}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+          </div>
+          <sc-for list="{{ pageNumbers }}" as="pg" hint-placeholder-count="3">
+            <div onClick="{{ pg.onClick }}" style="cursor:pointer;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:{{ pg.bg }};color:{{ pg.color }}">{{ pg.label }}</div>
+          </sc-for>
+          <div onClick="{{ onNextPage }}" style="cursor:pointer;width:30px;height:30px;border-radius:8px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;color:{{ c.text }};opacity:{{ nextPageOpacity }}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+    <sc-if value="{{ noRoutes }}" hint-placeholder-val="{{ true }}">
+      <div style="border:1.5px dashed {{ c.border }};border-radius:14px;padding:48px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div onClick="{{ openNewTripModal }}" style="width:44px;height:44px;border-radius:50%;background:{{ c.chipBg }};display:flex;align-items:center;justify-content:center;font-size:20px;color:{{ c.textSub }};cursor:pointer">＋</div>
+        <div style="font-size:14px;font-weight:700;color:{{ c.text }}">저장된 일정이 없어요</div>
+        <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.6">Route Planner에서 방문지를 추가하고<br>"저장"을 누르면 여기에 나타나요</div>
+        <div onClick="{{ openNewTripModal }}" style="cursor:pointer;margin-top:6px;font-size:13px;font-weight:700;color:#12321F;background:#7BCB93;border-radius:8px;padding:9px 16px">새 일정 만들기</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ modeSelectModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:20">
+      <div style="position:relative"><div onClick="{{ closeModeSelectModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D0D1D4" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.cardBg }};border-radius:16px;padding:24px;width:360px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px" onClick="{{ stopClick }}">
+        <div style="font-size:16px;font-weight:700;color:{{ c.text }}">어떻게 일정을 만들까요?</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div onClick="{{ chooseCreateModeManual }}" style="cursor:pointer;border:1px solid {{ c.border }};border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:14.5px;font-weight:700;color:{{ c.text }}">직접 생성하기</div>
+            <div style="font-size:12px;color:{{ c.textSub }}">내가 가고 싶은 곳을 입력하고 최적의 동선을 생성해줘요</div>
+          </div>
+          <div onClick="{{ chooseCreateModeAi }}" style="cursor:pointer;border:1px solid {{ c.border }};border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:14.5px;font-weight:700;color:{{ c.text }}">AI 생성하기</div>
+            <div style="font-size:12px;color:{{ c.textSub }}">AI로 알아서 최적의 동선을 생성해줘요</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ newTripModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:20">
+      <div style="position:relative"><div onClick="{{ closeNewTripModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D0D1D4" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.cardBg }};border-radius:16px;padding:24px;width:340px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px" onClick="{{ stopClick }}">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:16px;font-weight:700;color:{{ c.text }}">새 일정 만들기</div>
+          <div onClick="{{ onResetDates }}" title="날짜 초기화" style="cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:{{ c.textSub }}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div onClick="{{ onCalPrevMonth }}" style="cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:{{ c.text }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+          </div>
+          <div style="font-size:13.5px;font-weight:700;color:{{ c.text }}">{{ calMonthLabel }}</div>
+          <div onClick="{{ onCalNextMonth }}" style="cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:{{ c.text }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+          <sc-for list="{{ calWeekdays }}" as="wd" hint-placeholder-count="7">
+            <div style="text-align:center;font-size:11px;font-weight:600;color:{{ wd.color }};padding:4px 0">{{ wd.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);row-gap:3px;column-gap:0">
+          <sc-for list="{{ calCells }}" as="cell" hint-placeholder-count="42">
+            <div onClick="{{ cell.onClick }}" style="cursor:pointer;height:36px;display:flex;align-items:center;justify-content:center;background:{{ cell.rangeBg }};border-radius:{{ cell.rangeRadius }}">
+              <div style="width: 30px; height: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: {{ cell.dotBg }}; color: {{ cell.textColor }}; font-size: 12px; font-weight: 400">{{ cell.day }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid {{ c.border }};padding-top:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size: 11px; font-weight: 400; color: {{ c.textSub }}">출발 날짜</div>
+              <div style="font-size: 13px; font-weight: 600; color: {{ c.text }}; padding-top: 5px; padding-bottom: 5px">{{ tripStartLabel }}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              
+              <div style="font-size: 11px; font-weight: 400; color: {{ c.textSub }}">도착 날짜</div><div style="font-size: 13px; font-weight: 600; color: {{ c.text }}; padding-top: 5px; padding-bottom: 5px">{{ tripEndLabel }}</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+          <div onClick="{{ closeNewTripModal }}" style="cursor: pointer; font-size: 12px; font-weight: 600; color: {{ c.textSub }}; background: {{ c.chipBg }}; border-radius: 8px; padding: 9px 16px">취소</div>
+          <a href="{{ newTripHref }}" style="font-size: 12px; font-weight: 700; color: #12321F; background: #7BCB93; border-radius: 8px; padding: 9px 16px; text-decoration: none">시작하기</a>
+        </div>
+      </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ deleteConfirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:20">
+      <div style="position:relative"><div onClick="{{ closeDeleteConfirm }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D0D1D4" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.cardBg }};border-radius:16px;padding:24px;width:300px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px" onClick="{{ stopClick }}">
+        <div style="font-size:15px;font-weight:700;color:{{ c.text }}">내 일정에서 삭제하시겠습니까?</div>
+        <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.5">내 일정 목록에서만 제거됩니다.</div>
+        <div style="background:#EAF6EE;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:#1F7A44;line-height:1.5">
+          <div>✓ 공유된 원본 일정은 삭제되지 않습니다.</div>
+          <div>✓ 다른 참여자의 일정에는 영향을 주지 않습니다.</div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+          <div onClick="{{ closeDeleteConfirm }}" style="cursor:pointer;font-size:13px;font-weight:600;color:{{ c.textSub }};background:{{ c.chipBg }};border-radius:8px;padding:9px 16px">취소</div>
+          <div onClick="{{ confirmDelete }}" style="cursor:pointer;font-size:13px;font-weight:700;color:#fff;background:#C25454;border-radius:8px;padding:9px 16px">내 일정에서 삭제</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:60;background:#171719;color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:10px;display:flex;align-items:center;gap:8px;box-shadow:0px 8px 20px -4px rgba(0,0,0,.3)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7BCB93" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+      {{ toastMsg }}
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+// MOCK: 실제 연동 시 localStorage 대신 서버 API에서 목록을 불러오도록 교체
+function fmtRange(start, end) {
+  if (!start) return '';
+  const fmt = (d) => new Date(d).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+  if (!end || end === start) return fmt(start);
+  return `${fmt(start)} - ${fmt(end)}`;
+}
+const LIGHT = { bg: '#FFFFFF', text: '#171719', textSub: 'rgba(23,23,25,.6)', border: '#E1E2E4', headerBg: 'rgba(255,255,255,.82)', cardBg: '#fff', chipBg: '#F4F4F5' };
+const DARK = { bg: '#0F0F10', text: '#F7F7F8', textSub: 'rgba(247,247,248,.62)', border: '#292A2D', headerBg: 'rgba(15,15,16,.72)', cardBg: '#17181A', chipBg: 'rgba(255,255,255,.08)' };
+function pad2(n) { return String(n).padStart(2, '0'); }
+const AVATAR_COLORS = ['#7BCB93', '#8FB6E8', '#E8A87C', '#B79BE8'];
+function hashStr(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h << 5) - h + s.charCodeAt(i); return h; }
+function fmtDateLabel(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  const week = ['일', '월', '화', '수', '목', '금', '토'][dt.getDay()];
+  return `${y}.${pad2(m)}.${pad2(d)} (${week})`;
+}
+const HOLIDAYS = new Set([
+  '2026-01-01','2026-02-16','2026-02-17','2026-02-18','2026-03-01','2026-03-02',
+  '2026-05-05','2026-05-24','2026-06-06','2026-08-15','2026-08-17',
+  '2026-09-24','2026-09-25','2026-09-26','2026-10-03','2026-10-05','2026-10-09','2026-12-25',
+]);
+function buildCalCells(viewYear, viewMonth, startStr, endStr, onDayClick, isDark) {
+  const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+  const cells = [];
+  const toStr = (y, m, d) => `${y}-${pad2(m + 1)}-${pad2(d)}`;
+  for (let i = firstDow - 1; i >= 0; i--) {
+    const d = daysInPrevMonth - i;
+    let y = viewYear, m = viewMonth - 1; if (m < 0) { m = 11; y -= 1; }
+    cells.push({ day: d, dateStr: toStr(y, m, d), inMonth: false });
+  }
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d, dateStr: toStr(viewYear, viewMonth, d), inMonth: true });
+  while (cells.length % 7 !== 0 || cells.length < 42) {
+    const idx = cells.length - (firstDow + daysInMonth);
+    const d = idx + 1;
+    let y = viewYear, m = viewMonth + 1; if (m > 11) { m = 0; y += 1; }
+    cells.push({ day: d, dateStr: toStr(y, m, d), inMonth: false });
+  }
+  return cells.map((cell, i) => {
+    const dow = i % 7;
+    const isStart = cell.dateStr === startStr;
+    const isEnd = cell.dateStr === endStr;
+    const isRangeActive = !!(startStr && endStr);
+    const inRange = isRangeActive && cell.dateStr > startStr && cell.dateStr < endStr;
+    const isEdge = isStart || isEnd;
+    const isHoliday = HOLIDAYS.has(cell.dateStr);
+    const dayColor = !cell.inMonth ? '#C9CACD' : (dow === 0 || isHoliday) ? '#E5484D' : dow === 6 ? '#0066FF' : (isDark ? '#FFFFFF' : '#171719');
+    return {
+      day: cell.day,
+      onClick: cell.inMonth ? () => onDayClick(cell.dateStr) : () => {},
+      rangeBg: (isRangeActive && (isEdge || inRange)) || (!isRangeActive && isStart) ? '#95C898' : 'transparent',
+      rangeRadius: !isRangeActive ? '8px' : (isStart && isEnd) ? '8px' : isStart ? '8px 0 0 8px' : isEnd ? '0 8px 8px 0' : inRange ? '0' : '8px',
+      dotBg: 'transparent',
+      textColor: (isRangeActive && (isEdge || inRange)) || (!isRangeActive && isStart) ? '#12321F' : dayColor,
+    };
+  });
+}
+
+class Component extends DCLogic {
+  state = { routes: [], theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || this.props.defaultTheme || 'light', editingId: null, editValue: '', newTripModalOpen: false, newTripStartDate: new Date().toISOString().slice(0, 10), newTripEndDate: '', dateEditingId: null, editStart: '', editEnd: '', deleteConfirmOpen: false, deleteTargetId: null, deleteTargetName: '' };
+  openDeleteConfirm = (route) => this.setState({ deleteConfirmOpen: true, deleteTargetId: route.id, deleteTargetName: route.name });
+  closeDeleteConfirm = () => this.setState({ deleteConfirmOpen: false });
+  confirmDelete = () => this.setState(s => {
+    const routes = s.routes.filter(r => r.id !== s.deleteTargetId);
+    this.persist(routes);
+    this.showToast('내 일정 1건이 삭제되었습니다');
+    return { routes, deleteConfirmOpen: false };
+  });
+  showToast = (message) => {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastMsg: message, toastVisible: true });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2400);
+  };
+  openNewTripModal = () => this.setState({ modeSelectModalOpen: true, newTripStartDate: new Date().toISOString().slice(0, 10), newTripEndDate: '' });
+  closeModeSelectModal = () => this.setState({ modeSelectModalOpen: false });
+  chooseCreateMode = (mode) => {
+    if (mode === 'ai') {
+      window.location.href = './AI Schedule Planner.dc.html';
+      return;
+    }
+    this.setState({ modeSelectModalOpen: false, newTripModalOpen: true, createMode: mode, calViewYear: this.state.calViewYear || new Date().getFullYear(), calViewMonth: this.state.calViewMonth ?? new Date().getMonth() });
+  };
+  closeNewTripModal = () => this.setState({ newTripModalOpen: false });
+  onNewTripStartDateChange = (e) => this.setState(s => ({ newTripStartDate: e.target.value, newTripEndDate: s.newTripEndDate < e.target.value ? e.target.value : s.newTripEndDate }));
+  onNewTripEndDateChange = (e) => this.setState({ newTripEndDate: e.target.value });
+  onCalPrevMonth = () => this.setState(s => {
+    let m = (s.calViewMonth ?? new Date().getMonth()) - 1, y = s.calViewYear || new Date().getFullYear();
+    if (m < 0) { m = 11; y -= 1; }
+    return { calViewMonth: m, calViewYear: y };
+  });
+  onCalNextMonth = () => this.setState(s => {
+    let m = (s.calViewMonth ?? new Date().getMonth()) + 1, y = s.calViewYear || new Date().getFullYear();
+    if (m > 11) { m = 0; y += 1; }
+    return { calViewMonth: m, calViewYear: y };
+  });
+  onCalDayClick = (dateStr) => {
+    this.setState(s => {
+      const { newTripStartDate: start, newTripEndDate: end } = s;
+      if (!start || (start && end)) return { newTripStartDate: dateStr, newTripEndDate: '' };
+      if (dateStr === start) return { newTripEndDate: dateStr };
+      if (dateStr < start) return { newTripStartDate: dateStr, newTripEndDate: start };
+      return { newTripEndDate: dateStr };
+    });
+  };
+  onResetDates = () => this.setState({ newTripStartDate: new Date().toISOString().slice(0, 10), newTripEndDate: '' });
+  onPrevPage = () => this.setState(s => ({ page: Math.max(0, (s.page || 0) - 1) }));
+  onNextPage = () => this.setState(s => ({ page: (s.page || 0) + 1 }));
+  goToPage = (p) => this.setState({ page: p });
+  onSetFilterMode = (mode) => (m2) => this.setState(s => ({ filterMode: s.filterMode === mode ? null : mode, filterValue: null, page: 0 }));
+  onClearFilter = () => this.setState({ filterValue: null, page: 0 });
+  onPickFilterValue = (v) => this.setState({ filterValue: v, page: 0 });
+  toggleMobileMenu = () => this.setState(s => ({ mobileMenuOpen: !s.mobileMenuOpen }));
+  onSetStatusTab = (tab) => () => this.setState({ statusTab: tab, page: 0 });
+  stopClick = (e) => e.stopPropagation();
+  toggleTheme = () => this.setState(s => {
+    const next = s.theme === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('pd-theme', next); } catch (e) {}
+    return { theme: next };
+  });
+
+  componentDidMount() {
+    this.load();
+  }
+  load() {
+    try {
+      const raw = localStorage.getItem('rp-saved-routes');
+      this.setState({ routes: raw ? JSON.parse(raw) : [] });
+    } catch (e) { this.setState({ routes: [] }); }
+  }
+  persist(routes) {
+    try { localStorage.setItem('rp-saved-routes', JSON.stringify(routes)); } catch (e) {}
+  }
+  deleteRoute = (id) => this.setState(s => {
+    const routes = s.routes.filter(r => r.id !== id);
+    this.persist(routes);
+    return { routes };
+  });
+  startEdit = (route) => this.setState({ editingId: route.id, editValue: route.name });
+  onEditChange = (e) => this.setState({ editValue: e.target.value });
+  onEditKeyDown = (e) => { if (e.key === 'Enter') this.saveEdit(); if (e.key === 'Escape') this.setState({ editingId: null }); };
+  saveEdit = () => this.setState(s => {
+    const name = s.editValue.trim();
+    const routes = s.routes.map(r => r.id === s.editingId ? { ...r, name: name || r.name, customName: true } : r);
+    this.persist(routes);
+    return { routes, editingId: null };
+  });
+  startDateEdit = (route) => {
+    const start = route.tripStart || new Date(Number(route.id) || Date.now()).toISOString().slice(0, 10);
+    const [y, m] = start.split('-').map(Number);
+    this.setState({ dateEditingId: route.id, editStart: start, editEnd: route.tripEnd || start, cardCalViewYear: y, cardCalViewMonth: m - 1 });
+  };
+  onCardCalPrev = () => this.setState(s => {
+    let m = (s.cardCalViewMonth ?? new Date().getMonth()) - 1, y = s.cardCalViewYear || new Date().getFullYear();
+    if (m < 0) { m = 11; y -= 1; }
+    return { cardCalViewMonth: m, cardCalViewYear: y };
+  });
+  onCardCalNext = () => this.setState(s => {
+    let m = (s.cardCalViewMonth ?? new Date().getMonth()) + 1, y = s.cardCalViewYear || new Date().getFullYear();
+    if (m > 11) { m = 0; y += 1; }
+    return { cardCalViewMonth: m, cardCalViewYear: y };
+  });
+  onCardCalDayClick = (dateStr) => {
+    this.setState(s => {
+      const { editStart: start, editEnd: end } = s;
+      if (!start || (start && end && start !== end)) return { editStart: dateStr, editEnd: dateStr };
+      if (dateStr < start) return { editStart: dateStr, editEnd: start };
+      return { editEnd: dateStr };
+    });
+  };
+  onEditStartChange = (e) => this.setState(s => ({ editStart: e.target.value, editEnd: s.editEnd < e.target.value ? e.target.value : s.editEnd }));
+  onEditEndChange = (e) => this.setState({ editEnd: e.target.value });
+  saveDateEdit = () => this.setState(s => {
+    const routes = s.routes.map(r => r.id === s.dateEditingId ? { ...r, tripStart: s.editStart, tripEnd: s.editEnd } : r);
+    this.persist(routes);
+    this.showToast('일정이 변경되었습니다');
+    return { routes, dateEditingId: null };
+  });
+
+  renderVals() {
+    const { routes } = this.state;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const calViewYear = this.state.calViewYear || now.getFullYear();
+    const calMonth = this.state.calViewMonth ?? now.getMonth();
+    const calCells = buildCalCells(calViewYear, calMonth, this.state.newTripStartDate, this.state.newTripEndDate, this.onCalDayClick, this.state.theme === 'dark');
+    const cardCalYear = this.state.cardCalViewYear || now.getFullYear();
+    const cardCalMonth = this.state.cardCalViewMonth ?? now.getMonth();
+    const cardCalCells = buildCalCells(cardCalYear, cardCalMonth, this.state.editStart, this.state.editEnd, this.onCardCalDayClick, this.state.theme === 'dark');
+    const cardCalLabel = `${cardCalYear}년 ${cardCalMonth + 1}월`;
+    const enriched = routes.map(r => ({
+      ...r,
+      countLabel: `${r.places.length}곳`,
+      placeChips: r.places.slice(0, 3).map(p => p.name),
+      openHref: `./Route Planner App.dc.html?loadRoute=${encodeURIComponent(r.id)}`,
+      onDeleteClick: () => this.openDeleteConfirm(r),
+      isEditing: this.state.editingId === r.id,
+      notEditing: this.state.editingId !== r.id,
+      editValue: this.state.editValue,
+      onEditStart: () => this.startEdit(r),
+      onEditChange: this.onEditChange,
+      onEditSave: this.saveEdit,
+      onEditKeyDown: this.onEditKeyDown,
+      memberChips: r.members || [],
+      hasMembers: !!(r.members && r.members.length),
+      memberAvatars: (r.members || []).map(name => ({ name, initial: name.slice(0, 1), bg: AVATAR_COLORS[Math.abs(hashStr(name)) % AVATAR_COLORS.length] })),
+      hasMoreChips: r.places.length > 3,
+      moreChipsCount: Math.max(0, r.places.length - 3),
+      dateOnly: fmtRange(r.tripStart, r.tripEnd) || new Date(Number(r.id) || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }),
+      cardOpacity: 1,
+      isDone: !!(r.tripEnd && r.tripEnd < todayStr),
+      isDateEditing: this.state.dateEditingId === r.id,
+      notDateEditing: this.state.dateEditingId !== r.id,
+      editStart: this.state.editStart,
+      editEnd: this.state.editEnd,
+      onDateEditStart: () => this.startDateEdit(r),
+      onDateEditCancel: () => this.setState({ dateEditingId: null }),
+      onEditStartChange: this.onEditStartChange,
+      onEditEndChange: this.onEditEndChange,
+      onDateSave: this.saveDateEdit,
+      onCardCalPrev: this.onCardCalPrev,
+      onCardCalNext: this.onCardCalNext,
+      cardCalCells, cardCalLabel,
+    }));
+    const c = this.state.theme === 'dark' ? DARK : LIGHT;
+    const statusTab = this.state.statusTab || 'upcoming';
+    const filteredRoutes = enriched.filter(r => statusTab === 'done' ? r.isDone : !r.isDone);
+    const statusTabs = ['upcoming', 'done'].map(k => ({
+      label: `${k === 'upcoming' ? '예정된 일정' : '완료된 일정'} (${enriched.filter(r => k === 'done' ? r.isDone : !r.isDone).length})`,
+      onSelect: this.onSetStatusTab(k),
+      color: statusTab === k ? '#4FAE6B' : c.textSub,
+      underline: statusTab === k ? '#4FAE6B' : 'transparent',
+    }));
+    const sortedRoutes = filteredRoutes;
+    const PAGE_SIZE = 5;
+    const pageCount = Math.max(1, Math.ceil(sortedRoutes.length / PAGE_SIZE));
+    const page = Math.min(this.state.page || 0, pageCount - 1);
+    const pagedRoutes = sortedRoutes.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+    const pageNumbers = Array.from({ length: pageCount }, (_, i) => ({
+      label: String(i + 1),
+      onClick: () => this.goToPage(i),
+      bg: i === page ? '#7BCB93' : 'transparent',
+      color: i === page ? '#12321F' : c.textSub,
+    }));
+    return {
+      routes: enriched, sortedRoutes, pagedRoutes, hasRoutes: routes.length > 0, noRoutes: routes.length === 0, c, statusTabs,
+      hasMultiplePages: pageCount > 1, pageNumbers,
+      onPrevPage: this.onPrevPage, onNextPage: this.onNextPage,
+      prevPageOpacity: page === 0 ? 0.4 : 1, nextPageOpacity: page === pageCount - 1 ? 0.4 : 1,
+      onSetFilterMode: () => {}, onClearFilter: () => {},
+      isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
+      mobileMenuOpen: this.state.mobileMenuOpen, toggleMobileMenu: this.toggleMobileMenu,
+      colorScheme: this.state.theme === 'dark' ? 'dark' : 'light',
+      newTripModalOpen: this.state.newTripModalOpen, openNewTripModal: this.openNewTripModal, closeNewTripModal: this.closeNewTripModal,
+      modeSelectModalOpen: this.state.modeSelectModalOpen, closeModeSelectModal: this.closeModeSelectModal,
+      chooseCreateModeManual: () => this.chooseCreateMode('manual'), chooseCreateModeAi: () => this.chooseCreateMode('ai'),
+      newTripStartDate: this.state.newTripStartDate, onNewTripStartDateChange: this.onNewTripStartDateChange,
+      newTripEndDate: this.state.newTripEndDate, onNewTripEndDateChange: this.onNewTripEndDateChange, stopClick: this.stopClick,
+      newTripHref: `./Route Planner App.dc.html?new=1&tripStart=${encodeURIComponent(this.state.newTripStartDate)}&tripEnd=${encodeURIComponent(this.state.newTripEndDate || this.state.newTripStartDate)}&mode=${encodeURIComponent(this.state.createMode || 'manual')}`,
+      onCalPrevMonth: this.onCalPrevMonth, onCalNextMonth: this.onCalNextMonth, onResetDates: this.onResetDates,
+      calMonthLabel: `${calMonth + 1}월`,
+      calWeekdays: ['일', '월', '화', '수', '목', '금', '토'].map((d, i) => ({ label: d, color: i === 0 ? '#E5484D' : i === 6 ? '#0066FF' : (this.state.theme === 'dark' ? '#FFFFFF' : c.textSub) })),
+      calCells,
+      tripStartLabel: this.state.newTripStartDate ? fmtDateLabel(this.state.newTripStartDate) : '날짜를 선택해주세요',
+      tripEndLabel: this.state.newTripEndDate ? fmtDateLabel(this.state.newTripEndDate) : '날짜를 선택해주세요',
+      deleteConfirmOpen: this.state.deleteConfirmOpen, deleteTargetName: this.state.deleteTargetName,
+      closeDeleteConfirm: this.closeDeleteConfirm, confirmDelete: this.confirmDelete,
+      toastMsg: this.state.toastMsg, toastVisible: this.state.toastVisible,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

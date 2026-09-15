@@ -79,14 +79,15 @@ a:hover{color:#146030}
       <a href="./My Routes.dc.html" class="ed-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">내 일정</a>
       <a href="./Community.dc.html" class="ed-nav-link" style="font-size:14px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">커뮤니티</a>
     </div>
-    <div style="display:flex;align-items:center;gap:10px">
+    <div style="display:flex;align-items:center;gap:4px">
       <div onClick="{{ toggleTheme }}" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">
         <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
         <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><img src="./uploads/moon-icon.png" alt="" style="width:15px;height:15px;object-fit:contain"></sc-if>
       </div>
-    </div>
     <div class="ed-mobile-menu-wrap" style="position:relative;display:none">
-      <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:{{ c.text }};letter-spacing:1px">···</div>
+      <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;color:{{ c.text }}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+      </div>
       <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
         <div style="position:fixed;inset:0;z-index:9" onClick="{{ toggleMobileMenu }}"></div>
         <div style="position:absolute;top:44px;right:0;z-index:10;background:{{ c.cardBg }};border:1px solid {{ c.border }};border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;min-width:140px">
@@ -96,6 +97,7 @@ a:hover{color:#146030}
           <a href="./Login Screen.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">로그인</a>
         </div>
       </sc-if>
+    </div>
     </div>
   </div>
 
@@ -125,16 +127,16 @@ a:hover{color:#146030}
 
   <div style="max-width:1080px;margin:0 auto;padding:32px 24px 80px">
     <div style="font-size:22px;font-weight:700;color:{{ c.text }};margin-bottom:4px">여행지 탐색</div>
-    <div style="font-size:13px;color:{{ c.textSub }};margin-bottom:20px">지도의 핀이나 아래 목록에서 지역을 눌러 여행지를 추천받아보세요</div>
+    <div style="font-size:13px;color:{{ c.textSub }};margin-bottom:20px">지도의 핀이나 아래 목록에서<br>지역을 눌러 여행지를 추천받아보세요</div>
 
     <div class="ed-map-row" style="margin-bottom:32px">
       <div class="ed-legend-outer">
         <div onClick="{{ toggleRegionCollapsed }}" style="display:flex;align-items:center;justify-content:flex-start;gap:7px;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
-          <span style="font-weight:600">지역 선택</span><span>{{ regionCollapseIcon }}</span>
+          <span style="font-weight:600;color:#237C4B">지역 선택</span><span>{{ regionCollapseIcon }}</span>
         </div>
         <sc-if value="{{ regionExpanded }}" hint-placeholder-val="{{ true }}">
           <div class="ed-legend-col" style="border-color: {{ c.border }}; background-color: {{ legendColBg }}">
-            <div onClick="{{ selectAll }}" class="ed-legend-item {{ allActiveClass }}" style="{{ allActiveStyleObj }};font-weight:400">전체</div>
+            <div onClick="{{ selectAll }}" class="ed-legend-item {{ allActiveClass }}" style="{{ allActiveStyleObj }}">전체</div>
             <sc-for list="{{ mapRegions }}" as="mr" hint-placeholder-count="17">
               <div onClick="{{ mr.onSelect }}" class="ed-legend-item {{ mr.legendActiveClass }}" style="color:{{ c.text }};font-weight:400">{{ mr.label }}</div>
             </sc-for>
@@ -310,7 +312,7 @@ class Component extends DCLogic {
       colorScheme: this.state.theme === 'dark' ? 'dark' : 'light',
       sections, mapRegions, noResults, selectAll: this.selectAll,
       allActiveClass: '',
-      allActiveStyleObj: activeRegion ? { color: this.state.theme === 'dark' ? '#12321F' : '#171719' } : { background: this.state.theme === 'dark' ? '#fff' : '#7BCB93', color: '#12321F' },
+      allActiveStyleObj: activeRegion ? { color: this.state.theme === 'dark' ? '#12321F' : '#171719', fontWeight: 400 } : { background: this.state.theme === 'dark' ? '#fff' : '#7BCB93', color: '#12321F', fontWeight: 400 },
       newTripModalOpen: this.state.newTripModalOpen, openNewTripModal: this.openNewTripModal, closeNewTripModal: this.closeNewTripModal,
       newTripStartDate: this.state.newTripStartDate, onNewTripStartDateChange: this.onNewTripStartDateChange,
       newTripEndDate: this.state.newTripEndDate, onNewTripEndDateChange: this.onNewTripEndDateChange, stopClick: this.stopClick,
