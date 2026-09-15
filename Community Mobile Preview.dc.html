@@ -85,7 +85,7 @@ class Component extends DCLogic {
       frameRadius: isPhone ? '44px' : '0px',
       screenRadius: isPhone ? '30px' : '0px',
       scrollbarHide: isPhone ? '18px' : '0px',
-      scrollbarHideX: isPhone ? (['aiplanner','login','community'].includes(this.state.page) ? '5px' : '18px') : '0px',
+      scrollbarHideX: isPhone ? (['aiplanner','login'].includes(this.state.page) ? '5px' : this.state.page === 'community' ? '20px' : '18px') : '0px',
 
     };
   }
