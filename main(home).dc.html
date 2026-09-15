@@ -117,7 +117,7 @@ body{margin:0;font-family:'Pretendard',-apple-system,sans-serif;overflow-x:hidde
       <div onClick="{{ toggleMobileMenu }}" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:16px;color:{{ c.text }}">☰</div>
       <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
         <div style="position:fixed;inset:0;z-index:9" onClick="{{ toggleMobileMenu }}"></div>
-        <div style="position:absolute;top:44px;right:0;z-index:10;background:{{ c.headerBg2 }};border:1px solid {{ c.border }};border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;min-width:140px">
+        <div style="position:absolute;top:44px;right:0;z-index:10;background:transparent;border:1px solid {{ c.border }};border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:flex;flex-direction:column;min-width:140px">
           <a href="./Explore Destinations.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">여행지 탐색</a>
           <a href="./My Routes.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">내 일정</a>
           <a href="./Community.dc.html" style="padding:9px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none;white-space:nowrap">커뮤니티</a>

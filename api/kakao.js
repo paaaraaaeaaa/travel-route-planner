@@ -59,48 +59,34 @@ function parseTransitRoute(data) {
   console.log('[route] transit props raw:', JSON.stringify(props));
   const pathPoints = [];
   const transitSteps = [];
-  let stepLists;
-  if (Array.isArray(route.steps) && route.steps.length > 0) {
-    stepLists = [route.steps];
-  } else {
-    const legs = route.legs || route.sections || route.paths || route.legList || [];
-    stepLists = legs.map(leg => leg.steps || leg.roads || leg.details || leg.stepList || []);
-  }
-  stepLists.forEach((stepList, li) => stepList.forEach((step, si) => {
-    if (li === 0 && si === 0) console.log('[route] transit first raw step:', JSON.stringify(step));
-    (step.path?.points || step.points || step.vertexes || []).forEach(pt => {
+  const steps = Array.isArray(route.steps) ? route.steps : [];
+  steps.forEach((step, si) => {
+    const p = step.properties || {};
+    (step.path?.points || []).forEach(pt => {
       if (Array.isArray(pt)) pathPoints.push({ x: pt[0], y: pt[1] });
     });
-    const rawType = step.trafficType ?? step.type ?? step.mode ?? step.stepType ?? step.transportType ?? (step.lane ? 'BUS' : null);
-    let type = null;
-    if (rawType != null) {
-      type = /walk|foot/i.test(String(rawType)) ? 'WALKING' : (/subway|rail|metro|train/i.test(String(rawType)) ? 'SUBWAY' : (/bus/i.test(String(rawType)) ? 'BUS' : String(rawType).toUpperCase()));
-    } else {
-      console.error(`kakao transit parse: step[${li}][${si}] has no recognizable type field, keys:`, Object.keys(step || {}));
-    }
-    const minutes = step.sectionTime != null ? Math.round(step.sectionTime / 60)
-      : step.time != null ? Math.round(step.time / 60)
-      : step.duration != null ? Math.round(step.duration / 60)
-      : step.stayTime != null ? Math.round(step.stayTime / 60)
+    const rawType = p.type;
+    const type = rawType != null
+      ? (/walk|foot/i.test(String(rawType)) ? 'WALKING' : (/subway|rail|metro|train/i.test(String(rawType)) ? 'SUBWAY' : (/bus/i.test(String(rawType)) ? 'BUS' : String(rawType).toUpperCase())))
       : null;
-    if (minutes == null) console.error(`kakao transit parse: step[${li}][${si}] has no time field, keys:`, Object.keys(step || {}));
-    const distanceKm = step.distance != null ? step.distance / 1000
-      : step.sectionDistance != null ? step.sectionDistance / 1000
-      : step.length != null ? step.length / 1000
-      : null;
-    if (distanceKm == null) console.error(`kakao transit parse: step[${li}][${si}] has no distance field, keys:`, Object.keys(step || {}));
-    const lane = step.lane || (Array.isArray(step.lanes) ? step.lanes[0] : null);
+    if (type == null) console.error(`kakao transit parse: step[${si}] has no properties.type, keys:`, Object.keys(p || {}));
+    const minutes = p.time != null ? Math.round(p.time / 60) : null;
+    if (minutes == null) console.error(`kakao transit parse: step[${si}] has no properties.time, keys:`, Object.keys(p || {}));
+    const distanceKm = p.distance != null ? p.distance / 1000 : null;
+    if (distanceKm == null) console.error(`kakao transit parse: step[${si}] has no properties.distance, keys:`, Object.keys(p || {}));
+    const stops = Array.isArray(p.stops) ? p.stops : [];
+    const vehicle = Array.isArray(p.vehicles) && p.vehicles.length > 0 ? p.vehicles[0] : null;
     transitSteps.push({
       type,
       minutes,
       distanceKm,
-      fromName: step.start?.name ?? step.startName ?? step.startStop?.name ?? step.start_name ?? null,
-      toName: step.end?.name ?? step.endName ?? step.endStop?.name ?? step.end_name ?? null,
-      vehicleName: lane?.name ?? lane?.busNo ?? lane?.busNumber ?? step.routeName ?? step.name ?? step.lineName ?? null,
-      stopCount: step.passStopList?.length ?? step.stationCount ?? step.passStopCnt ?? step.passStopCount ?? null,
+      fromName: stops[0]?.name ?? p.start?.name ?? null,
+      toName: stops[stops.length - 1]?.name ?? p.end?.name ?? null,
+      vehicleName: vehicle?.name ?? vehicle?.no ?? p.guidance ?? null,
+      stopCount: stops.length > 0 ? stops.length : null,
     });
-  }));
-  console.log('[route] transit parse', { stepListCount: stepLists.length, transitStepsLength: transitSteps.length, types: transitSteps.map(s => s.type) });
+  });
+  console.log('[route] transit parse', { stepsLength: steps.length, transitStepsLength: transitSteps.length, types: transitSteps.map(s => s.type) });
   if (transitSteps.length === 0) {
     console.error('kakao transit parse: no steps found in response, route keys:', Object.keys(route || {}));
   }
