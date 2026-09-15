@@ -52,8 +52,22 @@ function parseWalkRoute(data) {
 
 // Kakao 대중교통: route.properties.{totalDistance(m), totalTime(s), transferCount?}, path.points per step.
 // transitSteps는 각 step의 실제 API 필드만 사용해서 만든다 — 응답에 없는 값은 null로 두고 지어내지 않는다.
-function parseTransitRoute(data) {
-  const route = data?.routes?.[0] || data?.route || data;
+function parseTransitRoute(data, criteria) {
+  const routes = Array.isArray(data?.routes) ? data.routes : (data?.route ? [data.route] : (data ? [data] : []));
+  if (routes.length === 0) { console.error('kakao transit parse: no routes in response'); return null; }
+  // 후보가 여러 개면 criteria(최단시간/최단거리) 기준으로 실제 totalTime/totalDistance를 비교해 선택.
+  let route = routes[0];
+  if (routes.length > 1) {
+    const withTotals = routes
+      .map(rt => ({ rt, t: rt?.properties?.totalTime, d: rt?.properties?.totalDistance }))
+      .filter(x => x.t != null && x.d != null);
+    if (withTotals.length > 0) {
+      route = criteria === 'distance'
+        ? withTotals.reduce((best, cur) => cur.d < best.d ? cur : best).rt
+        : withTotals.reduce((best, cur) => cur.t < best.t ? cur : best).rt;
+    }
+    console.log('[route] transit candidates', { count: routes.length, criteria, totals: routes.map(rt => ({ t: rt?.properties?.totalTime, d: rt?.properties?.totalDistance })) });
+  }
   const props = route?.properties;
   if (!props) { console.error('kakao transit parse: no properties in route, route keys:', Object.keys(route || {})); return null; }
   console.log('[route] transit props raw:', JSON.stringify(props));
@@ -160,7 +174,7 @@ export default async function handler(req, res) {
           console.error('kakao transit route error', r.status, r.data, r.status === 429 ? '(무료 쿼터 초과 가능성)' : '');
           res.status(502).json({ error: '대중교통 경로를 불러오지 못했습니다.', detail: r.data }); return;
         }
-        const parsed = parseTransitRoute(r.data);
+        const parsed = parseTransitRoute(r.data, params?.priority);
         if (!parsed) { res.status(502).json({ error: '대중교통 경로 응답을 해석하지 못했습니다.', detail: r.data }); return; }
         res.status(200).json(parsed);
         return;

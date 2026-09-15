@@ -1171,7 +1171,7 @@ class Component extends DCLogic {
     const a = this.state.places[idx], b = this.state.places[idx + 1];
     const m = mode || this.state.segments[idx];
     if (!a || !b) return `_${idx}`;
-    return `${m}_${a.id}_${b.id}`;
+    return `${m}_${a.id}_${b.id}_${this.state.criteria}`;
   };
   // 실제 Kakao Polyline(선택된 이동수단의 실제 pathPoints)로 지도 경로선을 갱신. 캐시에 없으면 그리지 않음(가짜 직선 금지)
   syncKakaoRoutePolyline = () => {
@@ -1194,7 +1194,7 @@ class Component extends DCLogic {
   fetchSegmentRouteForMode = async (idx, mode) => {
     const { places } = this.state;
     const a = places[idx], b = places[idx + 1];
-    const key = `${mode}_${a?.id}_${b?.id}`;
+    const key = `${mode}_${a?.id}_${b?.id}_${this.state.criteria}`;
     if (!a || !b || !a.x || !a.y || !b.x || !b.y) {
       // 좌표 없는 방문지(수동 입력 실패 등) — 명확히 실패로 캐시해서 "검색 버튼 눌러주세요" 무한 루프 방지
       console.log('[route] skip fetch, missing coords', { idx, mode, a: a && { id: a.id, x: a.x, y: a.y }, b: b && { id: b.id, x: b.x, y: b.y } });

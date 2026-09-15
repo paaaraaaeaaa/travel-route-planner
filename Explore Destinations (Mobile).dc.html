@@ -130,13 +130,13 @@ a:hover{color:#146030}
     <div class="ed-map-row" style="margin-bottom:32px">
       <div class="ed-legend-outer">
         <div onClick="{{ toggleRegionCollapsed }}" style="display:flex;align-items:center;justify-content:flex-start;gap:7px;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
-          <span>지역 선택</span><span>{{ regionCollapseIcon }}</span>
+          <span style="font-weight:600">지역 선택</span><span>{{ regionCollapseIcon }}</span>
         </div>
         <sc-if value="{{ regionExpanded }}" hint-placeholder-val="{{ true }}">
           <div class="ed-legend-col" style="border-color: {{ c.border }}; background-color: {{ legendColBg }}">
-            <div onClick="{{ selectAll }}" class="ed-legend-item {{ allActiveClass }}" style="{{ allActiveStyleObj }}">전체</div>
+            <div onClick="{{ selectAll }}" class="ed-legend-item {{ allActiveClass }}" style="{{ allActiveStyleObj }};font-weight:400">전체</div>
             <sc-for list="{{ mapRegions }}" as="mr" hint-placeholder-count="17">
-              <div onClick="{{ mr.onSelect }}" class="ed-legend-item {{ mr.legendActiveClass }}" style="color:{{ c.text }}">{{ mr.label }}</div>
+              <div onClick="{{ mr.onSelect }}" class="ed-legend-item {{ mr.legendActiveClass }}" style="color:{{ c.text }};font-weight:400">{{ mr.label }}</div>
             </sc-for>
           </div>
         </sc-if>

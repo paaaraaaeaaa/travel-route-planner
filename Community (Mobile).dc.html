@@ -45,8 +45,9 @@ a:hover{color:#146030}
   .cm-nav-links{display:none!important}
   .cm-mobile-menu-wrap{display:block!important}
   .cm-sort-row{flex-wrap:wrap!important;row-gap:10px!important}
-  .cm-region-col{width:100%!important;max-height:none!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;flex-wrap:unset!important;gap:4px!important;padding:8px!important}
-  .cm-region-item{font-size:11.5px!important;padding:6px 10px!important}
+  .cm-region-col{width:100%!important;max-height:none!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;grid-auto-rows:1fr!important;flex-wrap:unset!important;gap:4px!important;padding:8px!important;box-sizing:border-box!important}
+  .cm-region-item{font-size:11.5px!important;padding:6px 10px!important;box-sizing:border-box!important;line-height:1.4!important;min-height:26px!important}
+  .cm-sort-row{flex-shrink:0!important}
   .cm-btn{padding:9px 12px!important;font-size:12.5px!important}
   .cm-like,.cm-comment-input{min-height:28px}
   input[type="text"],textarea{font-size:14px}
@@ -130,12 +131,12 @@ a:hover{color:#146030}
     <div class="cm-row">
       <div class="cm-region-outer">
         <div onClick="{{ toggleRegionCollapsed }}" class="cm-region-toggle" style="display:flex;align-items:center;justify-content:flex-start;gap:7px;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
-          <span>지역 선택</span><span>{{ regionCollapseIcon }}</span>
+          <span style="font-weight:600">지역 선택</span><span>{{ regionCollapseIcon }}</span>
         </div>
         <sc-if value="{{ regionExpanded }}" hint-placeholder-val="{{ true }}">
           <div class="cm-region-col" style="background-color: {{ legendColBg }}">
             <sc-for list="{{ regions }}" as="rg" hint-placeholder-count="18">
-              <div onClick="{{ rg.onSelect }}" class="cm-region-item {{ rg.activeClass }}">{{ rg.label }}</div>
+              <div onClick="{{ rg.onSelect }}" class="cm-region-item {{ rg.activeClass }}" style="font-weight:400">{{ rg.label }}</div>
             </sc-for>
           </div>
         </sc-if>
