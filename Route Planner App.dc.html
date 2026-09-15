@@ -24,8 +24,9 @@ a:hover{color:#146030}
   .rp-map-col{order:1;min-height:320px;display:none}
   .rp-panel{max-height:none;order:0;scrollbar-width:none}
   .rp-panel::-webkit-scrollbar{display:none;width:0;height:0}
-  .rp-shell.rp-panel-collapsed{grid-template-columns:1fr;grid-template-rows:1fr}
-  .rp-shell.rp-panel-collapsed .rp-map-col{display:flex;min-height:100vh}
+  .rp-shell.rp-panel-collapsed{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .rp-shell.rp-panel-collapsed .rp-panel{height:auto!important;min-height:0}
+  .rp-shell.rp-panel-collapsed .rp-map-col{display:flex;min-height:0;flex:1}
   .rp-shell.rp-map-collapsed{grid-template-columns:1fr;grid-template-rows:52px 1fr}
 }
 .rp-rail{display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px 0;height:100%;cursor:pointer}
