@@ -101,7 +101,7 @@ a:hover{color:#146030}
 
   <sc-if value="{{ newTripModalOpen }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:20">
-      <div style="position:relative"><div onClick="{{ closeNewTripModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div><div style="background:{{ c.cardBg }};border-radius:16px;padding:24px;width:320px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px" onClick="{{ stopClick }}">
+      <div style="position:relative"><div onClick="{{ closeNewTripModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></div><div style="background:{{ c.cardBg }};border-radius:16px;padding:24px;width:320px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px" onClick="{{ stopClick }}">
         <div style="font-size:16px;font-weight:700;color:{{ c.text }}">새 일정 만들기</div>
         <div style="font-size:13px;color:{{ c.textSub }}">여행 날짜를 입력해주세요</div>
         <div style="display:flex;flex-direction:column;gap:10px">
@@ -129,10 +129,10 @@ a:hover{color:#146030}
 
     <div class="ed-map-row" style="margin-bottom:32px">
       <div class="ed-legend-outer">
-        <div style="padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
-          
+        <div onClick="{{ toggleRegionCollapsed }}" style="display:flex;align-items:center;justify-content:flex-start;gap:7px;cursor:pointer;padding:8px 4px;font-size:12.5px;font-weight:700;color:{{ c.textSub }}">
+          <span>지역 선택</span><span>{{ regionCollapseIcon }}</span>
         </div>
-        <sc-if value="{{ true }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ regionExpanded }}" hint-placeholder-val="{{ true }}">
           <div class="ed-legend-col" style="border-color: {{ c.border }}; background-color: {{ legendColBg }}">
             <div onClick="{{ selectAll }}" class="ed-legend-item {{ allActiveClass }}" style="{{ allActiveStyleObj }}">전체</div>
             <sc-for list="{{ mapRegions }}" as="mr" hint-placeholder-count="17">
@@ -302,6 +302,8 @@ class Component extends DCLogic {
     const noResults = sections.every(s => !s.hasItems);
     return {
       c, isDark: this.state.theme === 'dark', isLight: this.state.theme !== 'dark', toggleTheme: this.toggleTheme,
+      regionExpanded: this.state.regionCollapsed === false, toggleRegionCollapsed: this.toggleRegionCollapsed,
+      regionCollapseIcon: this.state.regionCollapsed === false ? '▴' : '▾',
       mobileMenuOpen: this.state.mobileMenuOpen, toggleMobileMenu: this.toggleMobileMenu,
       darkClass: this.state.theme === 'dark' ? 'ed-dark' : '',
       legendColBg: this.state.theme === 'dark' ? '#D6E0D9' : '#fff',

@@ -1879,8 +1879,8 @@ class Component extends DCLogic {
             minutes: ts.minutes ?? 0,
             distanceKm: ts.distanceKm ?? 0,
             nodeLabel: ts.type === 'WALKING'
-              ? [ts.fromName, ts.toName].filter(Boolean).join(' → ') || null
-              : [ts.vehicleName, [ts.fromName, ts.toName].filter(Boolean).join(' → '), ts.stopCount != null ? `${ts.stopCount}개 정류장` : null].filter(Boolean).join(' · ') || null,
+              ? (ts.toName || ts.fromName || null)
+              : (ts.vehicleName || null),
             transfers: cached.transfers,
           }));
         } else {
