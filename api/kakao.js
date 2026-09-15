@@ -30,7 +30,7 @@ function parseCarRoute(data) {
     minutes: Math.round(route.summary.duration / 60),
     transfers: null,
     pathPoints,
-    landingURL: data?.landingURL ?? route?.landingURL ?? null,
+    landingURL: data?.landingUrl ?? data?.landingURL ?? route?.landingUrl ?? route?.landingURL ?? null,
   };
 }
 
@@ -48,7 +48,25 @@ function parseWalkRoute(data) {
     minutes: Math.round(props.totalTime / 60),
     transfers: null,
     pathPoints,
-    landingURL: data?.landingURL ?? route?.landingURL ?? null,
+    landingURL: data?.landingUrl ?? data?.landingURL ?? route?.landingUrl ?? route?.landingURL ?? null,
+  };
+}
+
+// Kakao 자전거: route.properties.{totalDistance(m), totalTime(s)}, route.legs[].steps[].path.points ([x,y] pairs)
+function parseBikeRoute(data) {
+  const route = data?.routes?.[0] || data?.route || data;
+  const props = route?.properties;
+  if (!props) return null;
+  const pathPoints = [];
+  (route.legs || []).forEach(leg => (leg.steps || []).forEach(step => {
+    (step.path?.points || []).forEach(pt => pathPoints.push({ x: pt[0], y: pt[1] }));
+  }));
+  return {
+    distanceKm: props.totalDistance / 1000,
+    minutes: Math.round(props.totalTime / 60),
+    transfers: null,
+    pathPoints,
+    landingURL: data?.landingUrl ?? data?.landingURL ?? route?.landingUrl ?? route?.landingURL ?? null,
   };
 }
 
@@ -116,7 +134,7 @@ function parseTransitRoute(data, criteria) {
     transfers: props.transferCount ?? props.transferCnt ?? null,
     pathPoints,
     transitSteps,
-    landingURL: data?.landingURL ?? route?.landingURL ?? null,
+    landingURL: data?.landingUrl ?? data?.landingURL ?? route?.landingUrl ?? route?.landingURL ?? null,
   };
 }
 
@@ -179,6 +197,20 @@ export default async function handler(req, res) {
         }
         const parsed = parseTransitRoute(r.data, params?.priority);
         if (!parsed) { res.status(502).json({ error: '대중교통 경로 응답을 해석하지 못했습니다.', detail: r.data }); return; }
+        res.status(200).json(parsed);
+        return;
+      }
+      case 'bike': {
+        const r = await kakaoGet(`${LOCAL_BASE}/v2/routing/bicycle`, {
+          start_x: params?.originX, start_y: params?.originY,
+          end_x: params?.destX, end_y: params?.destY,
+        });
+        if (!r.ok) {
+          console.error('kakao bike route error', r.status, r.data, r.status === 429 ? '(무료 쿼터 초과 가능성)' : '');
+          res.status(502).json({ error: '자전거 경로를 불러오지 못했습니다.', detail: r.data }); return;
+        }
+        const parsed = parseBikeRoute(r.data);
+        if (!parsed) { res.status(502).json({ error: '자전거 경로 응답을 해석하지 못했습니다.', detail: r.data }); return; }
         res.status(200).json(parsed);
         return;
       }

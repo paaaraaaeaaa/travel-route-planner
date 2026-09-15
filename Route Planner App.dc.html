@@ -768,7 +768,7 @@ const PRIORITY_ORDER = ['high', 'normal', 'low'];
 const PIN_POS = ['20%,80%', '40%,54%', '64%,62%', '84%,28%'];
 
 const CATEGORY_OPTIONS = ['카페·베이커리', '식당', '쇼핑', '관광명소', '생활서비스', '기타'];
-const MODE_ORDER = ['car', 'walk', 'transit']; // 자전거 제외 (이번 작업 범위 밖)
+const MODE_ORDER = ['car', 'walk', 'transit', 'bike'];
 // 총 소요시간 표시 포맷: 내부 minutes 숫자는 그대로 두고 화면 표시만 이 함수로 변환.
 function formatDuration(mins) {
   const m = Math.round(mins || 0);
