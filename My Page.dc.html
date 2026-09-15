@@ -9,34 +9,55 @@
 <x-dc>
 
 <helmet>
+<script src="./image-slot.js"></script>
 <style>
   a{color:#1F7A44}
   a:hover{color:#146030}
   body{margin:0;font-family:'Pretendard',-apple-system,sans-serif}
   .mp-row{transition:background-color .12s ease}
   .mp-row:hover{background-color:{{ c.rowHover }}}
+  .mp-avatar-slot image-slot{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden}
+  @media (max-width:480px){
+    .mp-header-inner{padding:0 16px!important}
+    .mp-content{padding:24px 16px 64px!important}
+    .mp-profile-card{flex-wrap:wrap}
+    .mp-modal-card{width:100%!important}
+  }
 </style>
 </helmet>
 
 <div style="min-height:100vh;background:{{ c.bg }};color:{{ c.text }}">
 
   <div style="position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);background:{{ c.headerBg }};border-bottom:1px solid {{ c.border }}">
-    <div style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
+    <div class="mp-header-inner" style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px">
       <a href="./main(home).dc.html" style="display:flex;align-items:center;gap:2px;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:{{ c.text }};text-decoration:none">
         <span>p<span style="color:#26AB4E">:</span>nder</span>
       </a>
-      <a href="./main(home).dc.html" style="font-size:13.5px;font-weight:600;color:{{ c.textSub }};text-decoration:none">← 홈으로</a>
+      <div style="display:flex;align-items:center;gap:10px">
+      <div onClick="{{ toggleTheme }}" title="테마 전환" style="cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:15px">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">☀</sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}">☾</sc-if>
+      </div>
+      </div>
     </div>
   </div>
 
-  <div style="max-width:640px;margin:0 auto;padding:32px 20px 80px">
+  <div class="mp-content" style="max-width:640px;margin:0 auto;padding:32px 20px 80px;box-sizing:border-box">
+    <div style="text-align:right;margin-bottom:16px">
+      <a href="./main(home).dc.html" style="font-size:13px;font-weight:600;color:{{ c.textSub }};text-decoration:none">← 홈으로</a>
+    </div>
     <div style="margin-bottom:24px">
       <div style="font-size:24px;font-weight:800;letter-spacing:-0.01em">마이페이지</div>
       <div style="font-size:13.5px;color:{{ c.textSub }};margin-top:4px">내 계정과 서비스 설정을 관리해요</div>
     </div>
 
-    <div style="display:flex;align-items:center;gap:14px;padding:18px;border:1px solid {{ c.border }};border-radius:16px;background:{{ c.cardBg }};margin-bottom:28px">
-      <div style="width:48px;height:48px;border-radius:50%;background:#F2F6ED;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">👤</div>
+    <div class="mp-profile-card" style="display:flex;align-items:center;gap:14px;padding:18px;border:1px solid {{ c.border }};border-radius:16px;background:{{ c.cardBg }};margin-bottom:28px">
+      <div class="mp-avatar-slot" style="position:relative;width:64px;height:64px;flex-shrink:0">
+        <image-slot id="mp-avatar" shape="circle" placeholder="프로필 사진" src="./uploads/mypage-default-avatar.png" style="width:100%;height:100%"></image-slot>
+        <div onClick="{{ onAvatarChangeClick }}" style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:#7BCB93;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid {{ c.cardBg }}">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#12321F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        </div>
+      </div>
       <div style="min-width:0">
         <div style="font-size:15px;font-weight:700">{{ user.nickname }}</div>
         <div style="font-size:12.5px;color:{{ c.textSub }};margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ user.email }}</div>
@@ -83,7 +104,7 @@
 
   <sc-if value="{{ editNicknameOpen }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px" onClick="{{ onCloseEditNickname }}">
-      <div style="width:340px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:12px" onClick="{{ stopPropagation }}">
+      <div style="width:340px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:12px;box-sizing:border-box" onClick="{{ stopPropagation }}">
         <div style="font-size:16px;font-weight:800">닉네임 수정</div>
         <div style="font-size:11.5px;color:{{ c.textSub }}">닉네임</div>
         <div style="display:flex;gap:8px">
@@ -105,34 +126,100 @@
     <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:60;background:#12321F;color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.2)">✓ 닉네임이 변경되었어요.</div>
   </sc-if>
 
+  <sc-if value="{{ notificationSettingsOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px" onClick="{{ onCloseNotificationSettings }}">
+      <div class="mp-modal-card" style="width:420px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3);box-sizing:border-box" onClick="{{ stopPropagation }}">
+        <div style="font-size:16px;font-weight:800;margin-bottom:16px">알림 설정</div>
+        <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:18px">
+          <sc-for list="{{ notificationItems }}" as="ni" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 4px;border-bottom:1px solid {{ c.border }}">
+              <div style="min-width:0">
+                <div style="font-size:13.5px;font-weight:700">{{ ni.emoji }} {{ ni.title }}</div>
+                <div style="font-size:11.5px;color:{{ c.textSub }};margin-top:2px;line-height:1.4">{{ ni.desc }}</div>
+              </div>
+              <div onClick="{{ ni.onToggle }}" style="flex-shrink:0;width:40px;height:23px;border-radius:12px;background:{{ ni.trackBg }};position:relative;cursor:pointer;transition:background-color .15s">
+                <div style="position:absolute;top:2px;left:{{ ni.knobLeft }};width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <div onClick="{{ onCloseNotificationSettings }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:#7BCB93;color:#12321F">확인</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ termsOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px" onClick="{{ onCloseTerms }}">
+      <div class="mp-modal-card" style="width:460px;max-width:100%;max-height:80vh;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3);box-sizing:border-box;display:flex;flex-direction:column" onClick="{{ stopPropagation }}">
+        <div style="font-size:16px;font-weight:800;margin-bottom:14px;flex-shrink:0">약관 및 개인정보</div>
+        <div style="overflow-y:auto;padding-right:4px">
+          <sc-for list="{{ termsSections }}" as="tm" hint-placeholder-count="3">
+            <div style="margin-bottom:16px">
+              <div style="font-size:13.5px;font-weight:700;margin-bottom:6px">{{ tm.title }}</div>
+              <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.6;white-space:pre-line">{{ tm.body }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:14px;flex-shrink:0">
+          <div onClick="{{ onCloseTerms }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:#7BCB93;color:#12321F">확인</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
   <sc-if value="{{ withdrawOpen }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;background:rgba(23,23,25,.4);z-index:49;display:flex;align-items:center;justify-content:center;padding:20px" onClick="{{ onCloseWithdraw }}">
-      <div style="width:360px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3)" onClick="{{ stopPropagation }}">
+      <div class="mp-modal-card" style="width:360px;max-width:100%;background:{{ c.cardBg }};border-radius:16px;padding:22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.3);box-sizing:border-box" onClick="{{ stopPropagation }}">
 
         <sc-if value="{{ blockedByCreatorSchedules }}" hint-placeholder-val="{{ false }}">
           <div style="font-size:16px;font-weight:800;margin-bottom:8px">탈퇴하기 전에 확인해주세요</div>
           <div style="font-size:13px;color:{{ c.text }};line-height:1.6;margin-bottom:10px">현재 제작자(Creator)인 일정이 있습니다.</div>
           <div style="font-size:12.5px;color:{{ c.textSub }};line-height:1.6;margin-bottom:14px">제작자인 일정은 회원 탈퇴 전에 일정 삭제 또는 소유권 이전 등의 처리가 필요해요. 다른 참여자에게 영향을 줄 수 있어 탈퇴를 진행할 수 없어요.</div>
-          <div style="border:1px solid {{ c.border }};border-radius:10px;overflow:hidden;margin-bottom:18px">
+          <div style="border:1px solid {{ c.border }};border-radius:10px;overflow:hidden;margin-bottom:14px">
             <sc-for list="{{ creatorSchedules }}" as="sc" hint-placeholder-count="1">
               <div style="padding:10px 12px;font-size:12.5px;font-weight:600;border-bottom:1px solid {{ c.border }}">{{ sc.title }}</div>
             </sc-for>
           </div>
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:18px">
+            <input type="checkbox" checked="{{ blockedAgreeChecked }}" onChange="{{ onToggleBlockedAgree }}" style="margin-top:2px;flex-shrink:0;width:16px;height:16px;accent-color:#D9534F">
+            <span style="font-size:12.5px;color:{{ c.text }};line-height:1.4">일정 삭제 및 소유권 이전 처리 등에 동의합니다.</span>
+          </label>
           <div style="display:flex;gap:8px;justify-content:flex-end">
-            <div onClick="{{ onCloseWithdraw }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:#7BCB93;color:#12321F">확인</div>
+            <div onClick="{{ onCloseWithdraw }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};color:{{ c.text }}">취소</div>
+            <div onClick="{{ onConfirmBlocked }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:{{ blockedConfirmCursor }};background:{{ blockedConfirmBg }};color:{{ blockedConfirmColor }}">확인</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showFinalWarningStep }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:15px;font-weight:800;line-height:1.5;margin-bottom:14px">회원 탈퇴 시 모든 일정, 기록들은 소멸되며,<br>계정 정보는 복구가 불가능합니다.<br>정말로 탈퇴하시겠어요?</div>
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:16px">
+            <input type="checkbox" checked="{{ finalWarningAgreeChecked }}" onChange="{{ onToggleFinalWarningAgree }}" style="margin-top:2px;flex-shrink:0;width:16px;height:16px;accent-color:#D9534F">
+            <span style="font-size:12.5px;color:{{ c.text }};line-height:1.4">내용을 확인했으며 이에 동의합니다.</span>
+          </label>
+          <sc-if value="{{ withdrawError }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px;color:{{ c.dangerText }};background:{{ c.dangerBg }};border-radius:8px;padding:9px 11px;margin-bottom:14px">회원 탈퇴에 실패했어요. 잠시 후 다시 시도해주세요.</div>
+          </sc-if>
+          <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+            <div onClick="{{ onCancelFinalWarning }}" style="flex:1;min-width:110px;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};color:{{ c.text }}">계속 사용할래요.</div>
+            <div onClick="{{ onConfirmFinalWarning }}" style="flex:1;min-width:110px;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:{{ finalWarningBtnCursor }};background:{{ finalWarningBtnBg }};color:{{ finalWarningBtnColor }};opacity:{{ finalWarningLoadingOpacity }}">{{ finalWarningBtnLabel }}</div>
           </div>
         </sc-if>
 
         <sc-if value="{{ showConfirmStep }}" hint-placeholder-val="{{ true }}">
           <div style="font-size:16px;font-weight:800;margin-bottom:8px">정말 탈퇴하시겠어요?</div>
-          <div style="font-size:13px;color:{{ c.text }};line-height:1.6;margin-bottom:10px">탈퇴하면 계정과 내 계정에 연결된 정보가 삭제되거나 더 이상 이용할 수 없게 됩니다.</div>
-          <div style="font-size:11.5px;color:{{ c.dangerText }};margin-bottom:18px">⚠️ 탈퇴 후에는 계정을 복구할 수 없습니다.</div>
+          <div style="font-size:13px;color:{{ c.text }};line-height:1.6;margin-bottom:14px">탈퇴하면 계정과 관련된 정보가 삭제되거나 서비스 이용이 제한될 수 있습니다.</div>
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:16px">
+            <input type="checkbox" checked="{{ withdrawAgreeChecked }}" onChange="{{ onToggleWithdrawAgree }}" style="margin-top:2px;flex-shrink:0;width:16px;height:16px;accent-color:#D9534F">
+            <span style="font-size:12.5px;color:{{ c.text }};line-height:1.4">회원 탈퇴에 동의합니다.</span>
+          </label>
           <sc-if value="{{ withdrawError }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:12.5px;color:{{ c.dangerText }};background:{{ c.dangerBg }};border-radius:8px;padding:9px 11px;margin-bottom:14px">회원 탈퇴에 실패했어요. 잠시 후 다시 시도해주세요.</div>
           </sc-if>
-          <div style="display:flex;gap:8px;justify-content:flex-end">
-            <div onClick="{{ onCloseWithdraw }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};color:{{ c.text }}">취소</div>
-            <div onClick="{{ onConfirmWithdraw }}" style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:{{ c.dangerBg }};color:{{ c.dangerText }};opacity:{{ withdrawLoadingOpacity }}">{{ withdrawButtonLabel }}</div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+            <div onClick="{{ onCloseWithdraw }}" style="flex:1;min-width:100px;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};color:{{ c.text }}">뒤로가기</div>
+            <div onClick="{{ onConfirmWithdraw }}" style="flex:1;min-width:100px;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:{{ withdrawBtnCursor }};background:{{ withdrawBtnBg }};color:{{ withdrawBtnColor }};opacity:{{ withdrawLoadingOpacity }}">{{ withdrawButtonLabel }}</div>
           </div>
         </sc-if>
 
@@ -154,9 +241,45 @@ class Component extends DCLogic {
     theme: (typeof localStorage !== 'undefined' && localStorage.getItem('pd-theme')) || 'light',
     withdrawOpen: false, withdrawStep: 'confirm', withdrawError: false,
     editNicknameOpen: false, nicknameDraft: '', nickname: '유수',
+    notificationSettingsOpen: false,
+    notifications: { schedule: true, scheduleStart: true, route: true, communityComment: true, like: true, serviceNews: false },
   };
-  onOpenWithdraw = () => this.setState({ withdrawOpen: true, withdrawStep: 'confirm', withdrawError: false });
+  NOTIFICATION_DEFS = [
+    { key: 'schedule', emoji: '📅', title: '일정 알림', desc: '여행 일정과 계획된 활동을 미리 알려드려요.' },
+    { key: 'scheduleStart', emoji: '📍', title: '일정 시작 알림', desc: '다음 일정이 시작되기 전에 알려드려요.' },
+    { key: 'route', emoji: '🚶', title: '동선 알림', desc: '최적 동선 및 이동 정보를 알려드려요.' },
+    { key: 'communityComment', emoji: '💬', title: '커뮤니티 알림', desc: '내 게시물의 댓글, 대댓글 활동을 알려드려요.' },
+    { key: 'like', emoji: '❤️', title: '좋아요 알림', desc: '내 댓글이나 게시물에 좋아요가 눌리면 알려드려요.' },
+    { key: 'serviceNews', emoji: '📢', title: '서비스 소식', desc: '새로운 기능 및 서비스 관련 소식을 알려드려요.' },
+  ];
+  TERMS_SECTIONS = [
+    { title: '이용약관', body: 'p:nder 서비스 이용에 관한 기본적인 사항을 규정합니다.\n서비스를 이용함으로써 본 약관에 동의한 것으로 간주됩니다.' },
+    { title: '개인정보 처리방침', body: '수집 항목: 이메일, 닉네임, 프로필 사진, 여행 일정 정보\n수집 목적: 서비스 제공, 계정 관리, 맞춤 추천\n보관 기간: 회원 탈퇴 시까지 (관련 법령에 따라 일부 정보는 별도 보관)' },
+    { title: '위치기반서비스 이용약관', body: '동선 자동 생성 및 지도 표시를 위해 입력한 장소의 위치 정보를 활용합니다.\n위치 정보는 경로 계산 목적 외에 사용되지 않습니다.' },
+  ];
+  onOpenTerms = () => this.setState({ termsOpen: true });
+  onCloseTerms = () => this.setState({ termsOpen: false });
+  onOpenNotificationSettings = () => this.setState({ notificationSettingsOpen: true });
+  onCloseNotificationSettings = () => this.setState({ notificationSettingsOpen: false });
+  onToggleNotification = (key) => this.setState(s => ({ notifications: { ...s.notifications, [key]: !s.notifications[key] } }));
+  onOpenWithdraw = () => this.setState({ withdrawOpen: true, withdrawStep: 'confirm', withdrawError: false, withdrawAgreeChecked: false, blockedAgreeChecked: false });
   onCloseWithdraw = () => this.setState({ withdrawOpen: false });
+  onToggleWithdrawAgree = () => this.setState(s => ({ withdrawAgreeChecked: !s.withdrawAgreeChecked }));
+  onToggleBlockedAgree = () => this.setState(s => ({ blockedAgreeChecked: !s.blockedAgreeChecked }));
+  onConfirmBlocked = () => { if (this.state.blockedAgreeChecked) this.setState({ withdrawStep: 'finalWarning', finalWarningAgreeChecked: false }); };
+  onToggleFinalWarningAgree = () => this.setState(s => ({ finalWarningAgreeChecked: !s.finalWarningAgreeChecked }));
+  onCancelFinalWarning = () => this.onCloseWithdraw();
+  onConfirmFinalWarning = async () => {
+    if (!this.state.finalWarningAgreeChecked) return;
+    this.setState({ withdrawStep: 'finalLoading', withdrawError: false });
+    const mySchedules = [{ id: 's1', title: '제주 3박4일', role: 'creator' }];
+    const result = await this.deleteAccount(this.mockUser(), mySchedules, { skipCreatorCheck: true });
+    if (!result.ok) {
+      this.setState({ withdrawStep: 'finalWarning', withdrawError: true });
+      return;
+    }
+    this.setState({ withdrawStep: 'success' });
+  };
   stopPropagation = (e) => e && e.stopPropagation && e.stopPropagation();
   // ---- mock 닉네임 repository/service — 실제 DB 연결 시 이 3개 함수 내부만 실제 API 호출로 교체 ----
   NICKNAME_RULES = { min: 2, max: 12, pattern: /^[가-힣a-zA-Z0-9_]+$/ };
@@ -194,6 +317,15 @@ class Component extends DCLogic {
     return { ok: true, nickname: nextNickname };
   };
 
+  toggleTheme = () => {
+    const next = this.state.theme === 'dark' ? 'light' : 'dark';
+    try { if (typeof localStorage !== 'undefined') localStorage.setItem('pd-theme', next); } catch (e) {}
+    this.setState({ theme: next });
+  };
+  onAvatarChangeClick = () => {
+    const slot = document.getElementById('mp-avatar');
+    if (slot && slot.openFilePicker) slot.openFilePicker();
+  };
   onEditNickname = () => this.setState(s => ({ editNicknameOpen: true, nicknameDraft: s.nickname, nicknameCheck: null }));
   onCloseEditNickname = () => this.setState({ editNicknameOpen: false });
   onNicknameDraftChange = (e) => {
@@ -219,10 +351,13 @@ class Component extends DCLogic {
 
   // 회원 탈퇴는 "계정 삭제"만 담당한다 — 일정 삭제(Route Planner의 원본 일정 삭제)와는 완전히 분리된 별도 흐름.
   // 실제 백엔드가 연결되면 이 함수 내부만 실제 API 호출로 교체하면 되도록 단계를 명시적으로 나눠둔다.
-  deleteAccount = async (user, mySchedules) => {
+  deleteAccount = async (user, mySchedules, opts) => {
     // 1) Creator 소유 일정이 남아있으면 탈퇴를 막는다 — 소유권 임의 이전/타인 데이터 삭제 금지.
+    // 단, 이미 '탈퇴하기 전에 확인해주세요' 화면에서 일정 삭제/소유권 이전 처리에 동의한 뒤 최종 경고까지 통과한
+    // 경우(skipCreatorCheck)에는 같은 mock 목록으로 다시 막지 않는다 — 실제 연동 시에는 그 사이 처리된
+    // 최신 일정 목록으로 재확인하도록 교체.
     const creatorSchedules = (mySchedules || []).filter(s => s.role === 'creator');
-    if (creatorSchedules.length > 0) return { ok: false, reason: 'has_creator_schedules', creatorSchedules };
+    if (creatorSchedules.length > 0 && !(opts && opts.skipCreatorCheck)) return { ok: false, reason: 'has_creator_schedules', creatorSchedules };
 
     // 2) 역할별 관계 정리 — 원본 일정은 절대 건드리지 않고, "이 계정과의 관계"만 제거한다.
     //    editor  → 해당 일정의 participants에서 이 계정만 제거 (일정 자체는 유지)
@@ -240,6 +375,7 @@ class Component extends DCLogic {
   };
 
   onConfirmWithdraw = async () => {
+    if (!this.state.withdrawAgreeChecked) return; // 동의 체크 전에는 탈퇴 불가
     this.setState({ withdrawStep: 'loading', withdrawError: false });
     // mock: 실제 탈퇴 대상 사용자의 일정 목록 — 백엔드 연결 시 실제 My Routes 데이터로 교체
     const mySchedules = [
@@ -255,7 +391,6 @@ class Component extends DCLogic {
       return;
     }
     this.setState({ withdrawStep: 'success' });
-    setTimeout(() => { window.location.href = './Login Screen.dc.html'; }, 1200);
   };
   mockUser = () => ({ id: 'u1', nickname: this.state.nickname, email: 'yusoo@example.com' });
 
@@ -270,9 +405,17 @@ class Component extends DCLogic {
     const user = this.mockUser();
     const step = this.state.withdrawStep;
     return {
-      c, user,
+      c, user, isDark, isLight: !isDark, toggleTheme: this.toggleTheme,
       onEditNickname: this.onEditNickname,
-      onNotificationSettings: this.noop, onTerms: this.noop,
+      onAvatarChangeClick: this.onAvatarChangeClick,
+      onNotificationSettings: this.onOpenNotificationSettings, onTerms: this.onOpenTerms,
+      termsOpen: this.state.termsOpen, onCloseTerms: this.onCloseTerms, termsSections: this.TERMS_SECTIONS,
+      notificationSettingsOpen: this.state.notificationSettingsOpen,
+      onCloseNotificationSettings: this.onCloseNotificationSettings,
+      notificationItems: this.NOTIFICATION_DEFS.map(def => {
+        const on = this.state.notifications[def.key];
+        return { ...def, onToggle: () => this.onToggleNotification(def.key), trackBg: on ? '#7BCB93' : (isDark ? '#3A3B3E' : '#E1E2E4'), knobLeft: on ? '19px' : '2px' };
+      }),
       editNicknameOpen: this.state.editNicknameOpen, onCloseEditNickname: this.onCloseEditNickname,
       nicknameDraft: this.state.nicknameDraft, onNicknameDraftChange: this.onNicknameDraftChange, onSaveNickname: this.onSaveNickname,
       onCheckNickname: this.onCheckNickname,
@@ -304,11 +447,28 @@ class Component extends DCLogic {
       stopPropagation: this.stopPropagation,
       blockedByCreatorSchedules: step === 'blocked',
       creatorSchedules: this.state.creatorSchedules || [],
-      showConfirmStep: step === 'confirm' || step === 'loading',
+      blockedAgreeChecked: this.state.blockedAgreeChecked, onToggleBlockedAgree: this.onToggleBlockedAgree,
+      blockedConfirmBg: this.state.blockedAgreeChecked ? c.dangerBg : c.chipDisabled,
+      blockedConfirmColor: this.state.blockedAgreeChecked ? c.dangerText : c.textSub,
+      blockedConfirmCursor: this.state.blockedAgreeChecked ? 'pointer' : 'default',
+      onConfirmBlocked: this.onConfirmBlocked,
+      showFinalWarningStep: step === 'finalWarning' || step === 'finalLoading',
+      finalWarningBtnLabel: step === 'finalLoading' ? '탈퇴 처리 중...' : '네, 탈퇴할게요.',
+      finalWarningLoadingOpacity: step === 'finalLoading' ? 0.6 : 1,
+      finalWarningAgreeChecked: this.state.finalWarningAgreeChecked, onToggleFinalWarningAgree: this.onToggleFinalWarningAgree,
+      onCancelFinalWarning: this.onCancelFinalWarning, onConfirmFinalWarning: this.onConfirmFinalWarning,
+      finalWarningBtnBg: this.state.finalWarningAgreeChecked ? c.dangerBg : c.chipDisabled,
+      finalWarningBtnColor: this.state.finalWarningAgreeChecked ? c.dangerText : c.textSub,
+      finalWarningBtnCursor: this.state.finalWarningAgreeChecked ? 'pointer' : 'default',
+      showConfirmStep: step === 'confirm',
       showSuccessStep: step === 'success',
       withdrawError: this.state.withdrawError,
       withdrawButtonLabel: step === 'loading' ? '탈퇴 처리 중...' : '회원 탈퇴',
       withdrawLoadingOpacity: step === 'loading' ? 0.6 : 1,
+      withdrawAgreeChecked: this.state.withdrawAgreeChecked, onToggleWithdrawAgree: this.onToggleWithdrawAgree,
+      withdrawBtnBg: this.state.withdrawAgreeChecked ? c.dangerBg : c.chipDisabled,
+      withdrawBtnColor: this.state.withdrawAgreeChecked ? c.dangerText : c.textSub,
+      withdrawBtnCursor: this.state.withdrawAgreeChecked ? 'pointer' : 'default',
       nicknameSavedToast: this.state.nicknameSavedToast,
     };
   }

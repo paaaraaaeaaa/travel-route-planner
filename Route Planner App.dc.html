@@ -8,6 +8,7 @@
 <body>
 <x-dc>
 <helmet data-dc-atomics="">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 <style>
@@ -200,7 +201,9 @@ a:hover{color:#146030}
       <div style="position:relative"><div onClick="{{ closeLoginRequiredModal }}" style="position:absolute;top:-32px;right:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B4B5B9"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg></div>
         <div style="background:{{ c.panelBg }};border-radius:16px;padding:26px;width:300px;max-width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:0px 12px 24px -6px rgba(23,23,25,.2)">
           <div style="font-size:15px;font-weight:700;color:{{ c.text }};line-height:1.5">내 일정에 저장하려면<br>로그인이 필요해요</div>
-          <div onClick="{{ mockLoginThenSave }}" style="width:100%;text-align:center;cursor:pointer;background:#7BCB93;color:#12321F;border-radius:10px;padding:11px;font-size:13.5px;font-weight:700">로그인</div>
+          <div style="position:relative;width:100%;height:44px">
+            <a href="./Login Screen.dc.html" style="width:100%;height:100%;text-align:center;cursor:pointer;background:#7BCB93;color:#12321F;border-radius:10px;padding:11px;font-size:13.5px;font-weight:700;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-decoration:none">로그인</a>
+          </div>
           <div style="font-size:12px;color:{{ c.textSub }}">계정이 없나요? <a href="./Signup Screen.dc.html" style="color:#1F7A44;font-weight:700;text-decoration:none">회원가입</a></div>
         </div>
       </div>
@@ -745,7 +748,7 @@ a:hover{color:#146030}
         </div>
       </sc-if>
       <div style="display:flex;gap:8px">
-        <div onClick="{{ closeDeleteConfirm }}" style="flex:1;text-align:center;border:1px solid #E1E2E4;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:#171719;cursor:pointer">취소</div>
+        <div onClick="{{ closeDeleteConfirm }}" style="flex:1;text-align:center;border:1px solid #E1E2E4;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;color:#171719;cursor:pointer">{{ deleteCancelLabel }}</div>
         <div onClick="{{ confirmDelete }}" style="flex:1;text-align:center;background:{{ deleteConfirmBg }};color:#fff;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:{{ deleteConfirmCursor }}">{{ deleteConfirmBtnLabel }}</div>
       </div>
       </div>
@@ -1334,6 +1337,12 @@ class Component extends DCLogic {
   componentDidMount() {
     this.loadKakaoSdk();
     this.syncPolyline();
+    // Login Screen에서 Google 인증을 마치고 돌아온 경우, 전달된 로그인 상태를 이어받는다.
+    try {
+      if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('pnder_google_logged_in') === '1') {
+        this.setState({ isLoggedIn: true });
+      }
+    } catch (e) {}
     this._onKeyDown = (e) => {
       if (e.key !== 'Escape') return;
       const s = this.state;
@@ -1466,12 +1475,17 @@ class Component extends DCLogic {
     this.showToast('내 일정에 저장했어요');
   };
   closeLoginRequiredModal = () => this.setState({ loginRequiredModalOpen: false });
-  mockLoginThenSave = () => {
+
+  // Google Identity Services 로그인. Client Secret은 사용하지 않음 — 브라우저에는 Client ID만 노출.
+  GOOGLE_CLIENT_ID = '356356472447-08t0m833394b59rschmd23oog33359gi.apps.googleusercontent.com';
+  onGoogleLoginSuccess = (response) => {
+    // response.credential은 서명된 ID 토큰(JWT) — 이 데모에서는 별도 서버 검증 없이 로그인 성공 신호로만 사용.
     this.setState({ loginRequiredModalOpen: false, isLoggedIn: true });
     this.saveCurrentRoute();
     this.setState({ devRole: 'savedViewer' });
     this.showToast('내 일정에 저장했어요');
   };
+  // Google 로그인은 Login Screen.dc.html에서만 실행한다 (메인 화면에는 Google 버튼을 두지 않음).
   requestEditPermission = () => {
     this.setState({ editRequestStatus: 'pending' });
     this.showToast('편집 권한을 요청했어요');
@@ -2132,7 +2146,6 @@ class Component extends DCLogic {
       canEdit, canManageInvite, canDeleteOriginal, isViewerRole, devRole, devRoleOptions,
       loginRequiredModalOpen: this.state.loginRequiredModalOpen,
       closeLoginRequiredModal: this.closeLoginRequiredModal,
-      mockLoginThenSave: this.mockLoginThenSave,
       isPlainViewer: devRole === 'viewer',
       editRequestStatus: this.state.editRequestStatus,
       canRequestEdit: devRole === 'viewer' && this.state.editRequestStatus === 'none',
@@ -2162,6 +2175,7 @@ class Component extends DCLogic {
       deleteConfirmOpen: this.state.deleteConfirmOpen,
       deleteConfirmMessage: this.state.deleteTargetId === 'ORIGINAL_ROUTE' ? '정말 삭제하시겠습니까?' : `${this.state.deleteTargetLabel}을 삭제하시겠습니까?`,
       deleteConfirmBtnLabel: this.state.deleteTargetId === 'ORIGINAL_ROUTE' ? '일정 삭제' : '삭제',
+      deleteCancelLabel: this.state.deleteTargetId === 'ORIGINAL_ROUTE' ? '뒤로가기' : '취소',
       isDeletingOriginalRoute: this.state.deleteTargetId === 'ORIGINAL_ROUTE',
       deleteAgreeChecked: this.state.deleteAgreeChecked,
       toggleDeleteAgreeChecked: this.toggleDeleteAgreeChecked,
